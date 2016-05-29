@@ -1,0 +1,9 @@
+
+sourceCompatibility = 1.7
+
+dependencies {
+    compile project(":web")
+    compile project(":velocity")
+    compile project(":assets")
+    compile project(":server")
+}

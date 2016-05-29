@@ -1,0 +1,11 @@
+language: java
+
+jdk:
+    - oraclejdk7
+
+sudo: false
+
+script: ./gradlew bintrayUpload
+
+notifications:
+    email: false

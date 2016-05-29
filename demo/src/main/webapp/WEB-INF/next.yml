@@ -1,0 +1,14 @@
+intercept:
+  priority: -9999
+
+http:
+  priority: 0
+
+assets:
+  priority: -200
+  args:
+    forward: false
+    uri-mapping:
+      - /imgs
+      - /css
+      - /js

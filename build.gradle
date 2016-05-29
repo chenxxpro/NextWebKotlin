@@ -1,0 +1,22 @@
+group 'com.github.yoojia'
+version '1.0'
+
+ext.kotlin_version = "1.0.1-2"
+
+subprojects {
+
+    buildscript {
+        repositories {
+            jcenter()
+            mavenCentral()
+        }
+    }
+
+    apply plugin: 'java'
+
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+}
