@@ -8,9 +8,9 @@ buildscript {
     }
 }
 
-plugins {
-    id "com.jfrog.bintray" version "1.6"
-}
+//plugins {
+//    id "com.jfrog.bintray" version "1.6"
+//}
 
 sourceCompatibility = 1.7
 
@@ -23,16 +23,16 @@ dependencies {
     compile project(":web")
 }
 
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-
-ext{
-    projVersion = '2.0'
-    projArtivactId = 'next-web-velocity'
-    projName = 'NextWebKotlin'
-    projDesc = 'NextWebKotlin: A Servlet3-based micro web framework written in Kotlin'
-    projURL = "https://github.com/yoojia/NextWebKotlin"
-    projVCS = "https://github.com/yoojia/NextWebKotlin.git"
-}
-
-apply from: '../publish.gradle'
+//apply plugin: 'maven'
+//apply plugin: 'maven-publish'
+//
+//ext{
+//    projVersion = '2.0'
+//    projArtivactId = 'next-web-velocity'
+//    projName = 'NextWebKotlin'
+//    projDesc = 'NextWebKotlin: A Servlet3-based micro web framework written in Kotlin'
+//    projURL = "https://github.com/yoojia/NextWebKotlin"
+//    projVCS = "https://github.com/yoojia/NextWebKotlin.git"
+//}
+//
+//apply from: '../publish.gradle'
