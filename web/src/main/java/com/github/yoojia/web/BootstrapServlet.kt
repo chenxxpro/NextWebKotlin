@@ -1,10 +1,9 @@
 package com.github.yoojia.web
 
+import com.github.yoojia.web.kernel.ClassProvider
+import com.github.yoojia.web.kernel.ClassScanner
 import com.github.yoojia.web.kernel.Engine
-import javax.servlet.Servlet
-import javax.servlet.ServletConfig
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
+import javax.servlet.*
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
@@ -19,7 +18,11 @@ class BootstrapServlet : Servlet {
     }
 
     override fun init(config: ServletConfig?) {
-        mEngine.start(config?.servletContext!!)
+        mEngine.start(config?.servletContext!!, ClassScanner())
+    }
+
+    fun init(context: ServletContext, classProvider: ClassProvider) {
+        mEngine.start(context, classProvider)
     }
 
     override fun getServletConfig(): ServletConfig? {

@@ -9,10 +9,6 @@ import com.github.yoojia.web.interceptor.BeforeHandler
 import com.github.yoojia.web.supports.InternalPriority
 import com.github.yoojia.web.supports.Logger
 import com.github.yoojia.web.util.*
-import java.io.File
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -28,14 +24,14 @@ import javax.servlet.http.HttpServletResponse
 class Engine {
 
     companion object {
-        const val VERSION = "NextEngine/2.0 (Kotlin 1.0.1-2; Java 8)"
+        const val VERSION = "NextEngine/2.0 (Kotlin 1.0.2; Java 7)"
     }
 
     private val mDispatchChain = DispatchChain()
     private val mKernelManager = KernelManager()
     private val mContext = AtomicReference<Context>()
 
-    fun start(servletContext: ServletContext) {
+    fun start(servletContext: ServletContext, classProvider: ClassProvider) {
         Logger.d("--> NextEngine starting")
         Logger.d("Engine-Version: $VERSION")
         val engineStart = now()
@@ -44,7 +40,7 @@ class Engine {
         Logger.d("Web-Directory: ${context.webPath}")
         Logger.d("Web-Context: ${servletContext.contextPath}")
         // 扫描
-        loadModules(context, scanClasses())
+        initModules(context, classProvider.get().toMutableList())
         // 所有Module注册到Chain中
         mKernelManager.all { module ->
             mDispatchChain.add(module)
@@ -83,22 +79,7 @@ class Engine {
         mKernelManager.onDestroy()
     }
 
-    private fun scanClasses(): ArrayList<Class<*>> {
-        val scanStart = now()
-        // 查找所有Java Class文件
-        val kernelPath = Paths.get(listOf("com","github","yoojia","web").joinToString(File.separator))
-        val filter = fun(path: Path): Boolean {
-            return ! path.startsWith(kernelPath)
-        }
-        val runtimeNames = findRuntimeNames(getClassPath(), filter)
-        val jarNames = findJarClassNames(filter)
-        val classes = ArrayList<Class<*>>(loadClassByName(runtimeNames.concat(jarNames)))
-        Logger.d("Classes-Scan: ${escape(scanStart)}ms")
-        Logger.d("Classes-Count: ${classes.size}")
-        return classes
-    }
-
-    private fun loadModules(context: Context, classes: ArrayList<Class<*>>) {
+    private fun initModules(context: Context, classes: MutableList<Class<*>>) {
         val rootConfig = context.config;
 
         val register = fun(tag: String, module: Module, priority: Int, config: String){
@@ -144,7 +125,7 @@ class Engine {
         - 下载： com.github.yoojia.web.Downloads
         - 模板： com.github.yoojia.web.VelocityTemplates
     */
-    private fun tryRegisterBuildInModules(context: Context, classes: ArrayList<Class<*>>) {
+    private fun tryRegisterBuildInModules(context: Context, classes: MutableList<Class<*>>) {
         val classLoader = getClassLoader()
         val httpPriority = HttpHandler.DEFAULT_PRIORITY
         val load = fun(className: String, configName: String, tagName: String, priority: (Int)->Int){
@@ -224,7 +205,4 @@ class Engine {
         }
     }
 
-    private fun getClassPath(): Path {
-        return Paths.get(Engine::class.java.getResource("/").toURI())
-    }
 }
