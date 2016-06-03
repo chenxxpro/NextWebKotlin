@@ -79,14 +79,11 @@ fun isUriResourceMatched(request: List<String>, define: List<String>): Boolean{
  */
 fun isRequestMatched(req: RequestDefine, define: RequestDefine): Boolean {
     // 定义的HTTP方法为ALL，可以匹配所有HTTP方法
-    // 程序内部统一将Http方法转换成小写形式
-    // 在请求中只有一个HTTP方法，所以只需要判断第一个即可。
-    if("all" in define.methods) {
-        return isUriResourceMatched(req.segments, define.segments)
-    }else if(req.methods.first() in define.methods){
+    if("all".equals(define.method)) {
         return isUriResourceMatched(req.segments, define.segments)
     }else{
-        return false;
+        return req.method.equals(define.method) &&
+                isUriResourceMatched(req.segments, define.segments)
     }
 }
 

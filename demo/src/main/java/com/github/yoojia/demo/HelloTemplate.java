@@ -2,17 +2,17 @@ package com.github.yoojia.demo;
 
 import com.github.yoojia.web.Request;
 import com.github.yoojia.web.Response;
-import com.github.yoojia.web.http.Module;
-import com.github.yoojia.web.supports.Route;
+import com.github.yoojia.web.http.Controller;
+import com.github.yoojia.web.supports.GET;
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-@Module(base = "/templates")
+@Controller("/templates")
 public class HelloTemplate {
 
-    @Route(path = "/{username}", methods={"get", "post"})
+    @GET("/{username}")
     public void dynamic(Request request, Response response) {
         String username = request.dynamicParam("username");
         request.putParam("username", username);

@@ -44,10 +44,10 @@ abstract class AbstractHandler(val handlerTag: String,
         // 解析各个Class的方法,并创建对应的MethodProcessor
         mCachedClasses.forEach { hostType ->
             val basedUri = getBaseUri(hostType)
-            filterRouteAnnotated(hostType, { method ->
+            filterAnnotatedMethods(hostType, { method, annotationType ->
                 checkReturnType(method)
                 checkArguments(method)
-                val define = createMethodDefine(basedUri, hostType, method)
+                val define = createMethodDefine(basedUri, hostType, method, annotationType)
                 mProcessors.add(define)
                 Logger.v("$handlerTag-Module-Define: $define")
             })
@@ -62,7 +62,7 @@ abstract class AbstractHandler(val handlerTag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val matched = findMatched(RequestDefine(listOf(request.method), request.resources))
+        val matched = findMatched(RequestDefine(request.method, request.resources))
         processMatches(matched, request, response, dispatch)
     }
 

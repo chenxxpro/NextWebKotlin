@@ -13,16 +13,15 @@ import com.github.yoojia.web.util.RequestDefine
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class HttpHandler(classes: List<Class<*>>) :
-        AbstractHandler("Http", Module::class.java, classes) {
+class HttpHandler(classes: List<Class<*>>) : AbstractHandler("Http", Controller::class.java, classes) {
 
     override fun getBaseUri(hostType: Class<*>): String {
-        return hostType.getAnnotation(Module::class.java).base
+        return hostType.getAnnotation(Controller::class.java).value
     }
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val matched = findMatched(RequestDefine(listOf(request.method), request.resources));
+        val matched = findMatched(RequestDefine(request.method, request.resources));
         // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
         if(matched.isNotEmpty()) {
             response.setStatusCode(StatusCode.ACCEPTED)

@@ -34,7 +34,7 @@ class MethodProcessor(val host: Class<*>, val method: Method) {
     }
 
     override fun toString(): String{
-        return "${this.javaClass.simpleName}(host=${host.name}, method=${method.name})"
+        return "{class: ${host.name}, method:${method.name} }"
     }
 
 }
