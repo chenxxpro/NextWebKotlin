@@ -1,4 +1,4 @@
-package com.github.yoojia.web.util
+package com.github.yoojia.web.supports
 
 import com.github.yoojia.web.kernel.Config
 import org.yaml.snakeyaml.Yaml

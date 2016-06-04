@@ -6,7 +6,7 @@ import com.github.yoojia.web.StatusCode
 import com.github.yoojia.web.kernel.DispatchChain
 import com.github.yoojia.web.supports.AbstractHandler
 import com.github.yoojia.web.supports.InternalPriority
-import com.github.yoojia.web.util.RequestDefine
+import com.github.yoojia.web.supports.HttpRequestDefine
 
 /**
  * HTTP 模块，处理HTTP请求
@@ -21,7 +21,7 @@ class HttpHandler(classes: List<Class<*>>) : AbstractHandler("Http", Controller:
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val matched = findMatched(RequestDefine(request.method, request.resources));
+        val matched = findMatched(HttpRequestDefine(request.method, request.path, request.resources));
         // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
         if(matched.isNotEmpty()) {
             response.setStatusCode(StatusCode.ACCEPTED)

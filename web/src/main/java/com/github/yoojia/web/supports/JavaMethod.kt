@@ -1,4 +1,4 @@
-package com.github.yoojia.web.util
+package com.github.yoojia.web.supports
 
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.RequestChain
@@ -6,7 +6,10 @@ import com.github.yoojia.web.Response
 import com.github.yoojia.web.supports.*
 import java.lang.reflect.Method
 
-data class MethodDefine(val processor: MethodProcessor, val request: RequestDefine, val priority: Int = getPriority(request)) {
+/**
+ * 处理请求的Java方法定义
+ */
+data class JavaMethodDefine(val processor: JavaMethodProcessor, val request: HttpRequestDefine, val priority: Int = getRequestPriority(request)) {
     override fun toString(): String {
         return "{processor: $processor, request: $request, priority: $priority}"
     }
@@ -15,27 +18,19 @@ data class MethodDefine(val processor: MethodProcessor, val request: RequestDefi
 /**
  * 请求参数定义
  */
-class RequestDefine {
+class HttpRequestDefine {
 
     val method: String
-    val segments: List<String>
+    val uriSegments: List<String>
     val uri: String
 
-    constructor(method: String, segments: List<String>) {
-        this.method = method
-        this.segments = segments
-        if(segments.size == 1) {
-            this.uri = segments[0]
-        }else{
-            this.uri = segments.subList(1, segments.size - 1).joinToString()
-        }
+    constructor(method: String, uri: String, segments: List<String>) {
+        this.method = method.toUpperCase()
+        this.uri = uri
+        this.uriSegments = segments
     }
 
-    constructor(method: String, uri: String){
-        this.method = method
-        this.uri = uri
-        this.segments = splitUri(uri)
-    }
+    constructor(method: String, uri: String): this(method, uri, splitUri(uri))
 
     override fun toString(): String {
         return "{method: $method, uri: $uri}"
@@ -100,18 +95,18 @@ fun checkArguments(method: Method) {
 /**
  * 创建方法的定义参数
  */
-fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): MethodDefine {
+fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): JavaMethodDefine {
     val annotation = method.getAnnotation(annotationType)
     val params = when(annotation) {
-        is GET -> Pair("get", annotation.value)
-        is POST -> Pair("post", annotation.value)
-        is PUT -> Pair("put", annotation.value)
-        is DELETE -> Pair("delete", annotation.value)
-        is ALL -> Pair("all", annotation.value)
+        is GET -> Pair("GET", annotation.value)
+        is POST -> Pair("POST", annotation.value)
+        is PUT -> Pair("PUT", annotation.value)
+        is DELETE -> Pair("DELETE", annotation.value)
+        is ALL -> Pair("ALL", annotation.value)
         else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
     }
-    return MethodDefine(MethodProcessor(moduleType, method),
-            RequestDefine(params.first/*method*/, linkUri(rootUri, params.second/*path*/)))
+    return JavaMethodDefine(JavaMethodProcessor(moduleType, method),
+            HttpRequestDefine(params.first/*method*/, linkUri(rootUri, params.second/*path*/)))
 }
 
 /**
@@ -119,14 +114,14 @@ fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, an
  * - 短URI路径优先；
  * - 静态方法优先；
  */
-private fun getPriority(define: RequestDefine): Int {
+private fun getRequestPriority(define: HttpRequestDefine): Int {
     var priority = 0
-    define.segments.forEach {
+    define.uriSegments.forEach {
         if(isWildcards(it)) {
             priority += -1
         }else{
             priority += if(isDynamicSegment(it)) 1 else 0
         }
     }
-    return define.segments.size + priority
+    return define.uriSegments.size + priority
 }

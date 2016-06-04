@@ -19,7 +19,7 @@ abstract class AbstractHandler(val handlerTag: String,
                                val annotation: Class<out Annotation>,
                                classes: List<Class<*>>) : Module {
 
-    private val mProcessors = ArrayList<MethodDefine>()
+    private val mProcessors = ArrayList<JavaMethodDefine>()
     private val mHostedObjectProvider: ObjectProvider
 
     private val mCachedClasses: ArrayList<Class<*>>
@@ -62,11 +62,11 @@ abstract class AbstractHandler(val handlerTag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val matched = findMatched(RequestDefine(request.method, request.resources))
+        val matched = findMatched(HttpRequestDefine(request.method, request.path, request.resources))
         processMatches(matched, request, response, dispatch)
     }
 
-    fun processMatches(matched: List<MethodDefine>, request: Request, response: Response, dispatch: DispatchChain) {
+    fun processMatches(matched: List<JavaMethodDefine>, request: Request, response: Response, dispatch: DispatchChain) {
         Logger.vv("$handlerTag-Module-Processing: ${request.path}")
         Logger.vv("$handlerTag-Module-Handlers: ${matched.size}")
         // 根据优先级排序后处理
@@ -97,8 +97,8 @@ abstract class AbstractHandler(val handlerTag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected fun findMatched(request: RequestDefine): List<MethodDefine> {
-        val out = ArrayList<MethodDefine>()
+    protected fun findMatched(request: HttpRequestDefine): List<JavaMethodDefine> {
+        val out = ArrayList<JavaMethodDefine>()
         mProcessors.forEach { processor ->
             if(isRequestMatched(request, processor.request)) {
                 out.add(processor)

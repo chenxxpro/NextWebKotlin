@@ -5,8 +5,8 @@ import com.github.yoojia.web.kernel.Context
 import com.github.yoojia.web.kernel.DispatchChain
 import com.github.yoojia.web.kernel.Module
 import com.github.yoojia.web.supports.Logger
-import com.github.yoojia.web.util.isUriResourceMatched
-import com.github.yoojia.web.util.splitUri
+import com.github.yoojia.web.supports.isUriResourceMatched
+import com.github.yoojia.web.supports.splitUri
 import java.nio.file.Files
 import java.util.*
 

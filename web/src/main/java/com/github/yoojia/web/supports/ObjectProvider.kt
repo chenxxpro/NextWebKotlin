@@ -1,6 +1,6 @@
 package com.github.yoojia.web.supports
 
-import com.github.yoojia.web.util.newClassInstance
+import com.github.yoojia.web.supports.newClassInstance
 import java.util.*
 
 /**

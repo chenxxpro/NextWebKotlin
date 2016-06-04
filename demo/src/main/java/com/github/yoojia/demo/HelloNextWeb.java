@@ -16,14 +16,13 @@ public class HelloNextWeb {
 
     @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
-        response.sendText("Hello /hello/{username}, username=" + request.param("username"));
+        response.sendText("Hello /hello/{username}, username=" + request.dynamicParam("username"));
         chain.interrupt();
     }
 
     @GET("/{username}")
     public void dynamic(Request request, Response response) {
-        response.sendText("Hello /{username} , username=" + request.param("username"));
-        response.sendText(null);
+        response.sendText("Hello /{username} , username=" + request.dynamicParam("username"));
     }
 
     @GET("/*")
