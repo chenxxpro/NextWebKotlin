@@ -3,7 +3,6 @@ package com.github.yoojia.web.supports
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
-import com.github.yoojia.web.supports.*
 import java.lang.reflect.Method
 
 /**

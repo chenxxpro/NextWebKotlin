@@ -7,7 +7,6 @@ import com.github.yoojia.web.http.HttpHandler
 import com.github.yoojia.web.interceptor.AfterHandler
 import com.github.yoojia.web.interceptor.BeforeHandler
 import com.github.yoojia.web.supports.*
-import com.github.yoojia.web.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -23,7 +22,7 @@ import javax.servlet.http.HttpServletResponse
 class Engine {
 
     companion object {
-        const val VERSION = "NextEngine/2.0 (Kotlin 1.0.2; Java 7)"
+        const val VERSION = "NextEngine/2.2 (Kotlin 1.0.2; Java 7)"
     }
 
     private val mDispatchChain = DispatchChain()
