@@ -11,7 +11,7 @@ internal class KernelManager {
     private val mModules = ArrayList<Triple<Module, Int, Config>>()
     private val mPlugins = ArrayList<Triple<Plugin, Int, Config>>()
 
-    fun all(step: (Module) -> Unit) {
+    fun modulesForEach(step: (Module) -> Unit) {
         mModules.forEach { step.invoke(it.first) }
     }
 

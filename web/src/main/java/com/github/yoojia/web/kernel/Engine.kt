@@ -42,7 +42,7 @@ class Engine {
         // 扫描
         initModules(context, classProvider.get().toMutableList())
         // 所有Module注册到Chain中
-        mKernelManager.all { module ->
+        mKernelManager.modulesForEach { module ->
             mDispatchChain.add(module)
         }
         Logger.d("Loaded-Modules: ${mKernelManager.moduleCount()}")
@@ -57,10 +57,10 @@ class Engine {
         val context = mContext.get()
         // 默认情况下，HTTP状态码为404。在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
         val response = Response(context, res as HttpServletResponse)
+        val request = Request(context, req as HttpServletRequest)
+        Logger.vv("NextEngine-Accepted: ${request.path}")
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
-            val request = Request(context, req as HttpServletRequest)
-            Logger.vv("NextEngine-Accepted: ${request.path}")
             mDispatchChain.process(request, response)
         }catch(err: Throwable) {
             // 尝试发送错误消息 给客户端。

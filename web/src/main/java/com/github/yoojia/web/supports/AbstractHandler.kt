@@ -89,7 +89,6 @@ abstract class AbstractHandler(val handlerTag: String,
                         type -> mHostedObjectProvider.get(type)
                     })
                     // 处理器要求中断
-                    //
                     if(chain.isInterrupted()) return@forEach
                     if(chain.isStopDispatching()) return
                 }
