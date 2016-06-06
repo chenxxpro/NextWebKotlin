@@ -39,10 +39,10 @@ class HttpRequestDefine {
 /**
  * 查找@GET / @POST / @PUT / @DELETE 的方法函数列表
  */
-fun filterAnnotatedMethods(hostType: Class<*>, eachStep: (Method, Class<out Annotation>) -> Unit) {
+fun filterAnnotatedMethods(hostType: Class<*>, processor: (Method, Class<out Annotation>) -> Unit) {
     val ifFindAnnotated = fun(method: Method, annotationType: Class<out Annotation>) {
         if(method.isAnnotationPresent(annotationType)) {
-            eachStep.invoke(method, annotationType)
+            processor.invoke(method, annotationType)
         }
     }
     hostType.declaredMethods.forEach {
@@ -62,7 +62,7 @@ fun filterAnnotatedMethods(hostType: Class<*>, eachStep: (Method, Class<out Anno
  */
 fun checkReturnType(method: Method) {
     if(!Void.TYPE.equals(method.returnType)) {
-        throw IllegalArgumentException("Return type of @Route methods must be <VOID>/<Unit> !")
+        throw IllegalArgumentException("Return type of @GET/@POST/@PUT/@DELETE methods must be <VOID>/<Unit> !")
     }
 }
 
