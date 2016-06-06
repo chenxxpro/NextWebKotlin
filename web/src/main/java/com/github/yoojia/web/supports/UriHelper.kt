@@ -1,4 +1,4 @@
-package com.github.yoojia.web.util
+package com.github.yoojia.web.supports
 
 import java.util.*
 
@@ -77,28 +77,25 @@ fun isUriResourceMatched(request: List<String>, define: List<String>): Boolean{
 /**
  * 判断两个请求是否匹配
  */
-fun isRequestMatched(req: RequestDefine, define: RequestDefine): Boolean {
+fun isRequestMatched(req: HttpRequestDefine, define: HttpRequestDefine): Boolean {
     // 定义的HTTP方法为ALL，可以匹配所有HTTP方法
-    // 程序内部统一将Http方法转换成小写形式
-    // 在请求中只有一个HTTP方法，所以只需要判断第一个即可。
-    if("all" in define.methods) {
-        return isUriResourceMatched(req.segments, define.segments)
-    }else if(req.methods.first() in define.methods){
-        return isUriResourceMatched(req.segments, define.segments)
+    if("ALL".equals(define.method)) {
+        return isUriResourceMatched(req.uriSegments, define.uriSegments)
     }else{
-        return false;
+        return req.method.equals(define.method) &&
+                isUriResourceMatched(req.uriSegments, define.uriSegments)
     }
 }
 
 /**
  * 解析请求URI资源，返回动态参数
  */
-fun dynamicParams(request: List<String>, define: RequestDefine): Map<String, String> {
+fun dynamicParams(request: List<String>, define: HttpRequestDefine): Map<String, String> {
     val out = HashMap<String, String>()
     // request: ['/', 'users', 'yoojia']
     // define: ['/', 'users', '{username}']
-    for(i in define.segments.indices) {
-        val seg = define.segments[i]
+    for(i in define.uriSegments.indices) {
+        val seg = define.uriSegments[i]
         if(isDynamicSegment(seg)) {
             out.put(getDynamicSegmentName(seg), request[i])
         }

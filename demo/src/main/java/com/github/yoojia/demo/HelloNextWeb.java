@@ -3,34 +3,35 @@ package com.github.yoojia.demo;
 import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;
 import com.github.yoojia.web.Response;
-import com.github.yoojia.web.http.Module;
-import com.github.yoojia.web.supports.Route;
+import com.github.yoojia.web.http.Controller;
+import com.github.yoojia.web.supports.GET;
+import com.github.yoojia.web.supports.POST;
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-@Module(base = "/admin")
+@Controller("/admin")
 public class HelloNextWeb {
 
-    @Route(path = "/hello/{username}", methods={"get", "post"})
+    @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
-        response.sendText("Hello /hello/{username}, username=" + request.param("username"));
+        response.sendText("Hello /hello/{username}, username=" + request.dynamicParam("username"));
         chain.interrupt();
     }
 
-    @Route(path = "/{username}", methods={"get", "post"})
+    @GET("/{username}")
     public void dynamic(Request request, Response response) {
-        response.sendText("Hello /{username} , username=" + request.param("username"));
-        response.sendText(null);
+        response.sendText("Hello /{username} , username=" + request.dynamicParam("username"));
     }
 
-    @Route(path = "/*", methods={"get", "post"})
+    @GET("/*")
+    @POST("/*")
     public void wildcards(Request request, Response response) {
         response.sendText("Hello /* , " + request.param("username"));
     }
 
-    @Route(path = "/yoojia", methods={"get", "post"})
+    @GET("/yoojia")
     public void statix(Request request, Response response) {
         response.sendText("Hello /yoojia, username=" + request.param("username"));
     }

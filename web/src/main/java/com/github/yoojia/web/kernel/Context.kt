@@ -1,8 +1,8 @@
 package com.github.yoojia.web.kernel
 
 import com.github.yoojia.web.supports.Logger
-import com.github.yoojia.web.util.escape
-import com.github.yoojia.web.util.loadConfig
+import com.github.yoojia.web.supports.escape
+import com.github.yoojia.web.supports.loadConfig
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths

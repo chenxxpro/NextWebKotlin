@@ -1,7 +1,7 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.util.isUriResourceMatched
-import com.github.yoojia.web.util.splitUri
+import com.github.yoojia.web.supports.isUriResourceMatched
+import com.github.yoojia.web.supports.splitUri
 import org.junit.Assert
 import org.junit.Test
 
