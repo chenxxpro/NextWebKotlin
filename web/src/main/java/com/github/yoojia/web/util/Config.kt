@@ -8,7 +8,7 @@ import java.nio.file.Path
 /**
  * 配置参数数据包装.不使用Triple的是为使得参数意义更新清晰.
  */
-data class ConfigMeta(val className: String, val priority: Int, val args: Config)
+data class ConfigParam(val className: String, val priority: Int, val args: Config)
 
 /**
  * 从指定文件中加载配置信息
@@ -16,17 +16,24 @@ data class ConfigMeta(val className: String, val priority: Int, val args: Config
  */
 @Suppress("UNCHECKED_CAST")
 fun loadConfig(path: Path): Config {
-    val map = Yaml().load(FileInputStream(path.toFile()))
-    if(map == null) {
-        return Config(emptyMap())
-    }else{
-        return Config(map as Map<String, Any>)
+    val stream = FileInputStream(path.toFile())
+    try{
+        val map = Yaml().load(stream)
+        if(map == null) {
+            return Config(emptyMap())
+        }else{
+            return Config(map as Map<String, Any>)
+        }
+    }finally{
+        stream.close()
     }
 }
 
 /**
  * 解析配置条目
  */
-fun parseConfig(config: Config): ConfigMeta {
-    return ConfigMeta(config.getString("class"), config.getInt("priority"), config.getConfig("args"))
+fun parseConfig(config: Config): ConfigParam {
+    return ConfigParam(config.getString("class"),
+            config.getInt("priority"),
+            config.getConfig("args"))
 }
