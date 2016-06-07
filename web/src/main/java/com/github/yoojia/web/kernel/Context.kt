@@ -1,10 +1,5 @@
 package com.github.yoojia.web.kernel
 
-import com.github.yoojia.web.supports.Logger
-import com.github.yoojia.web.supports.escape
-import com.github.yoojia.web.supports.loadConfig
-import com.github.yoojia.web.supports.now
-import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.servlet.ServletContext
@@ -13,19 +8,7 @@ import javax.servlet.ServletContext
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class Context(val servletContext: ServletContext) {
-
-    val config: Config
-    val webPath: String
-
-    init{
-        webPath = servletContext.getRealPath("/")
-        val start = now()
-        val path = resolvePath("WEB-INF${File.separator}next.yml")
-        config = loadConfig(path)
-        Logger.d("Config-File: $path")
-        Logger.d("Config-Load-Time: ${escape(start)}ms")
-    }
+class Context(val webPath: String, val config: Config, val servletContext: ServletContext) {
 
     /**
      * 解析路径

@@ -7,6 +7,8 @@ import com.github.yoojia.web.http.HttpControllerHandler
 import com.github.yoojia.web.interceptor.AfterHandler
 import com.github.yoojia.web.interceptor.BeforeHandler
 import com.github.yoojia.web.supports.*
+import java.io.File
+import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicReference
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -23,6 +25,7 @@ class Engine {
 
     companion object {
         const val VERSION = "NextEngine/2.2 (Kotlin 1.0.2; Java 7)"
+        private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
 
     private val mDispatchChain = DispatchChain()
@@ -30,10 +33,15 @@ class Engine {
     private val mContext = AtomicReference<Context>()
 
     fun start(servletContext: ServletContext, classProvider: ClassProvider) {
+        val start = now()
         Logger.d("--> NextEngine starting")
         Logger.d("Engine-Version: $VERSION")
-        val engineStart = now()
-        val context = Context(servletContext)
+        val webPath = servletContext.getRealPath("/")
+        val configPath = Paths.get(webPath, CONFIG_FILE)
+        val config = loadConfig(configPath)
+        Logger.d("Config-File: $configPath")
+        Logger.d("Config-Load-Time: ${escape(start)}ms")
+        val context = Context(webPath, config, servletContext)
         mContext.set(context)
         Logger.d("Web-Directory: ${context.webPath}")
         Logger.d("Web-Context: ${servletContext.contextPath}")
@@ -47,7 +55,7 @@ class Engine {
         Logger.d("Loaded-Plugins: ${mKernelManager.pluginCount()}")
         // 启动全部内核模块
         mKernelManager.onCreated(context)
-        Logger.d("Engine-Boot: ${escape(engineStart)}ms")
+        Logger.d("Engine-Boot: ${escape(start)}ms")
         Logger.d("<-- NextEngine started successfully")
     }
 
