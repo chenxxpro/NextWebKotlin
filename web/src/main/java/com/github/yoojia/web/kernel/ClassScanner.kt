@@ -12,12 +12,24 @@ import java.util.*
  */
 internal class ClassScanner : ClassProvider {
 
+    companion object{
+        private val DEFAULT_SYSTEM_CLASSES = arrayOf(
+                "com.github.yoojia.web.",
+                "java.",
+                "javax.",
+                "org.xml.",
+                "org.w3c."
+        )
+    }
+
     override fun get(): List<Class<*>> {
         val scanStart = now()
         // 查找所有Java Class文件
-        val kernelPath = Paths.get(listOf("com","github","yoojia","web").joinToString(File.separator))
-        val filter = fun(path: Path): Boolean {
-            return ! path.startsWith(kernelPath)
+        val filter = fun(name: String): Boolean {
+            DEFAULT_SYSTEM_CLASSES.forEach {
+                if(name.startsWith(it)) return true
+            }
+            return false
         }
         val runtime = findRuntimeNames(getClassPath(), filter)
         val jar = findJarClassNames(filter)

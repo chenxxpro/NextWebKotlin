@@ -40,7 +40,7 @@ class Engine {
         // 扫描
         initModules(context, classProvider.get().toMutableList())
         // 所有Module注册到Chain中
-        mKernelManager.modulesForEach { module ->
+        mKernelManager.allModules { module ->
             mDispatchChain.add(module)
         }
         Logger.d("Loaded-Modules: ${mKernelManager.moduleCount()}")
