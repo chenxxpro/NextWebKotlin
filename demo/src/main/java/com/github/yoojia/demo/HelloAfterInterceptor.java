@@ -4,7 +4,7 @@ import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;
 import com.github.yoojia.web.Response;
 import com.github.yoojia.web.interceptor.AfterInterceptor;
-import com.github.yoojia.web.supports.Route;
+import com.github.yoojia.web.supports.GET;
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
@@ -13,7 +13,7 @@ import com.github.yoojia.web.supports.Route;
 @AfterInterceptor
 public class HelloAfterInterceptor {
 
-    @Route(path = "/*")
+    @GET("/*")
     public void used(Request request, Response response, RequestChain chain){
 //        response.sendText("After interceptor");
 //        chain.stop();

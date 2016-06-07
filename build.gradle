@@ -1,7 +1,7 @@
 group 'com.github.yoojia'
 version '1.0'
 
-ext.kotlin_version = "1.0.1-2"
+ext.kotlin_version = "1.0.2"
 
 subprojects {
 

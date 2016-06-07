@@ -9,11 +9,11 @@ class Logger private constructor() {
     companion object {
 
         private val verbose: Boolean by lazy {
-            "true".equals(System.getProperty("log-verbose", "true"))
+            "true".equals(System.getProperty("next-web.logger.verbose", "true"))
         }
 
         private val veryVerbose: Boolean by lazy {
-            "true".equals(System.getProperty("log-very-verbose", "true"))
+            "true".equals(System.getProperty("next-web.logger.very-verbose", "true"))
         }
 
         fun v(message: String) {

@@ -3,12 +3,12 @@ package com.github.yoojia.web.kernel
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.Response
 import com.github.yoojia.web.StatusCode
-import com.github.yoojia.web.http.HttpHandler
+import com.github.yoojia.web.http.HttpControllerHandler
 import com.github.yoojia.web.interceptor.AfterHandler
 import com.github.yoojia.web.interceptor.BeforeHandler
-import com.github.yoojia.web.supports.InternalPriority
-import com.github.yoojia.web.supports.Logger
-import com.github.yoojia.web.util.*
+import com.github.yoojia.web.supports.*
+import java.io.File
+import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicReference
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -24,7 +24,8 @@ import javax.servlet.http.HttpServletResponse
 class Engine {
 
     companion object {
-        const val VERSION = "NextEngine/2.0 (Kotlin 1.0.2; Java 7)"
+        const val VERSION = "NextEngine/2.2 (Kotlin 1.0.2; Java 7)"
+        private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
 
     private val mDispatchChain = DispatchChain()
@@ -32,24 +33,29 @@ class Engine {
     private val mContext = AtomicReference<Context>()
 
     fun start(servletContext: ServletContext, classProvider: ClassProvider) {
+        val start = now()
         Logger.d("--> NextEngine starting")
         Logger.d("Engine-Version: $VERSION")
-        val engineStart = now()
-        val context = Context(servletContext)
+        val webPath = servletContext.getRealPath("/")
+        val configPath = Paths.get(webPath, CONFIG_FILE)
+        val config = loadConfig(configPath)
+        Logger.d("Config-File: $configPath")
+        Logger.d("Config-Load-Time: ${escape(start)}ms")
+        val context = Context(webPath, config, servletContext)
         mContext.set(context)
         Logger.d("Web-Directory: ${context.webPath}")
         Logger.d("Web-Context: ${servletContext.contextPath}")
         // 扫描
         initModules(context, classProvider.get().toMutableList())
         // 所有Module注册到Chain中
-        mKernelManager.all { module ->
+        mKernelManager.allModules { module ->
             mDispatchChain.add(module)
         }
         Logger.d("Loaded-Modules: ${mKernelManager.moduleCount()}")
         Logger.d("Loaded-Plugins: ${mKernelManager.pluginCount()}")
         // 启动全部内核模块
         mKernelManager.onCreated(context)
-        Logger.d("Engine-Boot: ${escape(engineStart)}ms")
+        Logger.d("Engine-Boot: ${escape(start)}ms")
         Logger.d("<-- NextEngine started successfully")
     }
 
@@ -57,14 +63,12 @@ class Engine {
         val context = mContext.get()
         // 默认情况下，HTTP状态码为404。在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
         val response = Response(context, res as HttpServletResponse)
+        val request = Request(context, req as HttpServletRequest)
+        Logger.vv("NextEngine-Accepted: ${request.path}")
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
-            val request = Request(context, req as HttpServletRequest)
-            Logger.vv("NextEngine-Accepted: ${request.path}")
             mDispatchChain.process(request, response)
         }catch(err: Throwable) {
-            // 尝试发送错误消息 给客户端。
-            // 若依然失败时，服务端已无法处理，直接打印出错信息到日志
             Logger.e(err)
             try{
                 response.sendError(err)
@@ -92,7 +96,7 @@ class Engine {
         // Kernel modules
         register("BeforeInterceptor", BeforeHandler(classes), BeforeHandler.DEFAULT_PRIORITY, "before-interceptor")
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
-        register("Http", HttpHandler(classes), HttpHandler.DEFAULT_PRIORITY, "http")
+        register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
         // Build-in
         tryRegisterBuildInModules(context, classes)
         // User modules
@@ -127,73 +131,63 @@ class Engine {
     */
     private fun tryRegisterBuildInModules(context: Context, classes: MutableList<Class<*>>) {
         val classLoader = getClassLoader()
-        val httpPriority = HttpHandler.DEFAULT_PRIORITY
-        val load = fun(className: String, configName: String, tagName: String, priority: (Int)->Int){
-            val start = now()
-            val args = parseConfig(context.config.getConfig(configName))
-            val module = newClassInstance<Module>(loadClassByName(classLoader, className))
-            val used = module.prepare(classes)
-            classes.removeAll(used)
-            mKernelManager.register(module, priority.invoke(args.priority), args.args)
-            Logger.d("$tagName-Classes: ${used.size}")
-            Logger.d("$tagName-Prepare: ${escape(start)}ms")
+        val httpPriority = HttpControllerHandler.DEFAULT_PRIORITY
+        val ifExistsLoad = fun(className: String, configName: String, tagName: String, priority: (Int)->Int){
+            if(classExists(className)){
+                val start = now()
+                val args = parseConfig(context.config.getConfig(configName))
+                val module = newClassInstance<Module>(loadClassByName(classLoader, className))
+                val used = module.prepare(classes)
+                classes.removeAll(used)
+                mKernelManager.register(module, priority.invoke(args.priority), args.args)
+                Logger.d("$tagName-Classes: ${used.size}")
+                Logger.d("$tagName-Prepare: ${escape(start)}ms")
+            }
         }
         // Uploads
-        val uploadsClassName = "com.github.yoojia.web.Uploads"
-        if(classExists(uploadsClassName)){
-            load(uploadsClassName, "uploads", "Uploads", { define ->
-                val priority:Int
-                if(define >= HttpHandler.DEFAULT_PRIORITY) {
-                    priority = InternalPriority.UPLOADS
-                    Logger.v("Uploads.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
-                }else{
-                    priority = define
-                }
-                priority
-            })
-        }
+        ifExistsLoad("com.github.yoojia.web.Uploads", "uploads", "Uploads", { define ->
+            val priority:Int
+            if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
+                priority = InternalPriority.UPLOADS
+                Logger.v("Uploads.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
+            }else{
+                priority = define
+            }
+            priority
+        })
         // Assets
-        val assetsClassName = "com.github.yoojia.web.Assets"
-        if(classExists(assetsClassName)){
-            load(assetsClassName, "assets", "Assets", { define ->
-                val priority:Int
-                if(define >= HttpHandler.DEFAULT_PRIORITY) {
-                    priority = InternalPriority.ASSETS
-                    Logger.v("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
-                }else{
-                    priority = define
-                }
-                priority
-            })
-        }
+        ifExistsLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
+            val priority:Int
+            if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
+                priority = InternalPriority.ASSETS
+                Logger.v("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
+            }else{
+                priority = define
+            }
+            priority
+        })
         // Downloads
-        val downloadsClassName = "com.github.yoojia.web.Downloads"
-        if(classExists(downloadsClassName)){
-            load(downloadsClassName, "downloads", "Downloads", { define ->
-                val priority:Int
-                if(define <= HttpHandler.DEFAULT_PRIORITY) {
-                    priority = InternalPriority.DOWNLOADS
-                    Logger.v("Downloads.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
-                }else{
-                    priority = define
-                }
-                priority
-            })
-        }
+        ifExistsLoad("com.github.yoojia.web.Downloads", "downloads", "Downloads", { define ->
+            val priority:Int
+            if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
+                priority = InternalPriority.DOWNLOADS
+                Logger.v("Downloads.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
+            }else{
+                priority = define
+            }
+            priority
+        })
         // Templates
-        val templatesClassName = "com.github.yoojia.web.VelocityTemplates"
-        if(classExists(templatesClassName)){
-            load(templatesClassName, "templates", "Templates", { define ->
-                val priority:Int
-                if(define <= HttpHandler.DEFAULT_PRIORITY) {
-                    priority = InternalPriority.VELOCITY
-                    Logger.v("Templates.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
-                }else{
-                    priority = define
-                }
-                priority
-            })
-        }
+        ifExistsLoad("com.github.yoojia.web.VelocityTemplates", "templates", "Templates", { define ->
+            val priority:Int
+            if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
+                priority = InternalPriority.VELOCITY
+                Logger.v("Templates.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
+            }else{
+                priority = define
+            }
+            priority
+        })
     }
 
     private fun classExists(name: String): Boolean {

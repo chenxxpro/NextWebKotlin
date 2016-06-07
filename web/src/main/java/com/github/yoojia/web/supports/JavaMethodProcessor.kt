@@ -10,7 +10,7 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class MethodProcessor(val host: Class<*>, val method: Method) {
+class JavaMethodProcessor(val host: Class<*>, val method: Method) {
 
     @Throws(Exception::class)
     fun invoke(request: Request, response: Response, chain: RequestChain, fetcher: (Class<*>) -> Any) {
@@ -34,7 +34,7 @@ class MethodProcessor(val host: Class<*>, val method: Method) {
     }
 
     override fun toString(): String{
-        return "${this.javaClass.simpleName}(host=${host.name}, method=${method.name})"
+        return "{class: ${host.name}, method:${method.name} }"
     }
 
 }

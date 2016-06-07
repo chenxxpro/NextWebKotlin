@@ -1,4 +1,4 @@
-package com.github.yoojia.web.util
+package com.github.yoojia.web.supports
 
 import java.io.File
 import java.io.IOException
@@ -12,15 +12,18 @@ import java.util.*
 /**
  * 查找运行时类名
  */
-fun findRuntimeNames(based: Path, filter: (Path) -> Boolean): List<String> {
+fun findRuntimeNames(based: Path, filter: (String) -> Boolean): List<String> {
     val out = ArrayList<String>()
     Files.walkFileTree(based, object : SimpleFileVisitor<Path>() {
         @Throws(IOException::class)
         override fun visitFile(path: Path, attr: BasicFileAttributes): FileVisitResult {
-            val file = based.relativize(path)
-            val name = file.toString()
-            if(name.endsWith(".class") && filter.invoke(file)) {
-                out.add(resolveClassName(name));
+            val pathName = based.relativize(path).toString()
+            if(pathName.endsWith(".class")) {
+                val className = resolveClassName(pathName)
+                Logger.vv("Found class: $className")
+                if(! filter.invoke(className)) {
+                    out.add(className);
+                }
             }
             return FileVisitResult.CONTINUE
         }
@@ -31,7 +34,7 @@ fun findRuntimeNames(based: Path, filter: (Path) -> Boolean): List<String> {
 /**
  * 查找Jar包类名
  */
-fun findJarClassNames(acceptFilter: (Path) -> Boolean): List<String> {
+fun findJarClassNames(acceptFilter: (String) -> Boolean): List<String> {
     return emptyList() // TODO
 }
 

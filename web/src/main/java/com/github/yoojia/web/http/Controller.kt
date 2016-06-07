@@ -1,14 +1,15 @@
 package com.github.yoojia.web.http
 
 /**
+ * Http Controller
  * @author Yoojia Chen (yoojiachen@gmail.com)
- * @since 2.0
+ * @since 2.2
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Module(
+annotation class Controller(
         /**
-         * 模块基础地址。
+         * 基础地址。
          */
-        val base: String = "/"
+        val value: String = "/"
 )

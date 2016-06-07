@@ -7,7 +7,6 @@ import com.github.yoojia.web.kernel.Config
 import com.github.yoojia.web.kernel.Context
 import com.github.yoojia.web.kernel.DispatchChain
 import com.github.yoojia.web.kernel.Module
-import com.github.yoojia.web.util.*
 import java.util.*
 
 /**
@@ -19,7 +18,7 @@ abstract class AbstractHandler(val handlerTag: String,
                                val annotation: Class<out Annotation>,
                                classes: List<Class<*>>) : Module {
 
-    private val mProcessors = ArrayList<MethodDefine>()
+    private val mProcessors = ArrayList<JavaMethodDefine>()
     private val mHostedObjectProvider: ObjectProvider
 
     private val mCachedClasses: ArrayList<Class<*>>
@@ -44,10 +43,10 @@ abstract class AbstractHandler(val handlerTag: String,
         // 解析各个Class的方法,并创建对应的MethodProcessor
         mCachedClasses.forEach { hostType ->
             val basedUri = getBaseUri(hostType)
-            filterRouteAnnotated(hostType, { method ->
+            filterAnnotatedMethods(hostType, { method, annotationType ->
                 checkReturnType(method)
                 checkArguments(method)
-                val define = createMethodDefine(basedUri, hostType, method)
+                val define = createMethodDefine(basedUri, hostType, method, annotationType)
                 mProcessors.add(define)
                 Logger.v("$handlerTag-Module-Define: $define")
             })
@@ -62,11 +61,11 @@ abstract class AbstractHandler(val handlerTag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val matched = findMatched(RequestDefine(listOf(request.method), request.resources))
+        val matched = findMatched(HttpRequestDefine(request.method, request.path, request.resources))
         processMatches(matched, request, response, dispatch)
     }
 
-    fun processMatches(matched: List<MethodDefine>, request: Request, response: Response, dispatch: DispatchChain) {
+    fun processMatches(matched: List<JavaMethodDefine>, request: Request, response: Response, dispatch: DispatchChain) {
         Logger.vv("$handlerTag-Module-Processing: ${request.path}")
         Logger.vv("$handlerTag-Module-Handlers: ${matched.size}")
         // 根据优先级排序后处理
@@ -74,11 +73,11 @@ abstract class AbstractHandler(val handlerTag: String,
                 .forEach { method ->
                     /*
                         每个模块处理前清除前一模块的动态参数：
-                        像 /users/{username} 中定义的动态参数 username 只对 @Route(path = "/users/{username}") 所声明的方法有效，
-                        而对其它同样匹配路径如 @Route(path = "/users/ *") 来说，动态参数中突然出现 username 显得非常怪异。
+                        像 /users/{username} 中定义的动态参数 username 只对 @GET("/users/{username}") 所声明的方法有效，
+                        而对其它同样匹配路径如 @GET("/users/ *") 来说，动态参数中突然出现 username 显得非常怪异。
                     */
                     request.clearDynamicParams()
-                    //  每个@Route方法Handler定义了不同的处理URI地址, 这里需要解析动态URL，并保存到Request中
+                    //  每个@GET/POST/PUT/DELETE方法Handler定义了不同的处理URI地址, 这里需要解析动态URL，并保存到Request中
                     val params = dynamicParams(request.resources, method.request)
                     if(params.isNotEmpty()) {
                         request.putDynamicParams(params)
@@ -89,7 +88,6 @@ abstract class AbstractHandler(val handlerTag: String,
                         type -> mHostedObjectProvider.get(type)
                     })
                     // 处理器要求中断
-                    //
                     if(chain.isInterrupted()) return@forEach
                     if(chain.isStopDispatching()) return
                 }
@@ -97,8 +95,8 @@ abstract class AbstractHandler(val handlerTag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected fun findMatched(request: RequestDefine): List<MethodDefine> {
-        val out = ArrayList<MethodDefine>()
+    protected fun findMatched(request: HttpRequestDefine): List<JavaMethodDefine> {
+        val out = ArrayList<JavaMethodDefine>()
         mProcessors.forEach { processor ->
             if(isRequestMatched(request, processor.request)) {
                 out.add(processor)
