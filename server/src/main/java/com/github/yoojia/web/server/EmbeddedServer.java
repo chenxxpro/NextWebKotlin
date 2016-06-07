@@ -3,6 +3,8 @@ package com.github.yoojia.web.server;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+import javax.servlet.Servlet;
+
 /**
  * @author YOOJIA.CHEN (yoojia.chen@gmail.com)
  */
@@ -33,6 +35,13 @@ public class EmbeddedServer {
         server.start();
         server.join();
         server.stop();
+    }
+
+    public void init(Class<? extends Servlet> servletClass){
+        checkRunning();
+        final WebAppContext appContext = new WebAppContext(webApp, "/");
+        appContext.addServlet(servletClass, "/*");
+        server.setHandler(appContext);
     }
 
     public void start() throws Exception {
