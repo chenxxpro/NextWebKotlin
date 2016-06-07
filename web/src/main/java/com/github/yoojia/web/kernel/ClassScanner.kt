@@ -19,7 +19,7 @@ internal class ClassScanner : ClassProvider {
         val filter = fun(path: Path): Boolean {
             return ! path.startsWith(kernelPath)
         }
-        val runtime = findRuntimeNames(based = getClassPath(), filter = filter)
+        val runtime = findRuntimeNames(getClassPath(), filter)
         val jar = findJarClassNames(filter)
         val classes = ArrayList<Class<*>>(loadClassByName(runtime.concat(jar)))
         Logger.d("Classes-Scan: ${escape(scanStart)}ms")

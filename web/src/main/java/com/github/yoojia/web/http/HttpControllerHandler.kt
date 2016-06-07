@@ -13,7 +13,7 @@ import com.github.yoojia.web.supports.InternalPriority
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class HttpHandler(classes: List<Class<*>>) : AbstractHandler("Http", Controller::class.java, classes) {
+class HttpControllerHandler(classes: List<Class<*>>) : AbstractHandler("HttpController", Controller::class.java, classes) {
 
     override fun getBaseUri(hostType: Class<*>): String {
         return hostType.getAnnotation(Controller::class.java).value

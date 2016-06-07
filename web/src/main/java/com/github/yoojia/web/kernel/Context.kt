@@ -3,6 +3,7 @@ package com.github.yoojia.web.kernel
 import com.github.yoojia.web.supports.Logger
 import com.github.yoojia.web.supports.escape
 import com.github.yoojia.web.supports.loadConfig
+import com.github.yoojia.web.supports.now
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -17,10 +18,9 @@ class Context(val servletContext: ServletContext) {
     val config: Config
     val webPath: String
 
-
     init{
         webPath = servletContext.getRealPath("/")
-        val start = System.currentTimeMillis()
+        val start = now()
         val path = resolvePath("WEB-INF${File.separator}next.yml")
         config = loadConfig(path)
         Logger.d("Config-File: $path")
