@@ -12,3 +12,9 @@ assets:
       - /imgs
       - /css
       - /js
+
+
+plugins:
+  - class: "com.github.yoojia.demo.HelloPlugin"
+    args:
+      key: "my-value"

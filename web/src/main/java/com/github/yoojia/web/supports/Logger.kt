@@ -16,31 +16,31 @@ class Logger private constructor() {
             "true".equals(System.getProperty("next-web.logger.very-verbose", "true"))
         }
 
-        fun v(message: String) {
+        @JvmStatic fun v(message: String) {
             if(verbose) {
                 println("V [${Thread.currentThread().id}] $message")
             }
         }
 
-        fun vv(message: String) {
+        @JvmStatic fun vv(message: String) {
             if(verbose && veryVerbose) {
                 println("Vv [${Thread.currentThread().id}] $message")
             }
         }
 
-        fun d(message: String) {
+        @JvmStatic fun d(message: String) {
             println("D [${Thread.currentThread().id}] $message")
         }
 
-        fun w(message: String) {
+        @JvmStatic fun w(message: String) {
             error("W [${Thread.currentThread().id}] $message")
         }
 
-        fun e(message: String) {
+        @JvmStatic fun e(message: String) {
             error("E [${Thread.currentThread().id}] $message")
         }
 
-        fun e(error: Throwable) {
+        @JvmStatic fun e(error: Throwable) {
             error.printStackTrace()
             error("E [${Thread.currentThread().id}] $error")
         }
