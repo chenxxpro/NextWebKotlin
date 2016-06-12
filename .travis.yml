@@ -8,7 +8,7 @@ sudo: false
 before_install:
  - chmod +x gradlew
  
-script: ./gradlew test
+script: ./gradlew test bintrayUpload
 
 notifications:
     email: false
