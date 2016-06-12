@@ -36,7 +36,10 @@ class Assets : Module {
             val local = request.context.resolvePath(request.path)
             if(Files.exists(local)) {
                 response.setStatusCode(StatusCode.OK)
-                response.setContextType(request.raw.servletContext.getMimeType(local.toString()))
+                val mimeType = request.raw.servletContext.getMimeType(local.toString())
+                if(mimeType != null) {
+                    response.setContextType(mimeType)
+                }
                 TransferAdapter(local).dispatch(request, response)
             }else{
                 response.setStatusCode(StatusCode.NOT_FOUND)
