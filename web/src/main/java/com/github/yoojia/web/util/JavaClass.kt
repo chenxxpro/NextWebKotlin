@@ -1,4 +1,4 @@
-package com.github.yoojia.web.supports
+package com.github.yoojia.web.util
 
 import com.github.yoojia.web.supports.Logger
 import java.io.File

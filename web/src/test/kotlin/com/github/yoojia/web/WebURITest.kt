@@ -1,9 +1,9 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.supports.HttpRequestDefine
-import com.github.yoojia.web.supports.dynamicParams
-import com.github.yoojia.web.supports.isRequestMatched
-import com.github.yoojia.web.supports.splitUri
+import com.github.yoojia.web.util.HttpRequestDefine
+import com.github.yoojia.web.util.dynamicParams
+import com.github.yoojia.web.util.isRequestMatched
+import com.github.yoojia.web.util.splitUri
 import org.junit.Assert
 import org.junit.Test
 

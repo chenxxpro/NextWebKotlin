@@ -5,7 +5,7 @@ import com.github.yoojia.web.Response
 import com.github.yoojia.web.StatusCode
 import com.github.yoojia.web.kernel.DispatchChain
 import com.github.yoojia.web.supports.AbstractHandler
-import com.github.yoojia.web.supports.HttpRequestDefine
+import com.github.yoojia.web.util.HttpRequestDefine
 import com.github.yoojia.web.supports.InternalPriority
 
 /**
