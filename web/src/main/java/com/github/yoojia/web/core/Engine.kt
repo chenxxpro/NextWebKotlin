@@ -6,8 +6,9 @@ import com.github.yoojia.web.StatusCode
 import com.github.yoojia.web.http.HttpControllerHandler
 import com.github.yoojia.web.interceptor.AfterHandler
 import com.github.yoojia.web.interceptor.BeforeHandler
-import com.github.yoojia.web.supports.*
+import com.github.yoojia.web.supports.InternalPriority
 import com.github.yoojia.web.util.*
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicReference
@@ -25,6 +26,9 @@ import javax.servlet.http.HttpServletResponse
 class Engine {
 
     companion object {
+        
+        private val Logger = LoggerFactory.getLogger(Engine::class.java)
+        
         const val VERSION = "NextEngine/2.2 (Kotlin 1.0.2; Java 7)"
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
@@ -35,29 +39,29 @@ class Engine {
 
     fun start(servletContext: ServletContext, classProvider: ClassProvider) {
         val start = now()
-        Logger.d("--> NextEngine starting")
-        Logger.d("Engine-Version: $VERSION")
+        Logger.debug("--> NextEngine starting")
+        Logger.debug("Engine-Version: $VERSION")
         val webPath = servletContext.getRealPath("/")
         val configPath = Paths.get(webPath, CONFIG_FILE)
         val config = loadConfig(configPath)
-        Logger.d("Config-File: $configPath")
-        Logger.d("Config-Load-Time: ${escape(start)}ms")
+        Logger.debug("Config-File: $configPath")
+        Logger.debug("Config-Load-Time: ${escape(start)}ms")
         val context = Context(webPath, config, servletContext)
         mContext.set(context)
-        Logger.d("Web-Directory: ${context.webPath}")
-        Logger.d("Web-Context: ${servletContext.contextPath}")
+        Logger.debug("Web-Directory: ${context.webPath}")
+        Logger.debug("Web-Context: ${servletContext.contextPath}")
         // 扫描
         initModules(context, classProvider.get().toMutableList())
         // 所有Module注册到Chain中
         mKernelManager.allModules { module ->
             mDispatchChain.add(module)
         }
-        Logger.d("Loaded-Modules: ${mKernelManager.moduleCount()}")
-        Logger.d("Loaded-Plugins: ${mKernelManager.pluginCount()}")
+        Logger.debug("Loaded-Modules: ${mKernelManager.moduleCount()}")
+        Logger.debug("Loaded-Plugins: ${mKernelManager.pluginCount()}")
         // 启动全部内核模块
         mKernelManager.onCreated(context)
-        Logger.d("Engine-Boot: ${escape(start)}ms")
-        Logger.d("<-- NextEngine started successfully")
+        Logger.debug("Engine-Boot: ${escape(start)}ms")
+        Logger.debug("<-- NextEngine started successfully")
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {
@@ -65,16 +69,16 @@ class Engine {
         // 默认情况下，HTTP状态码为404。在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
         val response = Response(context, res as HttpServletResponse)
         val request = Request(context, req as HttpServletRequest)
-        Logger.vv("NextEngine-Accepted: ${request.path}")
+        Logger.info("NextEngine-Accepted: ${request.path}")
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
             mDispatchChain.process(request, response)
         }catch(err: Throwable) {
-            Logger.e(err)
+            Logger.error("Error when processing request", err)
             try{
                 response.sendError(err)
             }catch(stillError: Throwable) {
-                Logger.e(stillError)
+                Logger.error("Error when send ERROR to client",stillError)
             }
         }
     }
@@ -91,7 +95,7 @@ class Engine {
             val start = now()
             val preUsed = module.prepare(classes);
             classes.removeAll(preUsed)
-            Logger.d("$tag-Prepare: ${escape(start)}ms")
+            Logger.debug("$tag-Prepare: ${escape(start)}ms")
             mKernelManager.register(module, priority, rootConfig.getConfig(config))
         }
         // Kernel modules
@@ -111,7 +115,7 @@ class Engine {
             classes.removeAll(moduleUsed)
             mKernelManager.register(module, args.priority, args.args)
         }
-        Logger.d("User-Modules-Prepare: ${escape(modulesStart)}ms")
+        Logger.debug("User-Modules-Prepare: ${escape(modulesStart)}ms")
         // 从配置文件中加载用户插件
         val pluginStart = now()
         val pluginConfigs = rootConfig.getConfigList("plugins")
@@ -120,7 +124,7 @@ class Engine {
             val plugin = newClassInstance<Plugin>(loadClassByName(classLoader, args.className))
             mKernelManager.register(plugin, args.priority, args.args)
         }
-        Logger.d("User-Plugins-Prepare: ${escape(pluginStart)}ms")
+        Logger.debug("User-Plugins-Prepare: ${escape(pluginStart)}ms")
     }
 
     /**
@@ -141,8 +145,8 @@ class Engine {
                 val used = module.prepare(classes)
                 classes.removeAll(used)
                 mKernelManager.register(module, priority.invoke(args.priority), args.args)
-                Logger.d("$tagName-Classes: ${used.size}")
-                Logger.d("$tagName-Prepare: ${escape(start)}ms")
+                Logger.debug("$tagName-Classes: ${used.size}")
+                Logger.debug("$tagName-Prepare: ${escape(start)}ms")
             }
         }
         // Uploads
@@ -150,7 +154,7 @@ class Engine {
             val priority:Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.UPLOADS
-                Logger.v("Uploads.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
+                Logger.info("Uploads.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
             }else{
                 priority = define
             }
@@ -161,7 +165,7 @@ class Engine {
             val priority:Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.ASSETS
-                Logger.v("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
+                Logger.info("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
             }else{
                 priority = define
             }
@@ -172,7 +176,7 @@ class Engine {
             val priority:Int
             if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.DOWNLOADS
-                Logger.v("Downloads.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
+                Logger.info("Downloads.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
             }else{
                 priority = define
             }
@@ -183,7 +187,7 @@ class Engine {
             val priority:Int
             if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.VELOCITY
-                Logger.v("Templates.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
+                Logger.info("Templates.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
             }else{
                 priority = define
             }

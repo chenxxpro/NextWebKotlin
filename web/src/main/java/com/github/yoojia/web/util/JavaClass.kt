@@ -1,6 +1,6 @@
 package com.github.yoojia.web.util
 
-import com.github.yoojia.web.supports.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.nio.file.FileVisitResult
@@ -9,6 +9,8 @@ import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.*
+
+private val Logger = LoggerFactory.getLogger("JavaClass")
 
 /**
  * 查找运行时类名
@@ -21,7 +23,7 @@ fun findRuntimeNames(based: Path, filter: (String) -> Boolean): List<String> {
             val pathName = based.relativize(path).toString()
             if(pathName.endsWith(".class")) {
                 val className = resolveClassName(pathName)
-                Logger.vv("Found class: $className")
+                Logger.info("Found class: $className")
                 if(! filter.invoke(className)) {
                     out.add(className);
                 }

@@ -1,13 +1,10 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.DispatchChain
-import com.github.yoojia.web.core.Module
-import com.github.yoojia.web.supports.Logger
+import com.github.yoojia.web.core.*
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.Velocity
 import org.apache.velocity.app.VelocityEngine
+import org.slf4j.LoggerFactory
 import java.io.StringWriter
 import java.util.*
 
@@ -18,6 +15,10 @@ import java.util.*
 class VelocityTemplates : Module {
 
     private val mEngine = VelocityEngine()
+
+    companion object {
+        private val Logger = LoggerFactory.getLogger(Engine::class.java)
+    }
 
     override fun onCreated(context: Context, config: Config) {
         val path = context.resolvePath("/templates")
@@ -41,7 +42,7 @@ class VelocityTemplates : Module {
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
         val name = response.args[Response.TEMPLATE_NAME]
         if(name != null && name.isNotEmpty()) {
-            Logger.vv("Template-Module-Processing: ${request.path}, template: $name")
+            Logger.info("Template-Module-Processing: ${request.path}, template: $name")
             if ( ! mEngine.resourceExists(name)) {
                 throw RuntimeException("Template resource($name) not exists !");
             }

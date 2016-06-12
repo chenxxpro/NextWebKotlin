@@ -3,11 +3,9 @@ package com.github.yoojia.web.supports
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.DispatchChain
-import com.github.yoojia.web.core.Module
+import com.github.yoojia.web.core.*
 import com.github.yoojia.web.util.*
+import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
@@ -22,6 +20,10 @@ abstract class AbstractHandler(val handlerTag: String,
     private val mHostedObjectProvider: CachedObjectProvider
 
     private val mCachedClasses: ArrayList<Class<*>>
+    
+    companion object {
+        private val Logger = LoggerFactory.getLogger(AbstractHandler::class.java)
+    }
 
     init{
         val accepted = classes.filter {
@@ -48,7 +50,7 @@ abstract class AbstractHandler(val handlerTag: String,
                 checkArguments(method)
                 val define = createMethodDefine(basedUri, hostType, method, annotationType)
                 mProcessors.add(define)
-                Logger.v("$handlerTag-Module-Define: $define")
+                Logger.info("$handlerTag-Module-Define: $define")
             })
         }
         try{
@@ -66,8 +68,8 @@ abstract class AbstractHandler(val handlerTag: String,
     }
 
     fun processMatches(matched: List<JavaMethodDefine>, request: Request, response: Response, dispatch: DispatchChain) {
-        Logger.vv("$handlerTag-Module-Processing: ${request.path}")
-        Logger.vv("$handlerTag-Module-Handlers: ${matched.size}")
+        Logger.info("$handlerTag-Module-Processing: ${request.path}")
+        Logger.info("$handlerTag-Module-Handlers: ${matched.size}")
         // 根据优先级排序后处理
         matched.sortedBy { it.priority }
                 .forEach { handler ->
@@ -83,7 +85,7 @@ abstract class AbstractHandler(val handlerTag: String,
                         request.putDynamicParams(params)
                     }
                     val chain = RequestChain()
-                    Logger.vv("$handlerTag-Working-Processor: $handler")
+                    Logger.info("$handlerTag-Working-Processor: $handler")
                     val hostObject = mHostedObjectProvider.get(handler.processor.hostType)
                     if(hostObject is ModuleRequestsListener) {
                         hostObject.beforeEach(handler.javaMethod, request, response)

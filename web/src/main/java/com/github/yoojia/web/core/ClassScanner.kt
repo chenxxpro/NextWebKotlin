@@ -1,8 +1,7 @@
 package com.github.yoojia.web.core
 
-import com.github.yoojia.web.supports.*
 import com.github.yoojia.web.util.*
-import java.io.File
+import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
@@ -14,6 +13,9 @@ import java.util.*
 internal class ClassScanner : ClassProvider {
 
     companion object{
+
+        private val Logger = LoggerFactory.getLogger(ClassScanner::class.java)
+
         private val DEFAULT_SYSTEM_CLASSES = arrayOf(
                 "com.github.yoojia.web.",
                 "java.",
@@ -35,8 +37,8 @@ internal class ClassScanner : ClassProvider {
         val runtime = findRuntimeNames(getClassPath(), filter)
         val jar = findJarClassNames(filter)
         val classes = ArrayList<Class<*>>(loadClassByName(runtime.concat(jar)))
-        Logger.d("Classes-Scan: ${escape(scanStart)}ms")
-        Logger.d("Classes-Count: ${classes.size}")
+        Logger.debug("Classes-Scan: ${escape(scanStart)}ms")
+        Logger.debug("Classes-Count: ${classes.size}")
         return classes
     }
 
