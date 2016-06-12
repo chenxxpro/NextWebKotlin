@@ -1,11 +1,9 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.DispatchChain
-import com.github.yoojia.web.core.Module
+import com.github.yoojia.web.core.*
 import com.github.yoojia.web.util.isUriResourceMatched
 import com.github.yoojia.web.util.splitUri
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.util.*
 
@@ -19,13 +17,17 @@ class Assets : Module {
 
     private val mAssetsDefine = ArrayList<List<String>>()
 
+    companion object {
+        private val Logger = LoggerFactory.getLogger(Engine::class.java)
+    }
+
     override fun onCreated(context: Context, config: Config) {
         mForwardIfMatched = config.getBoolean("forward")
-        Logger.d("Assets-Forward: $mForwardIfMatched")
+        Logger.debug("Assets-Forward: $mForwardIfMatched")
         mAssetsDefine.clear()
         for(uri in config.getTypedList<String>("uri-mapping")) {
             val path = if(uri.endsWith("/*")) uri else uri + "/*"
-            Logger.d("Assets-URI-Define: $path")
+            Logger.debug("Assets-URI-Define: $path")
             mAssetsDefine.add(splitUri(path))
         }
     }
