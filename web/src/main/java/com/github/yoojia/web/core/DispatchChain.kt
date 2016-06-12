@@ -1,4 +1,4 @@
-package com.github.yoojia.web.kernel
+package com.github.yoojia.web.core
 
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.Response

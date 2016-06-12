@@ -1,6 +1,6 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.kernel.Context
+import com.github.yoojia.web.core.Context
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse

@@ -1,8 +1,8 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.kernel.ClassProvider
-import com.github.yoojia.web.kernel.ClassScanner
-import com.github.yoojia.web.kernel.Engine
+import com.github.yoojia.web.core.ClassProvider
+import com.github.yoojia.web.core.ClassScanner
+import com.github.yoojia.web.core.Engine
 import javax.servlet.*
 
 /**

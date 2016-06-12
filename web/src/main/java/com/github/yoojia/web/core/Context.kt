@@ -1,4 +1,4 @@
-package com.github.yoojia.web.kernel
+package com.github.yoojia.web.core
 
 import java.nio.file.Path
 import java.nio.file.Paths

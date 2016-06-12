@@ -3,7 +3,7 @@ package com.github.yoojia.web.http
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.Response
 import com.github.yoojia.web.StatusCode
-import com.github.yoojia.web.kernel.DispatchChain
+import com.github.yoojia.web.core.DispatchChain
 import com.github.yoojia.web.supports.AbstractHandler
 import com.github.yoojia.web.util.HttpRequestDefine
 import com.github.yoojia.web.supports.InternalPriority
