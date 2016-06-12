@@ -1,9 +1,9 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.kernel.Config
-import com.github.yoojia.web.kernel.Context
-import com.github.yoojia.web.kernel.DispatchChain
-import com.github.yoojia.web.kernel.Module
+import com.github.yoojia.web.core.Config
+import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.core.DispatchChain
+import com.github.yoojia.web.core.Module
 import com.github.yoojia.web.supports.Logger
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.Velocity

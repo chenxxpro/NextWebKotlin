@@ -1,9 +1,9 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.kernel.Config
-import com.github.yoojia.web.kernel.Context
-import com.github.yoojia.web.kernel.DispatchChain
-import com.github.yoojia.web.kernel.Module
+import com.github.yoojia.web.core.Config
+import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.core.DispatchChain
+import com.github.yoojia.web.core.Module
 import com.github.yoojia.web.supports.Logger
 import com.github.yoojia.web.util.isUriResourceMatched
 import com.github.yoojia.web.util.splitUri

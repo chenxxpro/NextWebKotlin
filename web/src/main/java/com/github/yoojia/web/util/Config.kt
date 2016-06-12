@@ -1,6 +1,6 @@
 package com.github.yoojia.web.util
 
-import com.github.yoojia.web.kernel.Config
+import com.github.yoojia.web.core.Config
 import org.yaml.snakeyaml.Yaml
 import java.io.FileInputStream
 import java.nio.file.Files

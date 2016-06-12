@@ -1,8 +1,8 @@
 package com.github.yoojia.demo;
 
-import com.github.yoojia.web.kernel.Config;
-import com.github.yoojia.web.kernel.Context;
-import com.github.yoojia.web.kernel.Plugin;
+import com.github.yoojia.web.core.Config;
+import com.github.yoojia.web.core.Context;
+import com.github.yoojia.web.core.Plugin;
 import com.github.yoojia.web.supports.Logger;
 import org.jetbrains.annotations.NotNull;
 

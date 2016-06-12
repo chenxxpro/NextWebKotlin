@@ -1,4 +1,4 @@
-package com.github.yoojia.web.kernel
+package com.github.yoojia.web.core
 
 import com.github.yoojia.web.supports.*
 import com.github.yoojia.web.util.*

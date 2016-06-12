@@ -3,10 +3,10 @@ package com.github.yoojia.web.supports
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
-import com.github.yoojia.web.kernel.Config
-import com.github.yoojia.web.kernel.Context
-import com.github.yoojia.web.kernel.DispatchChain
-import com.github.yoojia.web.kernel.Module
+import com.github.yoojia.web.core.Config
+import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.core.DispatchChain
+import com.github.yoojia.web.core.Module
 import com.github.yoojia.web.util.*
 import java.util.*
 
