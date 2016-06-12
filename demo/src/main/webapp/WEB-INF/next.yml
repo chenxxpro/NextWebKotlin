@@ -18,3 +18,5 @@ plugins:
   - class: "com.github.yoojia.demo.HelloPlugin"
     args:
       key: "my-value"
+      secret: true
+      secret1: false
