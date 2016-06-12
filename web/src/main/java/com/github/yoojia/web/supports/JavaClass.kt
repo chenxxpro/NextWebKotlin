@@ -1,5 +1,6 @@
 package com.github.yoojia.web.supports
 
+import com.github.yoojia.web.supports.Logger
 import java.io.File
 import java.io.IOException
 import java.nio.file.FileVisitResult

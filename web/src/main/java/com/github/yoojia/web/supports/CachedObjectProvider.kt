@@ -1,5 +1,6 @@
 package com.github.yoojia.web.supports
 
+import com.github.yoojia.web.supports.newClassInstance
 import java.util.*
 
 /**
@@ -11,16 +12,16 @@ class CachedObjectProvider(guessSize: Int) {
     private val mCached = object: LinkedHashMap<Class<*>, Any>(guessSize, 0.75f, true){
 
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Class<*>, Any>?): Boolean {
-            if(eldest?.value is CachedObjectListener) {
+            val toRemove = this.size > guessSize
+            if(toRemove && eldest?.value is CachedObjectListener) {
                 (eldest!!.value as CachedObjectListener).onDestroy()
             }
-            return this.size > guessSize
+            return toRemove
         }
 
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T> get(type: Class<*>): T {
+    fun get(type: Class<*>): Any {
         synchronized(mCached) {
             var obj = mCached[type]
             if(obj == null) {
@@ -30,7 +31,7 @@ class CachedObjectProvider(guessSize: Int) {
                 }
                 mCached.put(type, obj!!)
             }
-            return obj as T
+            return obj
         }
     }
 
