@@ -14,7 +14,9 @@ public class HelloPlugin implements Plugin {
 
     @Override
     public void onCreated(@NotNull Context context, @NotNull Config config) {
-        Logger.Companion.d("Hello plugin: " + config);
+        Logger.d("Hello plugin: " + config);
+        Logger.d("Hello plugin: " + config.getBoolean("secret"));
+        Logger.d("Hello plugin: " + config.getBoolean("secret1"));
     }
 
     @Override

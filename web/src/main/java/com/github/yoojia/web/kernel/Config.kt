@@ -41,38 +41,54 @@ class Config(val values: Map<String, Any>) {
     }
 
     fun getString(key: String): String {
+        return getString(key, "")
+    }
+
+    fun getString(key: String, def: String): String {
         val value = values[key]
         if(value != null) {
             return value as String
         }else{
-            return ""
+            return def
         }
     }
 
     fun getInt(key: String): Int {
+        return getInt(key, 0)
+    }
+
+    fun getInt(key: String, def: Int): Int {
         val value = values[key]
         if(value != null) {
             return value as Int
         }else{
-            return 0
+            return def
         }
     }
 
     fun getBoolean(key: String): Boolean {
+        return getBoolean(key, false)
+    }
+
+    fun getBoolean(key: String, def: Boolean): Boolean {
         val value = values[key]
         if(value != null) {
-            return "true".equals(value)
+            return value as Boolean
         }else{
-            return false
+            return def
         }
     }
 
     fun getFloat(key: String): Float {
+        return getFloat(key, 0f)
+    }
+
+    fun getFloat(key: String, def: Float): Float {
         val value = values[key]
         if(value != null) {
             return value as Float
         }else{
-            return 0f
+            return def
         }
     }
 

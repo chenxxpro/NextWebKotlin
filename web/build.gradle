@@ -28,7 +28,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 ext{
-    projVersion = '2.2.1'
+    projVersion = '2.2.2'
     projArtivactId = 'next-web'
     projName = 'NextWebKotlin'
     projDesc = 'NextWebKotlin: A Servlet 3.0 based micro web framework written in Kotlin'
