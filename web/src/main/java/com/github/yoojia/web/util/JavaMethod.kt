@@ -28,17 +28,19 @@ class HttpRequestDefine {
     val method: String
     val uriSegments: List<String>
     val uri: String
+    val priority: Int
 
-    constructor(method: String, uri: String, segments: List<String>) {
+    constructor(method: String, uri: String, priority: Int, segments: List<String>) {
         this.method = method.toUpperCase()
         this.uri = uri
+        this.priority = priority
         this.uriSegments = segments
     }
 
-    constructor(method: String, uri: String): this(method, uri, splitUri(uri))
+    constructor(method: String, uri: String, priority: Int): this(method, uri, priority, splitUri(uri))
 
     override fun toString(): String {
-        return "{method: $method, uri: $uri}"
+        return "{method: $method, uri: $uri, priority: $priority}"
     }
 }
 
@@ -103,30 +105,35 @@ fun checkArguments(method: Method) {
 fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): JavaMethodDefine {
     val annotation = method.getAnnotation(annotationType)
     val params = when(annotation) {
-        is GET -> Pair("GET", annotation.value)
-        is POST -> Pair("POST", annotation.value)
-        is PUT -> Pair("PUT", annotation.value)
-        is DELETE -> Pair("DELETE", annotation.value)
-        is ALL -> Pair("ALL", annotation.value)
+        is GET -> Triple("GET", annotation.value, annotation.priority)
+        is POST -> Triple("POST", annotation.value, annotation.priority)
+        is PUT -> Triple("PUT", annotation.value, annotation.priority)
+        is DELETE -> Triple("DELETE", annotation.value, annotation.priority)
+        is ALL -> Triple("ALL", annotation.value, annotation.priority)
         else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
     }
     return JavaMethodDefine(JavaMethodProcessor(moduleType, method),
-            HttpRequestDefine(params.first/*method*/, linkUri(rootUri, params.second/*path*/)))
+            HttpRequestDefine(params.first/*method*/, linkUri(rootUri, params.second/*path*/), params.third/* user priority*/))
 }
 
 /**
  * 计算请求参数的优先级
+ * - 首先使用用户设置自定义优先级(非 InternalPriority.INVALID 值)
  * - 短URI路径优先；
  * - 静态方法优先；
  */
 private fun getRequestPriority(define: HttpRequestDefine): Int {
-    var priority = 0
-    define.uriSegments.forEach {
-        if(isWildcards(it)) {
-            priority += -1
-        }else{
-            priority += if(isDynamicSegment(it)) 1 else 0
+    if(define.priority != InternalPriority.INVALID) {
+        return define.priority
+    }else{
+        var priority = 0
+        define.uriSegments.forEach {
+            if(isWildcards(it)) {
+                priority += -1
+            }else{
+                priority += if(isDynamicSegment(it)) 1 else 0
+            }
         }
+        return define.uriSegments.size + priority
     }
-    return define.uriSegments.size + priority
 }
