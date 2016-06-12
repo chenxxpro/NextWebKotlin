@@ -30,9 +30,9 @@ internal class KernelManager {
 
     fun onDestroy() {
         // Call onDestroy
-        mModules.forEach {  it.first.onDestroy() }
+        mModules.forEach { it.first.onDestroy() }
         mModules.clear()
-        mPlugins.forEach {  it.first.onDestroy() }
+        mPlugins.forEach { it.first.onDestroy() }
         mPlugins.clear()
     }
 
