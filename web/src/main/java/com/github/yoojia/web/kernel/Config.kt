@@ -75,4 +75,8 @@ class Config(val values: Map<String, Any>) {
             return 0f
         }
     }
+
+    override fun toString(): String {
+        return values.toString()
+    }
 }
