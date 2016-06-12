@@ -1,14 +1,20 @@
-package com.github.yoojia.web.supports
+package com.github.yoojia.web.util
 
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
+import com.github.yoojia.web.supports.JavaMethodProcessor
 import java.lang.reflect.Method
 
 /**
  * 处理请求的Java方法定义
  */
 data class JavaMethodDefine(val processor: JavaMethodProcessor, val request: HttpRequestDefine, val priority: Int = getRequestPriority(request)) {
+
+    val javaMethod: Method by lazy {
+        processor.method
+    }
+
     override fun toString(): String {
         return "{processor: $processor, request: $request, priority: $priority}"
     }

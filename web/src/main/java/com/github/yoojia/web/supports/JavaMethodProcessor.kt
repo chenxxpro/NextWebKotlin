@@ -10,13 +10,13 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class JavaMethodProcessor(val host: Class<*>, val method: Method) {
+class JavaMethodProcessor(val hostType: Class<*>, val method: Method) {
 
     @Throws(Exception::class)
-    fun invoke(request: Request, response: Response, chain: RequestChain, fetcher: (Class<*>) -> Any) {
+    fun invoke(request: Request, response: Response, chain: RequestChain, hostObject: Any) {
         val origin = method.isAccessible
         method.isAccessible = true
-        method.invoke(fetcher.invoke(host), *varargs(request, response, chain))
+        method.invoke(hostObject, *varargs(request, response, chain))
         method.isAccessible = origin
     }
 
@@ -34,7 +34,7 @@ class JavaMethodProcessor(val host: Class<*>, val method: Method) {
     }
 
     override fun toString(): String{
-        return "{class: ${host.name}, method:${method.name} }"
+        return "{class: ${hostType.name}, method:${method.name} }"
     }
 
 }

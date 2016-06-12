@@ -1,7 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.kernel.Context
-import com.github.yoojia.web.supports.splitUri
+import com.github.yoojia.web.util.splitUri
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest

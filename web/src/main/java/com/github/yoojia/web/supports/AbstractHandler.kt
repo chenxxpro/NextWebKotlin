@@ -7,10 +7,10 @@ import com.github.yoojia.web.kernel.Config
 import com.github.yoojia.web.kernel.Context
 import com.github.yoojia.web.kernel.DispatchChain
 import com.github.yoojia.web.kernel.Module
+import com.github.yoojia.web.util.*
 import java.util.*
 
 /**
- * HTTP 模块，处理HTTP请求
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
@@ -19,7 +19,7 @@ abstract class AbstractHandler(val handlerTag: String,
                                classes: List<Class<*>>) : Module {
 
     private val mProcessors = ArrayList<JavaMethodDefine>()
-    private val mHostedObjectProvider: ObjectProvider
+    private val mHostedObjectProvider: CachedObjectProvider
 
     private val mCachedClasses: ArrayList<Class<*>>
 
@@ -27,7 +27,7 @@ abstract class AbstractHandler(val handlerTag: String,
         val accepted = classes.filter {
             it.isAnnotationPresent(annotation)
         }
-        mHostedObjectProvider = ObjectProvider(accepted.size)
+        mHostedObjectProvider = CachedObjectProvider(accepted.size)
         mCachedClasses = ArrayList(accepted)
     }
 
@@ -70,7 +70,7 @@ abstract class AbstractHandler(val handlerTag: String,
         Logger.vv("$handlerTag-Module-Handlers: ${matched.size}")
         // 根据优先级排序后处理
         matched.sortedBy { it.priority }
-                .forEach { method ->
+                .forEach { handler ->
                     /*
                         每个模块处理前清除前一模块的动态参数：
                         像 /users/{username} 中定义的动态参数 username 只对 @GET("/users/{username}") 所声明的方法有效，
@@ -78,15 +78,23 @@ abstract class AbstractHandler(val handlerTag: String,
                     */
                     request.clearDynamicParams()
                     //  每个@GET/POST/PUT/DELETE方法Handler定义了不同的处理URI地址, 这里需要解析动态URL，并保存到Request中
-                    val params = dynamicParams(request.resources, method.request)
+                    val params = dynamicParams(request.resources, handler.request)
                     if(params.isNotEmpty()) {
                         request.putDynamicParams(params)
                     }
                     val chain = RequestChain()
-                    Logger.vv("$handlerTag-Working-Processor: $method")
-                    method.processor.invoke(request, response, chain, {
-                        type -> mHostedObjectProvider.get(type)
-                    })
+                    Logger.vv("$handlerTag-Working-Processor: $handler")
+                    val hostObject = mHostedObjectProvider.get(handler.processor.hostType)
+                    if(hostObject is ModuleRequestsListener) {
+                        hostObject.beforeEach(handler.javaMethod, request, response)
+                        try{
+                            handler.processor.invoke(request, response, chain, hostObject)
+                        }finally{
+                            hostObject.afterEach(handler.javaMethod, request, response)
+                        }
+                    }else{
+                        handler.processor.invoke(request, response, chain, hostObject)
+                    }
                     // 处理器要求中断
                     if(chain.isInterrupted()) return@forEach
                     if(chain.isStopDispatching()) return
