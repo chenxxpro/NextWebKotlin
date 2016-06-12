@@ -17,7 +17,7 @@ class VelocityTemplates : Module {
     private val mEngine = VelocityEngine()
 
     companion object {
-        private val Logger = LoggerFactory.getLogger(Engine::class.java)
+        private val Logger = LoggerFactory.getLogger(VelocityTemplates::class.java)
     }
 
     override fun onCreated(context: Context, config: Config) {

@@ -18,7 +18,7 @@ class Assets : Module {
     private val mAssetsDefine = ArrayList<List<String>>()
 
     companion object {
-        private val Logger = LoggerFactory.getLogger(Engine::class.java)
+        private val Logger = LoggerFactory.getLogger(Assets::class.java)
     }
 
     override fun onCreated(context: Context, config: Config) {
