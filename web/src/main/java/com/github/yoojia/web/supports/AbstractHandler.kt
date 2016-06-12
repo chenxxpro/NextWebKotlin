@@ -19,7 +19,7 @@ abstract class AbstractHandler(val handlerTag: String,
                                classes: List<Class<*>>) : Module {
 
     private val mProcessors = ArrayList<JavaMethodDefine>()
-    private val mHostedObjectProvider: ObjectProvider
+    private val mHostedObjectProvider: CachedObjectProvider
 
     private val mCachedClasses: ArrayList<Class<*>>
 
@@ -27,7 +27,7 @@ abstract class AbstractHandler(val handlerTag: String,
         val accepted = classes.filter {
             it.isAnnotationPresent(annotation)
         }
-        mHostedObjectProvider = ObjectProvider(accepted.size)
+        mHostedObjectProvider = CachedObjectProvider(accepted.size)
         mCachedClasses = ArrayList(accepted)
     }
 
