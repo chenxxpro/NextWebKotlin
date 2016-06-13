@@ -14,7 +14,7 @@ import java.util.*
  */
 class VelocityTemplates : Module {
 
-    private val mEngine = VelocityEngine()
+    private val velocity = VelocityEngine()
 
     companion object {
         private val Logger = LoggerFactory.getLogger(VelocityTemplates::class.java)
@@ -31,7 +31,7 @@ class VelocityTemplates : Module {
         conf.setProperty(Velocity.ENCODING_DEFAULT, "UTF-8")
         conf.setProperty(Velocity.INPUT_ENCODING, "UTF-8")
         conf.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8")
-        mEngine.init(conf)
+        velocity.init(conf)
     }
 
     override fun onDestroy() {
@@ -41,14 +41,15 @@ class VelocityTemplates : Module {
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
         val name = response.args[Response.TEMPLATE_NAME]
-        if(name != null && name.isNotEmpty()) {
+        if(name != null && name is String && name.isNotEmpty()) {
             Logger.info("Template-Module-Processing: ${request.path}, template: $name")
-            if ( ! mEngine.resourceExists(name)) {
+            if ( ! velocity.resourceExists(name)) {
                 throw RuntimeException("Template resource($name) not exists !");
             }
-            val text = StringWriter()
-            mEngine.getTemplate(name).merge(VelocityContext(request.params()), text)
-            response.sendHtml(text.toString())
+            val output = StringWriter()
+            velocity.getTemplate(name)
+                    .merge(VelocityContext(response.args), output)
+            response.sendHtml(output.toString())
         }
         dispatch.next(request, response, dispatch)
     }

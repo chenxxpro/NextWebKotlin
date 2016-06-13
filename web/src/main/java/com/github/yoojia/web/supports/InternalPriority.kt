@@ -14,6 +14,8 @@ class InternalPriority private constructor() {
         val ASSETS = HTTP - 200
         val DOWNLOADS = HTTP + 100
         val VELOCITY = HTTP + 200
+
+        val INVALID = Int.MIN_VALUE
     }
 
 }

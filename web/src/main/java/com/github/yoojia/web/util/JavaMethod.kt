@@ -116,6 +116,7 @@ fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, an
 
 /**
  * 计算请求参数的优先级
+ * - 首先使用用户设置自定义优先级(非 InternalPriority.INVALID 值)
  * - 短URI路径优先；
  * - 静态方法优先；
  */
