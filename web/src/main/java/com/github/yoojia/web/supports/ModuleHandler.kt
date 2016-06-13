@@ -20,10 +20,10 @@ abstract class ModuleHandler(val handlerTag: String,
                              val annotation: Class<out Annotation>,
                              classes: List<Class<*>>) : Module {
 
-    private val mProcessors = ArrayList<JavaMethodDefine>()
-    private val mHostedObjectProvider: ModuleCachedProvider
+    private val processors = ArrayList<JavaMethodDefine>()
+    private val hostedObjectProvider: ModuleCachedProvider
 
-    private val mCachedClasses: ArrayList<Class<*>>
+    private val cachedClasses: ArrayList<Class<*>>
     
     companion object {
         private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
@@ -33,8 +33,8 @@ abstract class ModuleHandler(val handlerTag: String,
         val accepted = classes.filter {
             it.isAnnotationPresent(annotation)
         }
-        mHostedObjectProvider = ModuleCachedProvider(accepted.size)
-        mCachedClasses = ArrayList(accepted)
+        hostedObjectProvider = ModuleCachedProvider(accepted.size)
+        cachedClasses = ArrayList(accepted)
     }
 
     override fun onCreated(context: Context, config: Config) {
@@ -42,26 +42,26 @@ abstract class ModuleHandler(val handlerTag: String,
     }
 
     override fun onDestroy() {
-        mProcessors.clear()
+        processors.clear()
     }
 
     override fun prepare(classes: List<Class<*>>): List<Class<*>> {
         // 解析各个Class的方法,并创建对应的MethodProcessor
-        mCachedClasses.forEach { hostType ->
+        cachedClasses.forEach { hostType ->
             val basedUri = getBaseUri(hostType)
             filterAnnotatedMethods(hostType, { method, annotationType ->
                 checkReturnType(method)
                 checkArguments(method)
                 val define = createMethodDefine(basedUri, hostType, method, annotationType)
-                mProcessors.add(define)
+                processors.add(define)
                 Logger.info("$handlerTag-Module-Define: $define")
             })
         }
         try{
-            return mCachedClasses.toList()
+            return cachedClasses.toList()
         }finally{
             // prepare 完成之后可以清除缓存
-            mCachedClasses.clear()
+            cachedClasses.clear()
         }
     }
 
@@ -90,7 +90,7 @@ abstract class ModuleHandler(val handlerTag: String,
                     }
                     val chain = RequestChain()
                     Logger.info("$handlerTag-Working-Processor: $handler")
-                    val moduleObject = mHostedObjectProvider.get(handler.processor.hostType)
+                    val moduleObject = hostedObjectProvider.get(handler.processor.hostType)
                     if(moduleObject is ModuleRequestsListener) {
                         moduleObject.beforeEach(handler.javaMethod, request, response)
                         try{
@@ -111,7 +111,7 @@ abstract class ModuleHandler(val handlerTag: String,
 
     protected fun findMatched(request: HttpRequestDefine): List<JavaMethodDefine> {
         val out = ArrayList<JavaMethodDefine>()
-        mProcessors.forEach { processor ->
+        processors.forEach { processor ->
             if(isRequestMatched(request, processor.request)) {
                 out.add(processor)
             }
