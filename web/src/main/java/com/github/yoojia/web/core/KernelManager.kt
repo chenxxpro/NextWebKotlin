@@ -24,8 +24,8 @@ internal class KernelManager {
     }
 
     fun onCreated(ctx: Context) {
-        mModules.sortedBy { it.second/*priority*/ }.forEach { it.first.onCreated(ctx, it.third) }
-        mPlugins.sortedBy { it.second/*priority*/ }.forEach { it.first.onCreated(ctx, it.third) }
+        mModules.sortedBy { it.second/*priority*/ }.forEach { it.first/*model*/.onCreated(ctx, it.third/*config*/) }
+        mPlugins.sortedBy { it.second/*priority*/ }.forEach { it.first/*plugin*/.onCreated(ctx, it.third/*config*/) }
     }
 
     fun onDestroy() {

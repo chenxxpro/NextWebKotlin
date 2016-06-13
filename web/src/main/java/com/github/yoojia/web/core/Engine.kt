@@ -137,21 +137,21 @@ class Engine {
     private fun tryRegisterBuildInModules(context: Context, classes: MutableList<Class<*>>) {
         val classLoader = getClassLoader()
         val httpPriority = HttpControllerHandler.DEFAULT_PRIORITY
-        val ifExistsLoad = fun(className: String, configName: String, tagName: String, priority: (Int)->Int){
+        val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){
             if(classExists(className)){
                 val start = now()
                 val args = parseConfig(context.config.getConfig(configName))
                 val module = newClassInstance<Module>(loadClassByName(classLoader, className))
                 val used = module.prepare(classes)
                 classes.removeAll(used)
-                mKernelManager.register(module, priority.invoke(args.priority), args.args)
+                mKernelManager.register(module, priorityAction.invoke(args.priority), args.args)
                 Logger.debug("$tagName-Classes: ${used.size}")
                 Logger.debug("$tagName-Prepare: ${escape(start)}ms")
             }
         }
         // Uploads
-        ifExistsLoad("com.github.yoojia.web.Uploads", "uploads", "Uploads", { define ->
-            val priority:Int
+        ifExistsThenLoad("com.github.yoojia.web.Uploads", "uploads", "Uploads", { define ->
+            val priority: Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.UPLOADS
                 Logger.info("Uploads.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
@@ -161,8 +161,8 @@ class Engine {
             priority
         })
         // Assets
-        ifExistsLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
-            val priority:Int
+        ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
+            val priority: Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.ASSETS
                 Logger.info("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
@@ -172,8 +172,8 @@ class Engine {
             priority
         })
         // Downloads
-        ifExistsLoad("com.github.yoojia.web.Downloads", "downloads", "Downloads", { define ->
-            val priority:Int
+        ifExistsThenLoad("com.github.yoojia.web.Downloads", "downloads", "Downloads", { define ->
+            val priority: Int
             if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.DOWNLOADS
                 Logger.info("Downloads.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
@@ -183,8 +183,8 @@ class Engine {
             priority
         })
         // Templates
-        ifExistsLoad("com.github.yoojia.web.VelocityTemplates", "templates", "Templates", { define ->
-            val priority:Int
+        ifExistsThenLoad("com.github.yoojia.web.VelocityTemplates", "templates", "Templates", { define ->
+            val priority: Int
             if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.VELOCITY
                 Logger.info("Templates.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")

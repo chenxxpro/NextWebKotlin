@@ -9,7 +9,7 @@ import java.lang.reflect.Method
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.3
  */
-interface ModuleRequestsListener {
+interface ModuleRequestsListener : ModuleListener{
 
     /**
      * 在模块内每个请求执行前回调
