@@ -20,8 +20,11 @@ class Request{
     val processTime: Long
     val resources: List<String>
 
-    private val mSharedParams: MutableMap<String, MutableList<String>>
-    private val mDynamicParams = HashMap<String, String>()
+    // 整个请求范围内生效的参数：请求参数
+    private val mRequestScopeParams: MutableMap<String, MutableList<String>>
+
+    // 仅限于处理方法范围内有效的参数：动态参数
+    private val mHandleScopeParams = HashMap<String, String>()
 
     constructor(ctx: Context, request: HttpServletRequest) {
         context = ctx
@@ -37,9 +40,9 @@ class Request{
         }
         method = request.method
         resources = splitUri(path)
-        mSharedParams = HashMap<String, MutableList<String>>()
+        mRequestScopeParams = HashMap<String, MutableList<String>>()
         for((key, value) in request.parameterMap) {
-            mSharedParams.put(key, value.toMutableList())
+            mRequestScopeParams.put(key, value.toMutableList())
         }
     }
 
@@ -49,25 +52,8 @@ class Request{
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun param(key: String): String? {
-        val values = mSharedParams[key]
+        val values = mRequestScopeParams[key]
         return if(values != null && values.isNotEmpty()) values.first() else null
-    }
-
-    /**
-     * 获取多个值的参数值。同时查找内置参数和请求参数的值，并将它们全部以列表形式返回。
-     * @return 非空值列表
-     */
-    fun params(key: String): List<String> {
-        val dynamic = mDynamicParams[key]
-        val out = ArrayList<String>()
-        if(dynamic != null) {
-            out.add(dynamic)
-        }
-        val values = mSharedParams[key]
-        if(values != null && values.isNotEmpty()) {
-            out.addAll(values)
-        }
-        return out.toList()
     }
 
     /**
@@ -78,7 +64,7 @@ class Request{
      */
     fun params(): Map<String, Any> {
         val out = HashMap<String, Any>()
-        for((k, v) in mSharedParams) {
+        for((k, v) in mRequestScopeParams) {
             if(v.size == 1) {
                 out.put(k, v.first())
             }else{
@@ -122,9 +108,9 @@ class Request{
      * 增加一个参数对到请求中，以便在后来的请求模块中使用。
      */
     fun putParam(name: String, value: String) {
-        val values = mSharedParams[name]
+        val values = mRequestScopeParams[name]
         if(values == null) {
-            mSharedParams.put(name, mutableListOf(value))
+            mRequestScopeParams.put(name, mutableListOf(value))
         }else{
             values.add(value)
         }
@@ -132,16 +118,16 @@ class Request{
 
     /**
      * 获取动态参数值。
-     * 注意：动态参数的有效范围是 @HttpModule 标注的模块，离开模块范围后动态参数失效。
+     * 注意：动态参数的有效范围是 @GET/POST/PUT/DELETE 标注的模块，离开模块范围后动态参数失效。
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun dynamicParam(name: String): String? {
-        return mDynamicParams[name]
+        return mHandleScopeParams[name]
     }
 
     /**
      * 获取动态参数值，如果不存在则返回默认值。
-     * 注意：动态参数的有效范围是 @HttpModule 标注的模块，离开模块范围后动态参数失效。
+     * 注意：动态参数的有效范围是 @GET/POST/PUT/DELETE 标注的模块，离开模块范围后动态参数失效。
      * @return 字符值，如果请求中不存在此name的值则返回默认值
      */
     fun dynamicParam(name: String, defaultValue: String): String {
@@ -150,11 +136,11 @@ class Request{
     }
 
     fun putDynamicParams(params: Map<String, String>) {
-        mDynamicParams.putAll(params)
+        mHandleScopeParams.putAll(params)
     }
 
     fun clearDynamicParams(){
-        mDynamicParams.clear()
+        mHandleScopeParams.clear()
     }
 
 }
