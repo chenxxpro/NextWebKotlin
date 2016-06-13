@@ -92,11 +92,11 @@ abstract class ModuleHandler(val handlerTag: String,
                     Logger.info("$handlerTag-Working-Processor: $handler")
                     val moduleObject = hostedObjectProvider.get(handler.processor.hostType)
                     if(moduleObject is ModuleRequestsListener) {
-                        moduleObject.beforeEach(handler.javaMethod, request, response)
+                        moduleObject.eachBefore(handler.javaMethod, request, response)
                         try{
                             handler.processor.invoke(request, response, chain, moduleObject)
                         }finally{
-                            moduleObject.afterEach(handler.javaMethod, request, response)
+                            moduleObject.eachAfter(handler.javaMethod, request, response)
                         }
                     }else{
                         handler.processor.invoke(request, response, chain, moduleObject)

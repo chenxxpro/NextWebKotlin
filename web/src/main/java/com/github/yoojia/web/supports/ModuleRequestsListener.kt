@@ -14,10 +14,10 @@ interface ModuleRequestsListener : ModuleListener{
     /**
      * 在模块内每个请求执行前回调
      */
-    fun beforeEach(method: Method, request: Request, response: Response)
+    fun eachBefore(method: Method, request: Request, response: Response)
 
     /**
      * 在模块内每个请求执行后回调
      */
-    fun afterEach(method: Method, request: Request, response: Response)
+    fun eachAfter(method: Method, request: Request, response: Response)
 }

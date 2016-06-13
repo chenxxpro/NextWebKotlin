@@ -52,12 +52,12 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
     }
 
     @Override
-    public void beforeEach(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void eachBefore(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         System.out.println("---- Method invoke before: " + method);
     }
 
     @Override
-    public void afterEach(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void eachAfter(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         System.out.println("---- Method invoke after: " + method);
     }
 }
