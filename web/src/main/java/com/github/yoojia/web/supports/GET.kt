@@ -6,4 +6,4 @@ package com.github.yoojia.web.supports
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class GET(val value: String, val priority:Int = InternalPriority.INVALID)
+annotation class GET(val value: String)

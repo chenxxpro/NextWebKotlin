@@ -5,17 +5,13 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
-}
-
-plugins {
-    id "com.jfrog.bintray" version "1.6"
 }
 
 sourceCompatibility = 1.7
 
 apply plugin: 'kotlin'
-
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -23,11 +19,8 @@ dependencies {
     compile project(":web")
 }
 
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-
 ext{
-    projVersion = '2.1.1'
+    projVersion = '2.2'
     projArtivactId = 'next-web-velocity'
     projName = 'NextWebKotlin'
     projDesc = 'NextWebKotlin: A Servlet3-based micro web framework written in Kotlin'

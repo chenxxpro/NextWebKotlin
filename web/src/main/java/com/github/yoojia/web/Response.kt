@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse
  */
 class Response(val context: Context, val raw: HttpServletResponse) {
 
-    val args = HashMap<String, String>()
+    val args = HashMap<String, Any>()
 
     /**
      * 向客户端发送文本数据
@@ -114,6 +114,26 @@ class Response(val context: Context, val raw: HttpServletResponse) {
      */
     fun static(name: String): Response {
         args.put(STATIC_NAME, name)
+        return this
+    }
+
+    fun putArgs(name: String, value: String): Response {
+        args.put(name, value)
+        return this
+    }
+
+    fun putArgs(name: String, value: Int): Response {
+        args.put(name, value)
+        return this
+    }
+
+    fun putArgs(name: String, value: Float): Response {
+        args.put(name, value)
+        return this
+    }
+
+    fun putArgs(name: String, value: Boolean): Response {
+        args.put(name, value)
         return this
     }
 
