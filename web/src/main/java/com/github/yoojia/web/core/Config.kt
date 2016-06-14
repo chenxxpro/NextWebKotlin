@@ -12,8 +12,7 @@ class Config(val values: Map<String, Any>) {
     fun <T> getTypedList(key: String): List<T> {
         val value = values[key]
         if(value != null) {
-            val list = value as ArrayList<T>
-            return list.toList()
+            return (value as ArrayList<T>).toList()
         }else{
             return emptyList()
         }
@@ -89,6 +88,19 @@ class Config(val values: Map<String, Any>) {
             return value as Float
         }else{
             return def
+        }
+    }
+
+    fun containsKey(key: String): Boolean {
+        return values.containsKey(key)
+    }
+
+    fun getValueType(key: String): Class<*> {
+        val value = values[key]
+        if(value != null) {
+            return value.javaClass
+        }else{
+            throw IllegalArgumentException("Value of key: $key is not exists")
         }
     }
 

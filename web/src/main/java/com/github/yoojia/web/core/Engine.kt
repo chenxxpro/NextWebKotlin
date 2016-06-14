@@ -29,7 +29,7 @@ class Engine {
         
         private val Logger = LoggerFactory.getLogger(Engine::class.java)
         
-        const val VERSION = "NextEngine/2.2 (Kotlin 1.0.2; Java 7)"
+        const val VERSION = "NextEngine/2.5 (Kotlin 1.0.2; Java 7)"
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
 
@@ -49,7 +49,7 @@ class Engine {
         val ctx = Context(webPath, config, servletContext)
         context.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
-        Logger.debug("Web-Context: ${servletContext.contextPath}")
+        Logger.debug("Web-Context: ${ctx.contextPath}")
         // 扫描
         initModules(ctx, classProvider.get(ctx).toMutableList())
         // 所有Module注册到Chain中

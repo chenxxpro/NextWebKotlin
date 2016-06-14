@@ -21,10 +21,10 @@ class Request{
     val resources: List<String>
 
     // 整个请求范围内生效的参数：请求参数
-    private val mRequestScopeParams: MutableMap<String, MutableList<String>>
+    private val requestScopeParams: MutableMap<String, MutableList<String>>
 
     // 仅限于处理方法范围内有效的参数：动态参数
-    private val mHandleScopeParams = HashMap<String, String>()
+    private val methodScopeParams = HashMap<String, String>()
 
     constructor(ctx: Context, request: HttpServletRequest) {
         context = ctx
@@ -40,9 +40,9 @@ class Request{
         }
         method = request.method
         resources = splitUri(path)
-        mRequestScopeParams = HashMap<String, MutableList<String>>()
+        requestScopeParams = HashMap<String, MutableList<String>>()
         for((key, value) in request.parameterMap) {
-            mRequestScopeParams.put(key, value.toMutableList())
+            requestScopeParams.put(key, value.toMutableList())
         }
     }
 
@@ -52,7 +52,7 @@ class Request{
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun param(key: String): String? {
-        val values = mRequestScopeParams[key]
+        val values = requestScopeParams[key]
         return if(values != null && values.isNotEmpty()) values.first() else null
     }
 
@@ -64,7 +64,7 @@ class Request{
      */
     fun params(): Map<String, Any> {
         val out = HashMap<String, Any>()
-        for((k, v) in mRequestScopeParams) {
+        for((k, v) in requestScopeParams) {
             if(v.size == 1) {
                 out.put(k, v.first())
             }else{
@@ -108,9 +108,9 @@ class Request{
      * 增加一个参数对到请求中，以便在后来的请求模块中使用。
      */
     fun putParam(name: String, value: String) {
-        val values = mRequestScopeParams[name]
+        val values = requestScopeParams[name]
         if(values == null) {
-            mRequestScopeParams.put(name, mutableListOf(value))
+            requestScopeParams.put(name, mutableListOf(value))
         }else{
             values.add(value)
         }
@@ -122,7 +122,7 @@ class Request{
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun dynamicParam(name: String): String? {
-        return mHandleScopeParams[name]
+        return methodScopeParams[name]
     }
 
     /**
@@ -136,11 +136,11 @@ class Request{
     }
 
     fun putDynamicParams(params: Map<String, String>) {
-        mHandleScopeParams.putAll(params)
+        methodScopeParams.putAll(params)
     }
 
     fun clearDynamicParams(){
-        mHandleScopeParams.clear()
+        methodScopeParams.clear()
     }
 
 }
