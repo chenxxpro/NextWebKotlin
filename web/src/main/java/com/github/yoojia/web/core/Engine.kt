@@ -42,15 +42,15 @@ class Engine {
         Logger.debug("--> NextEngine starting")
         Logger.debug("Engine-Version: $VERSION")
         val webPath = servletContext.getRealPath("/")
-        val configPath = Paths.get(webPath, CONFIG_FILE)
-        val config = loadConfig(configPath)
-        Logger.debug("Config-File: $configPath")
+        val config = loadConfig(Paths.get(webPath, CONFIG_FILE))
+        Logger.debug("Config-File: ${config.getString(KEY_CONFIG_PATH)}")
+        Logger.debug("Config-Load-State: ${config.getString(KEY_CONFIG_STATE)}")
         Logger.debug("Config-Load-Time: ${escape(start)}ms")
         val ctx = Context(webPath, config, servletContext)
         context.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context: ${ctx.contextPath}")
-        // 扫描
+        // 初始化所有需要加载的模块
         initModules(ctx, classProvider.get(ctx).toMutableList())
         // 所有Module注册到Chain中
         kernelManager.allModules { module ->
