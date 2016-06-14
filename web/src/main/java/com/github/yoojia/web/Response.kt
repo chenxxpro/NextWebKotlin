@@ -2,7 +2,6 @@ package com.github.yoojia.web
 
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.util.AnyMap
-import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 

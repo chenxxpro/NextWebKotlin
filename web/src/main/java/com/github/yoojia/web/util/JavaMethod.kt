@@ -64,7 +64,7 @@ fun checkArguments(method: Method) {
 /**
  * 创建方法的定义参数
  */
-fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): JavaMethodDefine {
+fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): MethodMeta {
     val annotation = method.getAnnotation(annotationType)
     val params = when(annotation) {
         is GET -> Pair("GET", annotation.value)
@@ -74,7 +74,7 @@ fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, an
         is ALL -> Pair("ALL", annotation.value)
         else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
     }
-    return JavaMethodDefine(JavaMethodProcessor(moduleType, method),
-            HttpRequestDefine(params.first/*method*/, linkUri(rootUri, params.second/*path*/)))
+    return MethodMeta(JavaMethodProcessor(moduleType, method),
+            RequestMeta.forDefine(params.first/*method*/, linkUri(rootUri, params.second/*path*/)))
 }
 

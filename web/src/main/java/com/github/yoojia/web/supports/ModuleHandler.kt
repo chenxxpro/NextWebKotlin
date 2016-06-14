@@ -20,7 +20,7 @@ abstract class ModuleHandler(val handlerTag: String,
                              val annotation: Class<out Annotation>,
                              classes: List<Class<*>>) : Module {
 
-    private val processors = ArrayList<JavaMethodDefine>()
+    private val processors = ArrayList<MethodMeta>()
     private val hostedObjectProvider: ModuleCachedProvider
 
     private val cachedClasses: ArrayList<Class<*>>
@@ -67,30 +67,31 @@ abstract class ModuleHandler(val handlerTag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val matched = findMatched(HttpRequestDefine(request.method, request.path, request.resources))
-        processMatches(matched, request, response, dispatch)
+        val found = findMatched(RequestMeta.forClient(request.method, request.path, request.resources))
+        processFound(found, request, response, dispatch)
     }
 
-    fun processMatches(matched: List<JavaMethodDefine>, request: Request, response: Response, dispatch: DispatchChain) {
+    fun processFound(found: List<MethodMeta>, request: Request, response: Response, dispatch: DispatchChain) {
         Logger.info("$handlerTag-Module-Processing: ${request.path}")
-        Logger.info("$handlerTag-Module-Handlers: ${matched.size}")
+        Logger.info("$handlerTag-Module-Handlers: ${found.size}")
         // 根据优先级排序后处理
-        matched.sortedBy { it.priority }
+        found.sortedBy { it.priority }
                 .forEach { handler ->
                     /*
-                        每个模块处理前清除前一模块的动态参数：
-                        像 /users/{username} 中定义的动态参数 username 只对 @GET("/users/{username}") 所声明的方法有效，
-                        而对其它同样匹配路径如 @GET("/users/ *") 来说，动态参数中突然出现 username 显得非常怪异。
+                        每个模块处理器在执行之前，清除前面处理器的动态参数：
+                        - 像 /users/{username} 中定义的动态参数 username 只对 @GET("/users/{username}") 所声明的方法函数有效，
+                        - 而对其它同样匹配路径如 @GET("/users/ *") 来说，动态参数中如果突然出现 username 参数值将会显得非常怪异。
                     */
-                    request._clearDynamicParams()
+                    request._resetDynamicScope()
                     //  每个@GET/POST/PUT/DELETE方法Handler定义了不同的处理URI地址, 这里需要解析动态URL，并保存到Request中
                     val params = dynamicParams(request.resources, handler.request)
                     if(params.isNotEmpty()) {
-                        request._putDynamicParams(params)
+                        request._setDynamicScope(params)
                     }
-                    val chain = RequestChain()
                     Logger.info("$handlerTag-Working-Processor: $handler")
                     val moduleObject = hostedObjectProvider.get(handler.processor.hostType)
+                    val chain = RequestChain()
+                    // 处理模块对象实现的特殊接口
                     if(moduleObject is ModuleRequestsListener) {
                         moduleObject.eachBefore(handler.javaMethod, request, response)
                         try{
@@ -109,8 +110,8 @@ abstract class ModuleHandler(val handlerTag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected fun findMatched(request: HttpRequestDefine): List<JavaMethodDefine> {
-        val out = ArrayList<JavaMethodDefine>()
+    protected fun findMatched(request: RequestMeta): List<MethodMeta> {
+        val out = ArrayList<MethodMeta>()
         processors.forEach { processor ->
             if(isRequestMatched(request, processor.request)) {
                 out.add(processor)
