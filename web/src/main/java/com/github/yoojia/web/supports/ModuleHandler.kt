@@ -3,34 +3,38 @@ package com.github.yoojia.web.supports
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
-import com.github.yoojia.web.core.*
+import com.github.yoojia.web.core.Config
+import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.core.DispatchChain
+import com.github.yoojia.web.core.Module
 import com.github.yoojia.web.util.*
 import org.slf4j.LoggerFactory
 import java.util.*
+
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-abstract class AbstractHandler(val handlerTag: String,
-                               val annotation: Class<out Annotation>,
-                               classes: List<Class<*>>) : Module {
+abstract class ModuleHandler(val handlerTag: String,
+                             val annotation: Class<out Annotation>,
+                             classes: List<Class<*>>) : Module {
 
-    private val mProcessors = ArrayList<JavaMethodDefine>()
-    private val mHostedObjectProvider: CachedObjectProvider
+    private val processors = ArrayList<JavaMethodDefine>()
+    private val hostedObjectProvider: ModuleCachedProvider
 
-    private val mCachedClasses: ArrayList<Class<*>>
+    private val cachedClasses: ArrayList<Class<*>>
     
     companion object {
-        private val Logger = LoggerFactory.getLogger(AbstractHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
     }
 
     init{
         val accepted = classes.filter {
             it.isAnnotationPresent(annotation)
         }
-        mHostedObjectProvider = CachedObjectProvider(accepted.size)
-        mCachedClasses = ArrayList(accepted)
+        hostedObjectProvider = ModuleCachedProvider(accepted.size)
+        cachedClasses = ArrayList(accepted)
     }
 
     override fun onCreated(context: Context, config: Config) {
@@ -38,26 +42,26 @@ abstract class AbstractHandler(val handlerTag: String,
     }
 
     override fun onDestroy() {
-        mProcessors.clear()
+        processors.clear()
     }
 
     override fun prepare(classes: List<Class<*>>): List<Class<*>> {
         // 解析各个Class的方法,并创建对应的MethodProcessor
-        mCachedClasses.forEach { hostType ->
+        cachedClasses.forEach { hostType ->
             val basedUri = getBaseUri(hostType)
             filterAnnotatedMethods(hostType, { method, annotationType ->
                 checkReturnType(method)
                 checkArguments(method)
                 val define = createMethodDefine(basedUri, hostType, method, annotationType)
-                mProcessors.add(define)
+                processors.add(define)
                 Logger.info("$handlerTag-Module-Define: $define")
             })
         }
         try{
-            return mCachedClasses.toList()
+            return cachedClasses.toList()
         }finally{
             // prepare 完成之后可以清除缓存
-            mCachedClasses.clear()
+            cachedClasses.clear()
         }
     }
 
@@ -86,16 +90,16 @@ abstract class AbstractHandler(val handlerTag: String,
                     }
                     val chain = RequestChain()
                     Logger.info("$handlerTag-Working-Processor: $handler")
-                    val hostObject = mHostedObjectProvider.get(handler.processor.hostType)
-                    if(hostObject is ModuleRequestsListener) {
-                        hostObject.beforeEach(handler.javaMethod, request, response)
+                    val moduleObject = hostedObjectProvider.get(handler.processor.hostType)
+                    if(moduleObject is ModuleRequestsListener) {
+                        moduleObject.eachBefore(handler.javaMethod, request, response)
                         try{
-                            handler.processor.invoke(request, response, chain, hostObject)
+                            handler.processor.invoke(request, response, chain, moduleObject)
                         }finally{
-                            hostObject.afterEach(handler.javaMethod, request, response)
+                            moduleObject.eachAfter(handler.javaMethod, request, response)
                         }
                     }else{
-                        handler.processor.invoke(request, response, chain, hostObject)
+                        handler.processor.invoke(request, response, chain, moduleObject)
                     }
                     // 处理器要求中断
                     if(chain.isInterrupted()) return@forEach
@@ -107,7 +111,7 @@ abstract class AbstractHandler(val handlerTag: String,
 
     protected fun findMatched(request: HttpRequestDefine): List<JavaMethodDefine> {
         val out = ArrayList<JavaMethodDefine>()
-        mProcessors.forEach { processor ->
+        processors.forEach { processor ->
             if(isRequestMatched(request, processor.request)) {
                 out.add(processor)
             }

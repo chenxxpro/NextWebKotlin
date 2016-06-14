@@ -10,10 +10,10 @@ import java.util.*
  */
 class DispatchChain {
 
-    private val mModules = ArrayList<Module>()
+    private val modules = ArrayList<Module>()
 
     fun add(module: Module) {
-        mModules.add(module)
+        modules.add(module)
     }
 
     @Throws(Exception::class)
@@ -25,14 +25,14 @@ class DispatchChain {
     @Throws(Exception::class)
     fun next(request: Request, response: Response, chain: DispatchChain) {
         val index = threadedIndex.get()
-        if (index != mModules.size) {
+        if (index != modules.size) {
             threadedIndex.set(index + 1)
-            mModules[index].process(request, response, chain)
+            modules[index].process(request, response, chain)
         }
     }
 
     fun clear(){
-        mModules.clear()
+        modules.clear()
     }
 
     companion object {

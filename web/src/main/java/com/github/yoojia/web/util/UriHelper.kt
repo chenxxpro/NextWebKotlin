@@ -1,5 +1,6 @@
 package com.github.yoojia.web.util
 
+import com.github.yoojia.web.supports.HttpRequestDefine
 import java.util.*
 
 /**

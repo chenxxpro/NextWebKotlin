@@ -4,7 +4,7 @@ import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;
 import com.github.yoojia.web.Response;
 import com.github.yoojia.web.http.Controller;
-import com.github.yoojia.web.supports.CachedObjectListener;
+import com.github.yoojia.web.supports.ModuleCachedListener;
 import com.github.yoojia.web.supports.GET;
 import com.github.yoojia.web.supports.ModuleRequestsListener;
 import com.github.yoojia.web.supports.POST;
@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
  * @since 1.0
  */
 @Controller("/admin")
-public class HelloNextWeb implements CachedObjectListener, ModuleRequestsListener{
+public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListener{
 
     @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
@@ -42,22 +42,22 @@ public class HelloNextWeb implements CachedObjectListener, ModuleRequestsListene
     }
 
     @Override
-    public void onCreated() {
+    public void onCached() {
         System.out.println("####### Module cached created");
     }
 
     @Override
-    public void onDestroy() {
+    public void onRemoved() {
         System.out.println("####### Module cached destroy");
     }
 
     @Override
-    public void beforeEach(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void eachBefore(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         System.out.println("---- Method invoke before: " + method);
     }
 
     @Override
-    public void afterEach(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void eachAfter(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         System.out.println("---- Method invoke after: " + method);
     }
 }

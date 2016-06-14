@@ -29,13 +29,13 @@ class Engine {
         
         private val Logger = LoggerFactory.getLogger(Engine::class.java)
         
-        const val VERSION = "NextEngine/2.2 (Kotlin 1.0.2; Java 7)"
+        const val VERSION = "NextEngine/2.5 (Kotlin 1.0.2; Java 7)"
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
 
-    private val mDispatchChain = DispatchChain()
-    private val mKernelManager = KernelManager()
-    private val mContext = AtomicReference<Context>()
+    private val dispatchChain = DispatchChain()
+    private val kernelManager = KernelManager()
+    private val context = AtomicReference<Context>()
 
     fun start(servletContext: ServletContext, classProvider: ClassProvider) {
         val start = now()
@@ -46,33 +46,33 @@ class Engine {
         val config = loadConfig(configPath)
         Logger.debug("Config-File: $configPath")
         Logger.debug("Config-Load-Time: ${escape(start)}ms")
-        val context = Context(webPath, config, servletContext)
-        mContext.set(context)
-        Logger.debug("Web-Directory: ${context.webPath}")
-        Logger.debug("Web-Context: ${servletContext.contextPath}")
+        val ctx = Context(webPath, config, servletContext)
+        context.set(ctx)
+        Logger.debug("Web-Directory: ${ctx.webPath}")
+        Logger.debug("Web-Context: ${ctx.contextPath}")
         // 扫描
-        initModules(context, classProvider.get().toMutableList())
+        initModules(ctx, classProvider.get(ctx).toMutableList())
         // 所有Module注册到Chain中
-        mKernelManager.allModules { module ->
-            mDispatchChain.add(module)
+        kernelManager.allModules { module ->
+            dispatchChain.add(module)
         }
-        Logger.debug("Loaded-Modules: ${mKernelManager.moduleCount()}")
-        Logger.debug("Loaded-Plugins: ${mKernelManager.pluginCount()}")
+        Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
+        Logger.debug("Loaded-Plugins: ${kernelManager.pluginCount()}")
         // 启动全部内核模块
-        mKernelManager.onCreated(context)
+        kernelManager.onCreated(ctx)
         Logger.debug("Engine-Boot: ${escape(start)}ms")
         Logger.debug("<-- NextEngine started successfully")
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {
-        val context = mContext.get()
+        val context = context.get()
         // 默认情况下，HTTP状态码为404。在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
         val response = Response(context, res as HttpServletResponse)
         val request = Request(context, req as HttpServletRequest)
         Logger.info("NextEngine-Accepted: ${request.path}")
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
-            mDispatchChain.process(request, response)
+            dispatchChain.process(request, response)
         }catch(err: Throwable) {
             Logger.error("Error when processing request", err)
             try{
@@ -84,8 +84,8 @@ class Engine {
     }
 
     fun stop() {
-        mDispatchChain.clear()
-        mKernelManager.onDestroy()
+        dispatchChain.clear()
+        kernelManager.onDestroy()
     }
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>) {
@@ -96,7 +96,7 @@ class Engine {
             val preUsed = module.prepare(classes);
             classes.removeAll(preUsed)
             Logger.debug("$tag-Prepare: ${escape(start)}ms")
-            mKernelManager.register(module, priority, rootConfig.getConfig(config))
+            kernelManager.register(module, priority, rootConfig.getConfig(config))
         }
         // Kernel modules
         register("BeforeInterceptor", BeforeHandler(classes), BeforeHandler.DEFAULT_PRIORITY, "before-interceptor")
@@ -113,7 +113,7 @@ class Engine {
             val module = newClassInstance<Module>(loadClassByName(classLoader, args.className))
             val moduleUsed = module.prepare(classes)
             classes.removeAll(moduleUsed)
-            mKernelManager.register(module, args.priority, args.args)
+            kernelManager.register(module, args.priority, args.args)
         }
         Logger.debug("User-Modules-Prepare: ${escape(modulesStart)}ms")
         // 从配置文件中加载用户插件
@@ -122,7 +122,7 @@ class Engine {
         pluginConfigs.forEach { config ->
             val args = parseConfig(config)
             val plugin = newClassInstance<Plugin>(loadClassByName(classLoader, args.className))
-            mKernelManager.register(plugin, args.priority, args.args)
+            kernelManager.register(plugin, args.priority, args.args)
         }
         Logger.debug("User-Plugins-Prepare: ${escape(pluginStart)}ms")
     }
@@ -137,21 +137,21 @@ class Engine {
     private fun tryRegisterBuildInModules(context: Context, classes: MutableList<Class<*>>) {
         val classLoader = getClassLoader()
         val httpPriority = HttpControllerHandler.DEFAULT_PRIORITY
-        val ifExistsLoad = fun(className: String, configName: String, tagName: String, priority: (Int)->Int){
+        val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){
             if(classExists(className)){
                 val start = now()
                 val args = parseConfig(context.config.getConfig(configName))
                 val module = newClassInstance<Module>(loadClassByName(classLoader, className))
                 val used = module.prepare(classes)
                 classes.removeAll(used)
-                mKernelManager.register(module, priority.invoke(args.priority), args.args)
+                kernelManager.register(module, priorityAction.invoke(args.priority), args.args)
                 Logger.debug("$tagName-Classes: ${used.size}")
                 Logger.debug("$tagName-Prepare: ${escape(start)}ms")
             }
         }
         // Uploads
-        ifExistsLoad("com.github.yoojia.web.Uploads", "uploads", "Uploads", { define ->
-            val priority:Int
+        ifExistsThenLoad("com.github.yoojia.web.Uploads", "uploads", "Uploads", { define ->
+            val priority: Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.UPLOADS
                 Logger.info("Uploads.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
@@ -161,8 +161,8 @@ class Engine {
             priority
         })
         // Assets
-        ifExistsLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
-            val priority:Int
+        ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
+            val priority: Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.ASSETS
                 Logger.info("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
@@ -172,8 +172,8 @@ class Engine {
             priority
         })
         // Downloads
-        ifExistsLoad("com.github.yoojia.web.Downloads", "downloads", "Downloads", { define ->
-            val priority:Int
+        ifExistsThenLoad("com.github.yoojia.web.Downloads", "downloads", "Downloads", { define ->
+            val priority: Int
             if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.DOWNLOADS
                 Logger.info("Downloads.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
@@ -183,8 +183,8 @@ class Engine {
             priority
         })
         // Templates
-        ifExistsLoad("com.github.yoojia.web.VelocityTemplates", "templates", "Templates", { define ->
-            val priority:Int
+        ifExistsThenLoad("com.github.yoojia.web.VelocityTemplates", "templates", "Templates", { define ->
+            val priority: Int
             if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.VELOCITY
                 Logger.info("Templates.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")

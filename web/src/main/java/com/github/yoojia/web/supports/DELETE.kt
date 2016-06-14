@@ -6,4 +6,4 @@ package com.github.yoojia.web.supports
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class DELETE(val value: String, val priority:Int = InternalPriority.INVALID)
+annotation class DELETE(val value: String)

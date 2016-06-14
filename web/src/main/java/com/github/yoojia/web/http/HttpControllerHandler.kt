@@ -4,8 +4,8 @@ import com.github.yoojia.web.Request
 import com.github.yoojia.web.Response
 import com.github.yoojia.web.StatusCode
 import com.github.yoojia.web.core.DispatchChain
-import com.github.yoojia.web.supports.AbstractHandler
-import com.github.yoojia.web.util.HttpRequestDefine
+import com.github.yoojia.web.supports.ModuleHandler
+import com.github.yoojia.web.supports.HttpRequestDefine
 import com.github.yoojia.web.supports.InternalPriority
 
 /**
@@ -13,7 +13,7 @@ import com.github.yoojia.web.supports.InternalPriority
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class HttpControllerHandler(classes: List<Class<*>>) : AbstractHandler("HttpController", Controller::class.java, classes) {
+class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpController", Controller::class.java, classes) {
 
     override fun getBaseUri(hostType: Class<*>): String {
         return hostType.getAnnotation(Controller::class.java).value

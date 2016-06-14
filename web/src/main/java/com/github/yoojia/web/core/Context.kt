@@ -10,6 +10,11 @@ import javax.servlet.ServletContext
  */
 class Context(val webPath: String, val config: Config, val servletContext: ServletContext) {
 
+    val contextPath: String by lazy {
+        val path = servletContext.contextPath
+        if(path.isNullOrEmpty()) "/" else path
+    }
+
     /**
      * 解析路径
      */
