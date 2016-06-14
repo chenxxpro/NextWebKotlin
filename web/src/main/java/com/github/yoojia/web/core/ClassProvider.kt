@@ -6,5 +6,5 @@ package com.github.yoojia.web.core
  */
 interface ClassProvider {
 
-    fun get(): List<Class<*>>
+    fun get(context: Context): List<Class<*>>
 }

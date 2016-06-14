@@ -4,5 +4,4 @@ include ':server'
 include ':velocity'
 include ':assets'
 include ':demo'
-include ':mock'
 

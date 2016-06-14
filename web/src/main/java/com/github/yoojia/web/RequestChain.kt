@@ -7,28 +7,28 @@ package com.github.yoojia.web
  */
 class RequestChain() {
 
-    private var mInterrupt: Boolean = false
-    private var mStopDispatching: Boolean = false
+    private var interrupt: Boolean = false
+    private var stopDispatching: Boolean = false
 
     /**
      * 中断模块内处理接口之间的后续处理
      */
     fun interrupt() {
-        mInterrupt = true
+        interrupt = true
     }
 
     /**
      * 中断请求后续处理
      */
     fun stopDispatching() {
-        mStopDispatching = true
+        stopDispatching = true
     }
 
     fun isStopDispatching(): Boolean {
-        return mStopDispatching
+        return stopDispatching
     }
 
     fun isInterrupted(): Boolean {
-        return mInterrupt
+        return interrupt
     }
 }

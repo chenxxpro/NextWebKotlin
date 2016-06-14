@@ -7,43 +7,7 @@ import com.github.yoojia.web.supports.*
 import java.lang.reflect.Method
 
 /**
- * 处理请求的Java方法定义
- */
-data class JavaMethodDefine(val processor: JavaMethodProcessor, val request: HttpRequestDefine, val priority: Int = getRequestPriority(request)) {
-
-    val javaMethod: Method by lazy {
-        processor.method
-    }
-
-    override fun toString(): String {
-        return "{processor: $processor, request: $request, priority: $priority}"
-    }
-}
-
-/**
- * 请求参数定义
- */
-class HttpRequestDefine {
-
-    val method: String
-    val uriSegments: List<String>
-    val uri: String
-
-    constructor(method: String, uri: String, segments: List<String>) {
-        this.method = method.toUpperCase()
-        this.uri = uri
-        this.uriSegments = segments
-    }
-
-    constructor(method: String, uri: String): this(method, uri, splitUri(uri))
-
-    override fun toString(): String {
-        return "{method: $method, uri: $uri}"
-    }
-}
-
-/**
- * 查找@GET / @POST / @PUT / @DELETE 的方法函数列表
+ * 查找@GET/POST/PUT/DELETE 的方法函数列表
  */
 fun filterAnnotatedMethods(hostType: Class<*>, processor: (Method, Class<out Annotation>) -> Unit) {
     val ifFindAnnotated = fun(method: Method, annotationType: Class<out Annotation>) {
@@ -114,20 +78,3 @@ fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, an
             HttpRequestDefine(params.first/*method*/, linkUri(rootUri, params.second/*path*/)))
 }
 
-/**
- * 计算请求参数的优先级
- * - 首先使用用户设置自定义优先级(非 InternalPriority.INVALID 值)
- * - 短URI路径优先；
- * - 静态方法优先；
- */
-private fun getRequestPriority(define: HttpRequestDefine): Int {
-    var priority = 0
-    define.uriSegments.forEach {
-        if(isWildcards(it)) {
-            priority += -1
-        }else{
-            priority += if(isDynamicSegment(it)) 1 else 0
-        }
-    }
-    return define.uriSegments.size + priority
-}
