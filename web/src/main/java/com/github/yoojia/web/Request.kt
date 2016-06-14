@@ -1,6 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.util.AnyMap
 import com.github.yoojia.web.util.splitUri
 import java.util.*
 import javax.servlet.http.Cookie
@@ -21,10 +22,10 @@ class Request{
     val resources: List<String>
 
     // 整个请求范围内生效的参数：请求参数
-    private val requestScopeParams: MutableMap<String, MutableList<String>>
+    private val scopeParams: MutableMap<String, MutableList<String>>
 
     // 仅限于处理方法范围内有效的参数：动态参数
-    private val methodScopeParams = HashMap<String, String>()
+    private val dynamicParams = AnyMap()
 
     constructor(ctx: Context, request: HttpServletRequest) {
         context = ctx
@@ -40,9 +41,9 @@ class Request{
         }
         method = request.method
         resources = splitUri(path)
-        requestScopeParams = HashMap<String, MutableList<String>>()
+        scopeParams = HashMap<String, MutableList<String>>()
         for((key, value) in request.parameterMap) {
-            requestScopeParams.put(key, value.toMutableList())
+            scopeParams.put(key, value.toMutableList())
         }
     }
 
@@ -52,7 +53,7 @@ class Request{
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun param(key: String): String? {
-        val values = requestScopeParams[key]
+        val values = scopeParams[key]
         return if(values != null && values.isNotEmpty()) values.first() else null
     }
 
@@ -64,7 +65,7 @@ class Request{
      */
     fun params(): Map<String, Any> {
         val out = HashMap<String, Any>()
-        for((k, v) in requestScopeParams) {
+        for((k, v) in scopeParams) {
             if(v.size == 1) {
                 out.put(k, v.first())
             }else{
@@ -108,9 +109,9 @@ class Request{
      * 增加一个参数对到请求中，以便在后来的请求模块中使用。
      */
     fun putParam(name: String, value: String) {
-        val values = requestScopeParams[name]
+        val values = scopeParams[name]
         if(values == null) {
-            requestScopeParams.put(name, mutableListOf(value))
+            scopeParams.put(name, mutableListOf(value))
         }else{
             values.add(value)
         }
@@ -122,7 +123,7 @@ class Request{
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun dynamicParam(name: String): String? {
-        return methodScopeParams[name]
+        return dynamicParams[name] as String
     }
 
     /**
@@ -135,12 +136,12 @@ class Request{
         return value?: defaultValue
     }
 
-    fun putDynamicParams(params: Map<String, String>) {
-        methodScopeParams.putAll(params)
+    fun _putDynamicParams(params: Map<String, String>) {
+        dynamicParams.putAll(params)
     }
 
-    fun clearDynamicParams(){
-        methodScopeParams.clear()
+    fun _clearDynamicParams(){
+        dynamicParams.clear()
     }
 
 }

@@ -1,6 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.util.AnyMap
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
@@ -11,7 +12,11 @@ import javax.servlet.http.HttpServletResponse
  */
 class Response(val context: Context, val raw: HttpServletResponse) {
 
-    val args = HashMap<String, Any>()
+    val args = AnyMap()
+
+    init{
+        addHeader("X-Powered-By", "NextWeb(Java/Kotlin,2.5)")
+    }
 
     /**
      * 向客户端发送文本数据
@@ -81,8 +86,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
      * 向客户端发送服务器内部错误响应数据
      */
     fun sendError(err: Throwable): Response  {
-        val text = err.message
-        return sendError(text?:err.toString())
+        return sendError(err.message ?: err.toString())
     }
 
     /**
@@ -117,22 +121,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
         return this
     }
 
-    fun putArgs(name: String, value: String): Response {
-        args.put(name, value)
-        return this
-    }
-
-    fun putArgs(name: String, value: Int): Response {
-        args.put(name, value)
-        return this
-    }
-
-    fun putArgs(name: String, value: Float): Response {
-        args.put(name, value)
-        return this
-    }
-
-    fun putArgs(name: String, value: Boolean): Response {
+    fun putArgs(name: String, value: Any): Response {
         args.put(name, value)
         return this
     }

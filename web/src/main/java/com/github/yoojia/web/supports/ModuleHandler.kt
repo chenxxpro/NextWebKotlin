@@ -82,11 +82,11 @@ abstract class ModuleHandler(val handlerTag: String,
                         像 /users/{username} 中定义的动态参数 username 只对 @GET("/users/{username}") 所声明的方法有效，
                         而对其它同样匹配路径如 @GET("/users/ *") 来说，动态参数中突然出现 username 显得非常怪异。
                     */
-                    request.clearDynamicParams()
+                    request._clearDynamicParams()
                     //  每个@GET/POST/PUT/DELETE方法Handler定义了不同的处理URI地址, 这里需要解析动态URL，并保存到Request中
                     val params = dynamicParams(request.resources, handler.request)
                     if(params.isNotEmpty()) {
-                        request.putDynamicParams(params)
+                        request._putDynamicParams(params)
                     }
                     val chain = RequestChain()
                     Logger.info("$handlerTag-Working-Processor: $handler")
