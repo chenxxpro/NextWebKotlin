@@ -34,12 +34,12 @@ class Assets : Module {
     }
 
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        if(matched(request.resources)){
+        if(match(request.resources)){
             val local = request.context.resolvePath(request.path)
             if(Files.exists(local)) {
                 response.setStatusCode(StatusCode.OK)
-                val mimeType = request.raw.servletContext.getMimeType(local.toString())
-                if(mimeType != null) {
+                val path = local.toString()
+                request.raw.servletContext.getMimeType(path)?.let{ mimeType ->
                     response.setContextType(mimeType)
                 }
                 TransferAdapter(local).dispatch(request, response)
@@ -51,11 +51,13 @@ class Assets : Module {
         }
     }
 
-    private fun matched(request: List<String>): Boolean {
-        for(define in mAssetsDefine) {
-            val requestSegments = request.map { UriSegment(it) }
-            val defineSegments = define.map { UriSegment(it) }
-            return UriSegment.fullListMatch(requestSegments, defineSegments)
+    private fun match(sources: List<String>): Boolean {
+        //request: /assets/js/boot.js
+        val request = sources.map { UriSegment(it) }
+        for(asset in mAssetsDefine) {
+            //define: /assets/js/*
+            val define = asset.map { UriSegment(it) }
+            return UriSegment.isRequestMatchDefine(request, define)
         }
         return false
     }

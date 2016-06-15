@@ -47,10 +47,7 @@ class UriSegment(segment: String) {
 
     companion object {
 
-        /**
-         * 客户端请求的UriSegments与定义的UriSegments是否匹配
-         */
-        fun fullListMatch(request: List<UriSegment>, define: List<UriSegment>): Boolean{
+        private fun match(request: List<UriSegment>, define: List<UriSegment>): Boolean{
             for(i in request.indices) {
                 val def = define[i]
                 val match = def.dynamic || def.name.equals(request[i].name)
@@ -70,10 +67,10 @@ class UriSegment(segment: String) {
                 if(request.size < defineIndex) {
                     return false
                 }else{
-                    return fullListMatch(request.subList(0, defineIndex), define.subList(0, defineIndex))
+                    return match(request.subList(0, defineIndex), define.subList(0, defineIndex))
                 }
             }else{
-                return request.size == define.size && fullListMatch(request, define)
+                return request.size == define.size && match(request, define)
             }
         }
     }
