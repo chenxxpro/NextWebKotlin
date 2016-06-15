@@ -55,7 +55,7 @@ class Assets : Module {
         for(define in mAssetsDefine) {
             val requestSegments = request.map { UriSegment(it) }
             val defineSegments = define.map { UriSegment(it) }
-            return UriSegment.match(requestSegments, defineSegments)
+            return UriSegment.fullListMatch(requestSegments, defineSegments)
         }
         return false
     }
