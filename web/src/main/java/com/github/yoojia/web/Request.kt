@@ -33,12 +33,7 @@ class Request{
         processTime = System.nanoTime()
         root = request.contextPath
         // 请求地址要去掉应用在容器中配置的ContextPath
-        val uri = request.requestURI
-        if ("/".equals(root)) {
-            path = uri;
-        }else {
-            path = uri.substring(root.length);
-        }
+        path = if("/".equals(root)) request.requestURI else request.requestURI.substring(root.length)
         method = request.method
         resources = splitUri(path)
         scopeParams = HashMap<String, MutableList<String>>()

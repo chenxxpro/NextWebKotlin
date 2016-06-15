@@ -29,7 +29,7 @@ class Engine {
         
         private val Logger = LoggerFactory.getLogger(Engine::class.java)
         
-        const val VERSION = "NextEngine/2.5 (Kotlin 1.0.2; Java 7)"
+        const val VERSION = "NextEngine/2.a.1 (Kotlin 1.0.2; Java 7)"
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
 

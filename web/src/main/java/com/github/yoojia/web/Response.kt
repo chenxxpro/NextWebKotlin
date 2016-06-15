@@ -1,6 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.core.Engine
 import com.github.yoojia.web.util.AnyMap
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
@@ -14,7 +15,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
     val args = AnyMap()
 
     init{
-        addHeader("X-Powered-By", "NextWeb(Java/Kotlin,2.5)")
+        addHeader("X-Powered-By", Engine.VERSION)
     }
 
     /**
