@@ -1,6 +1,6 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.supports.HttpRequestDefine
+import com.github.yoojia.web.supports.RequestMeta
 import com.github.yoojia.web.util.dynamicParams
 import com.github.yoojia.web.util.isRequestMatched
 import com.github.yoojia.web.util.splitUri
@@ -36,7 +36,7 @@ class WebURITest {
     fun testIsDynamic() {
         val req = "/users/yoojia/profile"
         val define = "/users/{username}/profile"
-        val params = dynamicParams(splitUri(req), HttpRequestDefine("all", define))
+        val params = dynamicParams(splitUri(req), RequestMeta.forDefine("all", define))
         Assert.assertEquals(true, params.isNotEmpty())
         Assert.assertEquals(true, params.contains("username"))
         Assert.assertEquals("yoojia", params["username"])
@@ -46,7 +46,7 @@ class WebURITest {
     fun testIsDynamic_1() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/profile/{id}"
-        val params = dynamicParams(splitUri(req), HttpRequestDefine("all", define))
+        val params = dynamicParams(splitUri(req), RequestMeta.forDefine("all", define))
         Assert.assertEquals(true, params.isNotEmpty())
         Assert.assertEquals(true, params.contains("username"))
         Assert.assertEquals(true, params.contains("id"))
@@ -58,57 +58,57 @@ class WebURITest {
     fun testURIMatched() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/profile/{id}"
-        Assert.assertEquals(true, isRequestMatched(HttpRequestDefine("post", req), HttpRequestDefine("all", define)))
-        Assert.assertEquals(true, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("all", define)))
-        Assert.assertEquals(true, isRequestMatched(HttpRequestDefine("put", req), HttpRequestDefine("all", define)))
-        Assert.assertEquals(true, isRequestMatched(HttpRequestDefine("delete", req), HttpRequestDefine("all", define)))
+        Assert.assertEquals(true, isRequestMatched(RequestMeta.forDefine("post", req), RequestMeta.forDefine("all", define)))
+        Assert.assertEquals(true, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("all", define)))
+        Assert.assertEquals(true, isRequestMatched(RequestMeta.forDefine("put", req), RequestMeta.forDefine("all", define)))
+        Assert.assertEquals(true, isRequestMatched(RequestMeta.forDefine("delete", req), RequestMeta.forDefine("all", define)))
     }
 
     @Test
     fun testURIMatched0() {
         val req = "/users/yoojia/"
         val define = "/users/{username}"
-        Assert.assertEquals(true, isRequestMatched(HttpRequestDefine("post", req), HttpRequestDefine("post", define)))
-        Assert.assertEquals(false, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("post", define)))
-        Assert.assertEquals(false, isRequestMatched(HttpRequestDefine("delete", req), HttpRequestDefine("post", define)))
-        Assert.assertEquals(false, isRequestMatched(HttpRequestDefine("put", req), HttpRequestDefine("post", define)))
+        Assert.assertEquals(true, isRequestMatched(RequestMeta.forDefine("post", req), RequestMeta.forDefine("post", define)))
+        Assert.assertEquals(false, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("post", define)))
+        Assert.assertEquals(false, isRequestMatched(RequestMeta.forDefine("delete", req), RequestMeta.forDefine("post", define)))
+        Assert.assertEquals(false, isRequestMatched(RequestMeta.forDefine("put", req), RequestMeta.forDefine("post", define)))
     }
 
     @Test
     fun testURIMatched_1() {
         val req = "/users/yoojia/profile/10086"
         val define = "/not-match/{username}/profile/{id}"
-        Assert.assertEquals(false, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("get", define)))
+        Assert.assertEquals(false, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_2() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/"
-        Assert.assertEquals(false, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("all", define)))
+        Assert.assertEquals(false, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("all", define)))
     }
 
     @Test
     fun testURIMatched_3() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/*"
-        Assert.assertEquals(true, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("all", define)))
-        Assert.assertEquals(true, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("get", define)))
-        Assert.assertEquals(false, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("post", define)))
+        Assert.assertEquals(true, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("all", define)))
+        Assert.assertEquals(true, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("get", define)))
+        Assert.assertEquals(false, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("post", define)))
     }
 
     @Test
     fun testURIMatched_4() {
         val req = "/"
         val define = "/admin/*"
-        Assert.assertEquals(false, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("get", define)))
+        Assert.assertEquals(false, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_5() {
         val req = "/admin"
         val define = "/admin/permission/access/*"
-        Assert.assertEquals(false, isRequestMatched(HttpRequestDefine("get", req), HttpRequestDefine("get", define)))
+        Assert.assertEquals(false, isRequestMatched(RequestMeta.forDefine("get", req), RequestMeta.forDefine("get", define)))
     }
 
 }

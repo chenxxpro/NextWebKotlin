@@ -1,7 +1,7 @@
 package com.github.yoojia.web.interceptor
 
-import com.github.yoojia.web.supports.ModuleHandler
 import com.github.yoojia.web.supports.InternalPriority
+import com.github.yoojia.web.supports.ModuleHandler
 
 /**
  * Http请求拦截器,后拦截器

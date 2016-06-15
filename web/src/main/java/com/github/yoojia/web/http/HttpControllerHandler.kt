@@ -4,9 +4,9 @@ import com.github.yoojia.web.Request
 import com.github.yoojia.web.Response
 import com.github.yoojia.web.StatusCode
 import com.github.yoojia.web.core.DispatchChain
-import com.github.yoojia.web.supports.ModuleHandler
-import com.github.yoojia.web.supports.HttpRequestDefine
 import com.github.yoojia.web.supports.InternalPriority
+import com.github.yoojia.web.supports.ModuleHandler
+import com.github.yoojia.web.supports.RequestMeta
 
 /**
  * HTTP 模块，处理HTTP请求
@@ -21,12 +21,12 @@ class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpContro
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val matched = findMatched(HttpRequestDefine(request.method, request.path, request.resources));
+        val found = findMatched(RequestMeta.forClient(request.method, request.path, request.resources));
         // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
-        if(matched.isNotEmpty()) {
+        if(found.isNotEmpty()) {
             response.setStatusCode(StatusCode.ACCEPTED)
         }
-        processMatches(matched, request, response, dispatch)
+        processFound(found, request, response, dispatch)
     }
 
     companion object {

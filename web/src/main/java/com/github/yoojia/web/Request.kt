@@ -1,6 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.util.AnyMap
 import com.github.yoojia.web.util.splitUri
 import java.util.*
 import javax.servlet.http.Cookie
@@ -21,10 +22,10 @@ class Request{
     val resources: List<String>
 
     // 整个请求范围内生效的参数：请求参数
-    private val requestScopeParams: MutableMap<String, MutableList<String>>
+    private val scopeParams: MutableMap<String, MutableList<String>>
 
     // 仅限于处理方法范围内有效的参数：动态参数
-    private val methodScopeParams = HashMap<String, String>()
+    private val dynamicParams = AnyMap()
 
     constructor(ctx: Context, request: HttpServletRequest) {
         context = ctx
@@ -40,9 +41,9 @@ class Request{
         }
         method = request.method
         resources = splitUri(path)
-        requestScopeParams = HashMap<String, MutableList<String>>()
+        scopeParams = HashMap<String, MutableList<String>>()
         for((key, value) in request.parameterMap) {
-            requestScopeParams.put(key, value.toMutableList())
+            scopeParams.put(key, value.toMutableList())
         }
     }
 
@@ -52,7 +53,7 @@ class Request{
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun param(key: String): String? {
-        val values = requestScopeParams[key]
+        val values = scopeParams[key]
         return if(values != null && values.isNotEmpty()) values.first() else null
     }
 
@@ -60,18 +61,18 @@ class Request{
      * 获取所有参数。
      * - 单个数值的参数以 String 返回
      * - 多个数值的参数以 List<String> 形式返回
-     * @return 非空列表
+     * @return 非空AnyMap对象
      */
-    fun params(): Map<String, Any> {
-        val out = HashMap<String, Any>()
-        for((k, v) in requestScopeParams) {
+    fun params(): AnyMap {
+        val map = AnyMap()
+        for((k, v) in scopeParams) {
             if(v.size == 1) {
-                out.put(k, v.first())
+                map.put(k, v.first())
             }else{
-                out.put(k, v.toList())
+                map.put(k, v.toList())
             }
         }
-        return out
+        return map
     }
 
     /**
@@ -98,7 +99,7 @@ class Request{
     /**
      * 增加多个参数对到请求中，以便在后来的请求模块中使用。
      */
-    fun putParams(params: Map<String, String>) {
+    fun putParam(params: Map<String, String>) {
         for((k, v) in params) {
             putParam(k, v)
         }
@@ -108,21 +109,12 @@ class Request{
      * 增加一个参数对到请求中，以便在后来的请求模块中使用。
      */
     fun putParam(name: String, value: String) {
-        val values = requestScopeParams[name]
-        if(values == null) {
-            requestScopeParams.put(name, mutableListOf(value))
-        }else{
+        val values = scopeParams[name]
+        if(values != null) {
             values.add(value)
+        }else{
+            scopeParams.put(name, mutableListOf(value))
         }
-    }
-
-    /**
-     * 获取动态参数值。
-     * 注意：动态参数的有效范围是 @GET/POST/PUT/DELETE 标注的模块，离开模块范围后动态参数失效。
-     * @return 字符值，如果请求中不存在此name的值则返回 null
-     */
-    fun dynamicParam(name: String): String? {
-        return methodScopeParams[name]
     }
 
     /**
@@ -130,17 +122,27 @@ class Request{
      * 注意：动态参数的有效范围是 @GET/POST/PUT/DELETE 标注的模块，离开模块范围后动态参数失效。
      * @return 字符值，如果请求中不存在此name的值则返回默认值
      */
-    fun dynamicParam(name: String, defaultValue: String): String {
-        val value = dynamicParam(name)
-        return value?: defaultValue
+    fun dynamicParam(name: String, defaultValue: String? = null): String? {
+        val value = dynamicParams[name] as String?
+        if(value != null) {
+            return value
+        }else{
+            return defaultValue
+        }
     }
 
-    fun putDynamicParams(params: Map<String, String>) {
-        methodScopeParams.putAll(params)
+    fun dynamicParam(name: String): String? {
+        return dynamicParam(name, null)
     }
 
-    fun clearDynamicParams(){
-        methodScopeParams.clear()
+    /// framework methods
+
+    fun _setDynamicScope(params: Map<String, String>) {
+        dynamicParams.putAll(params)
+    }
+
+    fun _resetDynamicScope(){
+        dynamicParams.clear()
     }
 
 }

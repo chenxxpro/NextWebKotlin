@@ -12,6 +12,9 @@ import java.util.*
  */
 data class ConfigParam(val className: String, val priority: Int, val args: Config)
 
+internal const val KEY_CONFIG_PATH = "config-path"
+internal const val KEY_CONFIG_STATE = "config-state"
+
 /**
  * 从指定文件中加载配置信息。
  * 查看配置状态可以读取两个字段数值：
@@ -26,8 +29,8 @@ fun loadConfig(path: Path): Config {
     if(! Files.exists(path)) {
         val values: LinkedHashMap<String, Any>
         values = LinkedHashMap<String, Any>(2)
-        values.put("config-path", path.toString())
-        values.put("config-state", "FILE-NOT-EXISTS")
+        values.put(KEY_CONFIG_PATH, path.toString())
+        values.put(KEY_CONFIG_STATE, "FILE-NOT-EXISTS")
         return Config(values)
     }else{
         val stream = FileInputStream(path.toFile())
@@ -36,15 +39,15 @@ fun loadConfig(path: Path): Config {
             val map = Yaml().load(stream)
             if(map == null) {
                 values = LinkedHashMap<String, Any>()
-                values.put("config-state", "LOAD-FAIL")
+                values.put(KEY_CONFIG_STATE, "LOAD-FAIL")
             }else{
                 values = map as LinkedHashMap<String, Any>
-                values.put("config-state", "LOAD-SUCCESS")
+                values.put(KEY_CONFIG_STATE, "LOAD-SUCCESS")
             }
         }finally{
             stream.close()
         }
-        values.put("config-path", path.toString())
+        values.put(KEY_CONFIG_PATH, path.toString())
         return Config(values)
     }
 }

@@ -35,22 +35,22 @@ class Engine {
 
     private val dispatchChain = DispatchChain()
     private val kernelManager = KernelManager()
-    private val context = AtomicReference<Context>()
+    private val contextRef = AtomicReference<Context>()
 
     fun start(servletContext: ServletContext, classProvider: ClassProvider) {
         val start = now()
         Logger.debug("--> NextEngine starting")
         Logger.debug("Engine-Version: $VERSION")
         val webPath = servletContext.getRealPath("/")
-        val configPath = Paths.get(webPath, CONFIG_FILE)
-        val config = loadConfig(configPath)
-        Logger.debug("Config-File: $configPath")
+        val config = loadConfig(Paths.get(webPath, CONFIG_FILE))
+        Logger.debug("Config-File: ${config.getString(KEY_CONFIG_PATH)}")
+        Logger.debug("Config-Load-State: ${config.getString(KEY_CONFIG_STATE)}")
         Logger.debug("Config-Load-Time: ${escape(start)}ms")
         val ctx = Context(webPath, config, servletContext)
-        context.set(ctx)
+        contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context: ${ctx.contextPath}")
-        // 扫描
+        // 初始化所有需要加载的模块
         initModules(ctx, classProvider.get(ctx).toMutableList())
         // 所有Module注册到Chain中
         kernelManager.allModules { module ->
@@ -65,8 +65,9 @@ class Engine {
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {
-        val context = context.get()
-        // 默认情况下，HTTP状态码为404。在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
+        val context = contextRef.get()
+        // 默认情况下，HTTP状态码为 404 NOT FOUND。
+        // 在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
         val response = Response(context, res as HttpServletResponse)
         val request = Request(context, req as HttpServletRequest)
         Logger.info("NextEngine-Accepted: ${request.path}")
