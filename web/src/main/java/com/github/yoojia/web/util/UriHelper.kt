@@ -2,6 +2,7 @@ package com.github.yoojia.web.util
 
 import com.github.yoojia.web.supports.RequestMeta
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * 将URI按指定分隔符分割成字符数组。如指定分隔符为"/"，将 "/users/yoojia" 拆分成数组\["users", "yoojia" \]。
@@ -110,6 +111,24 @@ fun dynamicParams(request: List<String>, meta: RequestMeta): Map<String, String>
 fun isDynamicSegment(segment: String): Boolean {
     return segment.length >= 3 /* {a} */&&
             segment.startsWith("{") && segment.endsWith("}")
+}
+
+fun getDynamicSegmentNameType(segment: String): Pair<String, KClass<*>> {
+    /*
+        {username} -> String
+        {string:username} -> String
+        {int:user-id} -> Int, Long
+        {float:value} -> Float, Double
+    */
+    val getDynamicName = fun(offset: Int, segment: String): String {
+        return segment.substring(offset, segment.length - 1).trim()
+    }
+    when{
+        segment.startsWith("int:") -> return Pair(getDynamicName(5, segment), Long::class)
+        segment.startsWith("float:") -> return Pair(getDynamicName(7, segment), Double::class)
+        segment.startsWith("string:") -> return Pair(getDynamicName(8, segment), String::class)
+        else -> return Pair(getDynamicName(1, segment), String::class)
+    }
 }
 
 /**
