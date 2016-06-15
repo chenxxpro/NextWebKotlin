@@ -3,8 +3,6 @@ package com.github.yoojia.web.supports
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
-import com.github.yoojia.web.util.isDynamicSegment
-import com.github.yoojia.web.util.isWildcards
 import java.lang.reflect.Method
 
 /**
@@ -68,15 +66,15 @@ internal fun checkArguments(method: Method) {
  * - 短URI路径优先；
  * - 静态方法优先；
  */
-fun getRequestPriority(meta: RequestMeta): Int {
+fun getRequestPriority(wrapper: RequestWrapper): Int {
 
     var priority = 0
-    meta.uriSegments.forEach {
-        if(isWildcards(it)) {
+    wrapper.segments.forEach { segment ->
+        if(segment.wildcard) {
             priority += -1
         }else{
-            priority += if(isDynamicSegment(it)) 1 else 0
+            priority += if(segment.dynamic) 1 else 0
         }
     }
-    return meta.uriSegments.size + priority
+    return wrapper.segments.size + priority
 }

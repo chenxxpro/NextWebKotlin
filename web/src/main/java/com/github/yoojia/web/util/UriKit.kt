@@ -1,6 +1,6 @@
 package com.github.yoojia.web.util
 
-import com.github.yoojia.web.supports.RequestMeta
+import com.github.yoojia.web.supports.RequestWrapper
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -53,95 +53,29 @@ fun linkUri(root: String, path: String): String {
  * 判断两个URI资源是否匹配
  */
 fun isUriResourceMatched(request: List<String>, define: List<String>): Boolean{
-    val arrayMatched = fun(request: List<String>, define: List<String>): Boolean {
-        for(index in request.indices) {
-            val def = define[index]
-            val match = isDynamicSegment(def) || def.equals(request[index])
-            if(!match) {
-                return false
-            }
-        }
-        return true
-    }
-    // 参数中定义了 * 表示接收其后所有字段的请求
-    if(isWildcards(define.last())) {
-        val defineIndex = define.size - 1
-        if(request.size < defineIndex) {
-            return false
-        }else{
-            return arrayMatched(request.subList(0, defineIndex), define.subList(0, defineIndex))
-        }
-    }else{
-        return request.size == define.size && arrayMatched(request, define)
-    }
+    return false
+//    val arrayMatched = fun(request: List<String>, define: List<String>): Boolean {
+//        for(index in request.indices) {
+//            val def = define[index]
+//            val match = isDynamicSegment(def) || def.equals(request[index])
+//            if(!match) {
+//                return false
+//            }
+//        }
+//        return true
+//    }
+//    // 参数中定义了 * 表示接收其后所有字段的请求
+//    if(isWildcards(define.last())) {
+//        val defineIndex = define.size - 1
+//        if(request.size < defineIndex) {
+//            return false
+//        }else{
+//            return arrayMatched(request.subList(0, defineIndex), define.subList(0, defineIndex))
+//        }
+//    }else{
+//        return request.size == define.size && arrayMatched(request, define)
+//    }
 }
 
-/**
- * 判断两个请求是否匹配
- */
-fun isRequestMatched(req: RequestMeta, meta: RequestMeta): Boolean {
-    // 定义的HTTP方法为ALL，可以匹配所有HTTP方法
-    if("ALL".equals(meta.method)) {
-        return isUriResourceMatched(req.uriSegments, meta.uriSegments)
-    }else{
-        return req.method.equals(meta.method) &&
-                isUriResourceMatched(req.uriSegments, meta.uriSegments)
-    }
-}
-
-/**
- * 解析请求URI资源，返回动态参数
- */
-fun dynamicParams(request: List<String>, meta: RequestMeta): Map<String, String> {
-    val out = HashMap<String, String>()
-    // request: ['/', 'users', 'yoojia']
-    // define: ['/', 'users', '{username}']
-    for(i in meta.uriSegments.indices) {
-        val seg = meta.uriSegments[i]
-        if(isDynamicSegment(seg)) {
-            out.put(getDynamicSegmentName(seg), request[i])
-        }
-    }
-    return if(out.isEmpty()) emptyMap() else out
-}
-
-/**
- * 是否是动态参数
- */
-fun isDynamicSegment(segment: String): Boolean {
-    return segment.length >= 3 /* {a} */&& segment.startsWith("{") && segment.endsWith("}")
-}
-
-/**
- * 获取动态参数的参数名和类型
- */
-fun getDynamicSegmentNameType(segment: String): Pair<String, KClass<*>> {
-    /*
-        {username} -> String
-        {string:username} -> String
-        {int:user-id} -> Int, Long
-        {float:value} -> Float, Double
-    */
-    val getDynamicName = fun(offset: Int, segment: String): String {
-        return segment.substring(offset, segment.length - 1).trim()
-    }
-    when{
-        segment.startsWith("int:") -> return Pair(getDynamicName(5, segment), Long::class)
-        segment.startsWith("float:") -> return Pair(getDynamicName(7, segment), Double::class)
-        segment.startsWith("string:") -> return Pair(getDynamicName(8, segment), String::class)
-        else -> return Pair(getDynamicName(1, segment), String::class)
-    }
-}
-
-/**
- * 是否为通配符
- */
-fun isWildcards(segment: String): Boolean {
-    return "*".equals(segment)
-}
-
-private fun getDynamicSegmentName(segment: String): String {
-    return segment.substring(1, segment.length - 1).trim()
-}
 
 

@@ -68,7 +68,7 @@ abstract class ModuleHandler(val tag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatched(RequestMeta.forClient(request.method, request.path, request.resources))
+        val found = findMatched(RequestWrapper.request(request.method, request.path, request.resources))
         processFound(found, request, response, dispatch)
     }
 
@@ -84,9 +84,9 @@ abstract class ModuleHandler(val tag: String,
             */
             request._resetDynamicScope()
             //  每个@GET/POST/PUT/DELETE方法Handler定义了不同的处理URI地址, 这里需要解析动态URL，并保存到Request中
-            val params = dynamicParams(request.resources, handler.request)
-            if(params.isNotEmpty()) {
-                request._setDynamicScope(params)
+            val dynamic = handler.request.parseDynamic(request.resources)
+            if(dynamic.isNotEmpty()) {
+                request._setDynamicScope(dynamic)
             }
             Logger.trace("$tag-Working-Processor: $handler")
             val moduleObject = moduleObjectProvider.get(handler.invoker.hostType)
@@ -110,14 +110,14 @@ abstract class ModuleHandler(val tag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected fun findMatched(request: RequestMeta): List<RequestHandler> {
-        val out = ArrayList<RequestHandler>()
-        handlers.forEach { processor ->
-            if(isRequestMatched(request, processor.request)) {
-                out.add(processor)
+    protected fun findMatched(request: RequestWrapper): List<RequestHandler> {
+        val found = ArrayList<RequestHandler>()
+        handlers.forEach { define ->
+            if(request.isRequestMatchDefine(define.request)) {
+                found.add(define)
             }
         }
-        return out
+        return found
     }
 
     protected abstract fun getModuleConfigUri(hostType: Class<*>): String

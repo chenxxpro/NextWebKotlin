@@ -1,6 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.core.*
+import com.github.yoojia.web.supports.UriSegment
 import com.github.yoojia.web.util.isUriResourceMatched
 import com.github.yoojia.web.util.splitUri
 import org.slf4j.LoggerFactory
@@ -52,9 +53,9 @@ class Assets : Module {
 
     private fun matched(request: List<String>): Boolean {
         for(define in mAssetsDefine) {
-            if(isUriResourceMatched(request, define)) {
-                return true
-            }
+            val requestSegments = request.map { UriSegment(it) }
+            val defineSegments = define.map { UriSegment(it) }
+            return UriSegment.match(requestSegments, defineSegments)
         }
         return false
     }
