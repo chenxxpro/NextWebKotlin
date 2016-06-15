@@ -20,10 +20,10 @@ dependencies {
 }
 
 ext{
-    projVersion = '2.2'
+    projVersion = '2.a.1'
     projArtivactId = 'next-web-velocity'
     projName = 'NextWebKotlin'
-    projDesc = 'NextWebKotlin: A Servlet3-based micro web framework written in Kotlin'
+    projDesc = 'NextWebKotlin: A Servlet 3+ based micro web framework written in Kotlin'
     projURL = "https://github.com/yoojia/NextWebKotlin"
     projVCS = "https://github.com/yoojia/NextWebKotlin.git"
 }
