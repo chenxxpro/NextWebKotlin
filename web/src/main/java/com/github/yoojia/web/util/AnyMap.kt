@@ -93,4 +93,7 @@ open class AnyMap(val realMap: MutableMap<String, Any>) : MutableMap<String, Any
         }
     }
 
+    override fun toString(): String {
+        return realMap.toString()
+    }
 }
