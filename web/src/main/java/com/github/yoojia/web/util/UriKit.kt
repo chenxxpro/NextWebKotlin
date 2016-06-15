@@ -109,10 +109,12 @@ fun dynamicParams(request: List<String>, meta: RequestMeta): Map<String, String>
  * 是否是动态参数
  */
 fun isDynamicSegment(segment: String): Boolean {
-    return segment.length >= 3 /* {a} */&&
-            segment.startsWith("{") && segment.endsWith("}")
+    return segment.length >= 3 /* {a} */&& segment.startsWith("{") && segment.endsWith("}")
 }
 
+/**
+ * 获取动态参数的参数名和类型
+ */
 fun getDynamicSegmentNameType(segment: String): Pair<String, KClass<*>> {
     /*
         {username} -> String

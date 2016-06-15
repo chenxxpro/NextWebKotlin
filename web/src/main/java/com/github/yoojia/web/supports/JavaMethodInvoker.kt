@@ -7,10 +7,11 @@ import java.lang.reflect.Method
 import java.util.*
 
 /**
+ * 执行 Java method
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class JavaMethodProcessor(val hostType: Class<*>, val method: Method) {
+class JavaMethodInvoker(val hostType: Class<*>, val method: Method) {
 
     @Throws(Exception::class)
     fun invoke(request: Request, response: Response, chain: RequestChain, hostObject: Any) {

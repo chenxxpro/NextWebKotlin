@@ -1,4 +1,4 @@
-package com.github.yoojia.web.util
+package com.github.yoojia.web.core
 
 import com.github.yoojia.web.core.Config
 import org.yaml.snakeyaml.Yaml
@@ -10,7 +10,7 @@ import java.util.*
 /**
  * 配置参数数据包装.不使用Triple的是为使得参数意义更新清晰.
  */
-data class ConfigParam(val className: String, val priority: Int, val args: Config)
+data class ConfigMeta(val className: String, val priority: Int, val args: Config)
 
 internal const val KEY_CONFIG_PATH = "config-path"
 internal const val KEY_CONFIG_STATE = "config-state"
@@ -55,8 +55,8 @@ fun loadConfig(path: Path): Config {
 /**
  * 解析配置条目
  */
-fun parseConfig(config: Config): ConfigParam {
-    return ConfigParam(config.getString("class"),
+fun parseConfig(config: Config): ConfigMeta {
+    return ConfigMeta(config.getString("class"),
             config.getInt("priority"),
             config.getConfig("args"))
 }

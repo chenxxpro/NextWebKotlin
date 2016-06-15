@@ -3,18 +3,24 @@ package com.github.yoojia.web.supports
 import com.github.yoojia.web.util.splitUri
 
 /**
+ * 客户端请求的元素封装类
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
 class RequestMeta {
 
+    // HTTP method
     val method: String
-    val uriSegments: List<String>
-    val uri: String
 
-    private constructor(method: String, uri: String, segments: List<String>) {
+    // HTTP request uri segments
+    val uriSegments: List<String>
+
+    // HTTP request uri
+    val path: String
+
+    private constructor(method: String, path: String, segments: List<String>) {
         this.method = method.toUpperCase()
-        this.uri = uri
+        this.path = path
         this.uriSegments = segments
     }
 
@@ -31,6 +37,6 @@ class RequestMeta {
     }
 
     override fun toString(): String {
-        return "{method: $method, uri: $uri}"
+        return "{method: $method, uri: $path}"
     }
 }

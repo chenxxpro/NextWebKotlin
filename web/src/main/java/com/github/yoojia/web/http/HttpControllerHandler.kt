@@ -15,7 +15,7 @@ import com.github.yoojia.web.supports.RequestMeta
  */
 class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpController", Controller::class.java, classes) {
 
-    override fun getBaseUri(hostType: Class<*>): String {
+    override fun getModuleConfigUri(hostType: Class<*>): String {
         return hostType.getAnnotation(Controller::class.java).value
     }
 

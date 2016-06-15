@@ -50,9 +50,9 @@ class Engine {
         contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context: ${ctx.contextPath}")
-        // 初始化所有需要加载的模块
+        // 初始化所有需要加载的模块类
         initModules(ctx, classProvider.get(ctx).toMutableList())
-        // 所有Module注册到Chain中
+        // 核心模块/插件注册到Chain中
         kernelManager.allModules { module ->
             dispatchChain.add(module)
         }
@@ -104,7 +104,7 @@ class Engine {
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
         register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
         // Build-in
-        tryRegisterBuildInModules(context, classes)
+        tryBuildInModules(context, classes)
         // User modules
         val classLoader = getClassLoader()
         val modulesStart = now()
@@ -135,7 +135,7 @@ class Engine {
         - 下载： com.github.yoojia.web.Downloads
         - 模板： com.github.yoojia.web.VelocityTemplates
     */
-    private fun tryRegisterBuildInModules(context: Context, classes: MutableList<Class<*>>) {
+    private fun tryBuildInModules(context: Context, classes: MutableList<Class<*>>) {
         val classLoader = getClassLoader()
         val httpPriority = HttpControllerHandler.DEFAULT_PRIORITY
         val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){

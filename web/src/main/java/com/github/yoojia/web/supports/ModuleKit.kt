@@ -1,18 +1,19 @@
-package com.github.yoojia.web.util
+package com.github.yoojia.web.supports
 
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
-import com.github.yoojia.web.supports.*
+import com.github.yoojia.web.util.isDynamicSegment
+import com.github.yoojia.web.util.isWildcards
 import java.lang.reflect.Method
 
 /**
  * 查找@GET/POST/PUT/DELETE 的方法函数列表
  */
-fun filterAnnotatedMethods(hostType: Class<*>, processor: (Method, Class<out Annotation>) -> Unit) {
+internal fun annotatedMethods(hostType: Class<*>, action: (Method, Class<out Annotation>) -> Unit) {
     val ifFindAnnotated = fun(method: Method, annotationType: Class<out Annotation>) {
         if(method.isAnnotationPresent(annotationType)) {
-            processor.invoke(method, annotationType)
+            action.invoke(method, annotationType)
         }
     }
     hostType.declaredMethods.forEach {
@@ -30,7 +31,7 @@ fun filterAnnotatedMethods(hostType: Class<*>, processor: (Method, Class<out Ann
 /**
  * 检查方法的返回类型
  */
-fun checkReturnType(method: Method) {
+internal fun checkReturnType(method: Method) {
     if(!Void.TYPE.equals(method.returnType)) {
         throw IllegalArgumentException("Return type of @GET/@POST/@PUT/@DELETE methods must be <VOID>/<Unit> !")
     }
@@ -39,7 +40,7 @@ fun checkReturnType(method: Method) {
 /**
  * 检查方法的参数要求
  */
-fun checkArguments(method: Method) {
+internal fun checkArguments(method: Method) {
     val types = method.parameterTypes
     if(types.size !in 1..3) {
         throw IllegalArgumentException("@GET/@POST/@PUT/@DELETE methods must has 1..3 params, but was ${types.size} in method $method")
@@ -62,19 +63,20 @@ fun checkArguments(method: Method) {
 }
 
 /**
- * 创建方法的定义参数
+ * 计算请求参数的优先级
+ * - 首先使用用户设置自定义优先级(非 InternalPriority.INVALID 值)
+ * - 短URI路径优先；
+ * - 静态方法优先；
  */
-fun createMethodDefine(rootUri: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): MethodMeta {
-    val annotation = method.getAnnotation(annotationType)
-    val params = when(annotation) {
-        is GET -> Pair("GET", annotation.value)
-        is POST -> Pair("POST", annotation.value)
-        is PUT -> Pair("PUT", annotation.value)
-        is DELETE -> Pair("DELETE", annotation.value)
-        is ALL -> Pair("ALL", annotation.value)
-        else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
-    }
-    return MethodMeta(JavaMethodProcessor(moduleType, method),
-            RequestMeta.forDefine(params.first/*method*/, linkUri(rootUri, params.second/*path*/)))
-}
+fun getRequestPriority(meta: RequestMeta): Int {
 
+    var priority = 0
+    meta.uriSegments.forEach {
+        if(isWildcards(it)) {
+            priority += -1
+        }else{
+            priority += if(isDynamicSegment(it)) 1 else 0
+        }
+    }
+    return meta.uriSegments.size + priority
+}
