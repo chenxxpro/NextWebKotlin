@@ -1,6 +1,6 @@
 package com.github.yoojia.web.supports
 
-import com.github.yoojia.web.util.linkUri
+import com.github.yoojia.web.util.concatPath
 import java.lang.reflect.Method
 
 /**
@@ -40,7 +40,7 @@ class RequestHandler(
                 else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
             }
             return RequestHandler(JavaMethodInvoker(moduleType, method),
-                    RequestWrapper.define(params.first/*method*/, linkUri(rootUri, params.second/*path*/)))
+                    RequestWrapper.define(params.first/*method*/, concatPath(rootUri, params.second/*path*/)))
         }
     }
 }

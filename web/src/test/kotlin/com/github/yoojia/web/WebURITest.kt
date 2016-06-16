@@ -1,7 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.supports.RequestWrapper
-import com.github.yoojia.web.util.splitUri
+import com.github.yoojia.web.util.splitToArray
 import org.junit.Assert
 import org.junit.Test
 
@@ -14,7 +14,7 @@ class WebURITest {
     @Test
     fun testSplitURI() {
         val uri = "/users/yoojia"
-        val resources = splitUri(uri)
+        val resources = splitToArray(uri)
         Assert.assertEquals(3, resources.size)
         Assert.assertEquals("/", resources[0])
         Assert.assertEquals("yoojia", resources[2])
@@ -23,7 +23,7 @@ class WebURITest {
     @Test
     fun testSplitURI_1() {
         val uri = "/users/yoojia/profile"
-        val resources = splitUri(uri)
+        val resources = splitToArray(uri)
         Assert.assertEquals(4, resources.size)
         Assert.assertEquals("/", resources[0])
         Assert.assertEquals("yoojia", resources[2])
@@ -34,7 +34,7 @@ class WebURITest {
     fun testIsDynamic() {
         val req = "/users/yoojia/profile"
         val define = "/users/{username}/profile"
-        val params = RequestWrapper.define("all", define).parseDynamic(splitUri(req))
+        val params = RequestWrapper.define("all", define).parseDynamic(splitToArray(req))
         Assert.assertEquals(true, params.isNotEmpty())
         Assert.assertEquals(true, params.contains("username"))
         Assert.assertEquals("yoojia", params["username"])
@@ -44,7 +44,7 @@ class WebURITest {
     fun testIsDynamic_1() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/profile/{id}"
-        val params = RequestWrapper.define("all", define).parseDynamic(splitUri(req))
+        val params = RequestWrapper.define("all", define).parseDynamic(splitToArray(req))
         Assert.assertEquals(true, params.isNotEmpty())
         Assert.assertEquals(true, params.contains("username"))
         Assert.assertEquals(true, params.contains("id"))

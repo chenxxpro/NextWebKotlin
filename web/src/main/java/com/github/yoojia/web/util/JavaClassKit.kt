@@ -73,7 +73,7 @@ fun getClassLoader(): ClassLoader {
 private fun resolveClassName(path: String): String {
     // Not String.replace, String.replace/replaceAll use regex objects
     // Here use a simple way: faster and lower memory
-    val segments = splitUri(path, File.separatorChar, false)
+    val segments = splitToArray(path, File.separatorChar, false)
     val ret = StringBuilder()
     segments.forEach { seg ->
         if (seg.contains(".class")) {

@@ -1,9 +1,11 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.*
+import com.github.yoojia.web.core.Config
+import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.core.DispatchChain
+import com.github.yoojia.web.core.Module
 import com.github.yoojia.web.supports.UriSegment
-import com.github.yoojia.web.util.isUriResourceMatched
-import com.github.yoojia.web.util.splitUri
+import com.github.yoojia.web.util.splitToArray
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.util.*
@@ -29,7 +31,7 @@ class Assets : Module {
         for(uri in config.getTypedList<String>("uri-mapping")) {
             val path = if(uri.endsWith("/*")) uri else uri + "/*"
             Logger.debug("Assets-URI-Define: $path")
-            mAssetsDefine.add(splitUri(path))
+            mAssetsDefine.add(splitToArray(path))
         }
     }
 
@@ -39,7 +41,7 @@ class Assets : Module {
             if(Files.exists(local)) {
                 response.setStatusCode(StatusCode.OK)
                 val path = local.toString()
-                request.raw.servletContext.getMimeType(path)?.let{ mimeType ->
+                request.servletRequest.servletContext.getMimeType(path)?.let{ mimeType ->
                     response.setContextType(mimeType)
                 }
                 TransferAdapter(local).dispatch(request, response)
@@ -51,9 +53,9 @@ class Assets : Module {
         }
     }
 
-    private fun match(sources: List<String>): Boolean {
+    private fun match(resource: List<String>): Boolean {
         //request: /assets/js/boot.js
-        val request = sources.map { UriSegment(it) }
+        val request = resource.map { UriSegment(it) }
         for(asset in mAssetsDefine) {
             //define: /assets/js/*
             val define = asset.map { UriSegment(it) }

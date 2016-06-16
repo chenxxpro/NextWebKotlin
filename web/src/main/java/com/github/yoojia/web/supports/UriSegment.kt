@@ -36,11 +36,7 @@ class UriSegment(segment: String) {
             }
             else -> {
                 type = String::class
-                if(dynamic) {
-                    name = parseName(1, segment)
-                }else{
-                    name = segment
-                }
+                name = if(dynamic) parseName(1, segment) else segment
             }
         }
     }

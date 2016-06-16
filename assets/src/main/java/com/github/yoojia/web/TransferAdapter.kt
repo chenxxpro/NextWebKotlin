@@ -28,7 +28,7 @@ internal class TransferAdapter {
         }else{
             response.addHeader("Last-Modified", serverDate)
             val file = FileInputStream(mInputFilter).channel
-            val out = Channels.newChannel(response.raw.outputStream)
+            val out = Channels.newChannel(response.servletResponse.outputStream)
             file.transferTo(0, file.size(), out)
         }
     }

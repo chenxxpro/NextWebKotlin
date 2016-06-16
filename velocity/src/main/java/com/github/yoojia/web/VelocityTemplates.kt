@@ -42,7 +42,7 @@ class VelocityTemplates : Module {
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
         val name = response.args[Response.TEMPLATE_NAME]
         if(name != null && name is String && name.isNotEmpty()) {
-            Logger.info("Template-Module-Processing: ${request.path}, template: $name")
+            Logger.trace("Template-Module-Processing: ${request.path}, template: $name")
             if ( ! velocity.resourceExists(name)) {
                 throw RuntimeException("Template resource($name) not exists !");
             }

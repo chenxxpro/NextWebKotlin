@@ -1,6 +1,6 @@
 package com.github.yoojia.web.supports
 
-import com.github.yoojia.web.util.splitUri
+import com.github.yoojia.web.util.splitToArray
 import java.util.*
 
 /**
@@ -32,7 +32,7 @@ class RequestWrapper {
         }
         /// 用户对开发程序定义的封装
         fun define(method: String, uri: String): RequestWrapper {
-            return RequestWrapper(method, uri, splitUri(uri).map { seg -> UriSegment(seg) })
+            return RequestWrapper(method, uri, splitToArray(uri).map { seg -> UriSegment(seg) })
         }
 
     }

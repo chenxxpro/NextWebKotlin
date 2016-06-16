@@ -29,7 +29,8 @@ class Engine {
         
         private val Logger = LoggerFactory.getLogger(Engine::class.java)
         
-        const val VERSION = "NextEngine/2.5 (Kotlin 1.0.2; Java 7)"
+        const val VERSION = "NextEngine/2.a.2 (build Kotlin 1.0.2; Java 7/8)"
+
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
 
@@ -130,9 +131,7 @@ class Engine {
 
     /**
         尝试加载内部实现模块：
-        - 上传： com.github.yoojia.web.Uploads
         - 资源： com.github.yoojia.web.Assets
-        - 下载： com.github.yoojia.web.Downloads
         - 模板： com.github.yoojia.web.VelocityTemplates
     */
     private fun tryBuildInModules(context: Context, classes: MutableList<Class<*>>) {
@@ -150,34 +149,12 @@ class Engine {
                 Logger.debug("$tagName-Prepare: ${escape(start)}ms")
             }
         }
-        // Uploads
-        ifExistsThenLoad("com.github.yoojia.web.Uploads", "uploads", "Uploads", { define ->
-            val priority: Int
-            if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
-                priority = InternalPriority.UPLOADS
-                Logger.info("Uploads.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
-            }else{
-                priority = define
-            }
-            priority
-        })
         // Assets
         ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
             val priority: Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.ASSETS
                 Logger.info("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
-            }else{
-                priority = define
-            }
-            priority
-        })
-        // Downloads
-        ifExistsThenLoad("com.github.yoojia.web.Downloads", "downloads", "Downloads", { define ->
-            val priority: Int
-            if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
-                priority = InternalPriority.DOWNLOADS
-                Logger.info("Downloads.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
             }else{
                 priority = define
             }
