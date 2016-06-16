@@ -1,7 +1,6 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.supports.RequestWrapper
-import com.github.yoojia.web.supports.UriSegment
 import com.github.yoojia.web.util.splitToArray
 import org.junit.Assert
 import org.junit.Test

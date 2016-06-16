@@ -96,9 +96,9 @@ class Request{
      * @return Cookie 对象，如果请求中不存在此Cookie则返回 null
      */
     fun cookie(key: String): Cookie? {
-        servletRequest.cookies.forEach {
-            if(key.equals(it.name)) {
-                return it
+        servletRequest.cookies.forEach { cookie ->
+            if(key.equals(cookie.name)) {
+                return cookie
             }
         }
         return null

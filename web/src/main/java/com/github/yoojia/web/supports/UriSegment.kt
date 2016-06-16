@@ -21,12 +21,8 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
 
         wildcard = !dynamic && "*".equals(segment)
 
-        val getName = fun(offset: Int, segment: String): String {
-            return segment.substring(offset, segment.length - 1).trim()
-        }
-
         // {user-id} -> user-id
-        val unwrap = if(dynamic) segment.substring(1, segment.length - 1) else segment
+        val unwrap = if(dynamic) segment.substring(1, segment.length-1) else segment
 
         if(!dynamic) {
             name = segment
@@ -34,15 +30,15 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
         }else when{
             unwrap.startsWith("int:") -> {
                 type = ValueType.Int
-                name = getName(5, unwrap)
+                name = unwrap.substring(4)
             }
             unwrap.startsWith("float:") -> {
                 type = ValueType.Float
-                name = getName(7, unwrap)
+                name = unwrap.substring(6)
             }
             unwrap.startsWith("string:") -> {
                 type = ValueType.String
-                name = getName(8, unwrap)
+                name = unwrap.substring(7)
             }
             else -> {
                 type = if(absoluteType) ValueType.String else ValueType.Any

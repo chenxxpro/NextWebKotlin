@@ -21,29 +21,29 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
 
     @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
-        response.sendText("Hello /hello/{username}, username=" + request.dynamicParam("username"));
+        response.sendHtml("<br/>Handle by /hello/{username}, username= " + request.dynamicParam("username"));
         chain.interrupt();
     }
 
     @GET("/{string:username}")
     public void dynamic(Request request, Response response) {
-        response.sendText("Hello /{username} , username=" + request.dynamicParam("username"));
+        response.sendText("<br/>Handle by /{username} , username= " + request.dynamicParam("username"));
     }
 
     @GET("/{int:user_id}")
     public void intDynamic(Request request, Response response) {
-        response.sendText("Hello /{user_id} , username=" + request.dynamicParam("user_id"));
+        response.sendHtml("<br/>Handle by /{user_id} , user_id= " + request.dynamicParam("user_id"));
     }
 
     @GET("/*")
     @POST("/*")
     public void wildcards(Request request, Response response) {
-        response.sendText("Hello /* , " + request.param("username"));
+        response.sendHtml("<br/>Handle by /* , username= " + request.param("username"));
     }
 
     @GET("/yoojia")
     public void statix(Request request, Response response) {
-        response.sendText("Hello /yoojia, username=" + request.param("username"));
+        response.sendHtml("<br/>Handle by /yoojia, username= " + request.param("username"));
     }
 
     @Override

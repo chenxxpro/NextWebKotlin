@@ -51,4 +51,22 @@ class UriSegmentTest {
         Assert.assertEquals(UriSegment.ValueType.String, UriSegment("{string:id}").type)
         Assert.assertEquals(UriSegment.ValueType.Any, UriSegment("{id}").type)
     }
+
+    @Test
+    fun testResourceName(){
+        val id = UriSegment("id")
+        Assert.assertEquals("id", id.name)
+
+        val user = UriSegment("{user}")
+        Assert.assertEquals("user", user.name)
+
+        val pass = UriSegment("{string:pass}")
+        Assert.assertEquals("pass", pass.name)
+
+        val age = UriSegment("{int:age}")
+        Assert.assertEquals("age", age.name)
+
+        val weight = UriSegment("{float:weight}")
+        Assert.assertEquals("weight", weight.name)
+    }
 }
