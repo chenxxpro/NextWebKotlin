@@ -29,7 +29,8 @@ class Engine {
         
         private val Logger = LoggerFactory.getLogger(Engine::class.java)
         
-        const val VERSION = "NextEngine/2.a.1 (Kotlin 1.0.2; Java 7)"
+        const val VERSION = "NextEngine/2.a.2 (build Kotlin 1.0.2; Java 7/8)"
+
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
 
@@ -50,9 +51,9 @@ class Engine {
         contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context: ${ctx.contextPath}")
-        // 初始化所有需要加载的模块
+        // 初始化所有需要加载的模块类
         initModules(ctx, classProvider.get(ctx).toMutableList())
-        // 所有Module注册到Chain中
+        // 核心模块/插件注册到Chain中
         kernelManager.allModules { module ->
             dispatchChain.add(module)
         }
@@ -68,8 +69,8 @@ class Engine {
         val context = contextRef.get()
         // 默认情况下，HTTP状态码为 404 NOT FOUND。
         // 在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
-        val response = Response(context, res as HttpServletResponse)
         val request = Request(context, req as HttpServletRequest)
+        val response = Response(context, res as HttpServletResponse)
         Logger.info("NextEngine-Accepted: ${request.path}")
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
@@ -104,7 +105,7 @@ class Engine {
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
         register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
         // Build-in
-        tryRegisterBuildInModules(context, classes)
+        tryBuildInModules(context, classes)
         // User modules
         val classLoader = getClassLoader()
         val modulesStart = now()
@@ -130,12 +131,10 @@ class Engine {
 
     /**
         尝试加载内部实现模块：
-        - 上传： com.github.yoojia.web.Uploads
         - 资源： com.github.yoojia.web.Assets
-        - 下载： com.github.yoojia.web.Downloads
         - 模板： com.github.yoojia.web.VelocityTemplates
     */
-    private fun tryRegisterBuildInModules(context: Context, classes: MutableList<Class<*>>) {
+    private fun tryBuildInModules(context: Context, classes: MutableList<Class<*>>) {
         val classLoader = getClassLoader()
         val httpPriority = HttpControllerHandler.DEFAULT_PRIORITY
         val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){
@@ -150,34 +149,12 @@ class Engine {
                 Logger.debug("$tagName-Prepare: ${escape(start)}ms")
             }
         }
-        // Uploads
-        ifExistsThenLoad("com.github.yoojia.web.Uploads", "uploads", "Uploads", { define ->
-            val priority: Int
-            if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
-                priority = InternalPriority.UPLOADS
-                Logger.info("Uploads.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
-            }else{
-                priority = define
-            }
-            priority
-        })
         // Assets
         ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
             val priority: Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.ASSETS
                 Logger.info("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
-            }else{
-                priority = define
-            }
-            priority
-        })
-        // Downloads
-        ifExistsThenLoad("com.github.yoojia.web.Downloads", "downloads", "Downloads", { define ->
-            val priority: Int
-            if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
-                priority = InternalPriority.DOWNLOADS
-                Logger.info("Downloads.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
             }else{
                 priority = define
             }

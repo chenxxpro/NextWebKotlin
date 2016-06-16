@@ -2,7 +2,7 @@ package com.github.yoojia.web
 
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.util.AnyMap
-import com.github.yoojia.web.util.splitUri
+import com.github.yoojia.web.util.splitToArray
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -13,12 +13,23 @@ import javax.servlet.http.HttpServletRequest
  */
 class Request{
 
+    // Servlet
+    val servletRequest: HttpServletRequest
     val context: Context
-    val raw: HttpServletRequest
+
+    // HTTP method
     val method: String
+
+    // Request path
     val path: String
-    val root: String
-    val processTime: Long
+
+    // Request context path
+    val contextPath: String
+
+    // Request create time
+    val createTime: Long
+
+    // Path to array
     val resources: List<String>
 
     // 整个请求范围内生效的参数：请求参数
@@ -28,14 +39,16 @@ class Request{
     private val dynamicParams = AnyMap()
 
     constructor(ctx: Context, request: HttpServletRequest) {
+        createTime = System.nanoTime()
         context = ctx
-        raw = request
-        processTime = System.nanoTime()
-        root = request.contextPath
+        servletRequest = request
+        contextPath = request.contextPath
         // 请求地址要去掉应用在容器中配置的ContextPath
-        path = if("/".equals(root)) request.requestURI else request.requestURI.substring(root.length)
+        val uri = request.requestURI
+        path = if ("/".equals(contextPath)) uri else uri.substring(contextPath.length)
         method = request.method
-        resources = splitUri(path)
+        resources = splitToArray(path)
+
         scopeParams = HashMap<String, MutableList<String>>()
         for((key, value) in request.parameterMap) {
             scopeParams.put(key, value.toMutableList())
@@ -75,7 +88,7 @@ class Request{
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun header(name: String): String? {
-        return raw.getHeader(name)
+        return servletRequest.getHeader(name)
     }
 
     /**
@@ -83,9 +96,9 @@ class Request{
      * @return Cookie 对象，如果请求中不存在此Cookie则返回 null
      */
     fun cookie(key: String): Cookie? {
-        raw.cookies.forEach {
-            if(key.equals(it.name)) {
-                return it
+        servletRequest.cookies.forEach { cookie ->
+            if(key.equals(cookie.name)) {
+                return cookie
             }
         }
         return null

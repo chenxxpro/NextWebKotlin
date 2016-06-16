@@ -10,12 +10,14 @@ import javax.servlet.http.HttpServletResponse
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class Response(val context: Context, val raw: HttpServletResponse) {
+class Response(val context: Context, val servletResponse: HttpServletResponse) {
 
     val args = AnyMap()
+    val createTime: Long
 
     init{
         addHeader("X-Powered-By", Engine.VERSION)
+        createTime = System.nanoTime()
     }
 
     /**
@@ -38,7 +40,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
      * 设置ContextType
      */
     fun setContextType(contextType: String): Response {
-        raw.contentType = contextType
+        servletResponse.contentType = contextType
         return this
     }
 
@@ -62,7 +64,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
      * 设置响应状态码
      */
     fun setStatusCode(code: Int): Response  {
-        raw.status = code
+        servletResponse.status = code
         return this
     }
 
@@ -70,7 +72,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
      * 添加Cookie
      */
     fun addCookie(name: String, value: String): Response {
-        raw.addCookie(Cookie(name, value))
+        servletResponse.addCookie(Cookie(name, value))
         return this
     }
 
@@ -78,7 +80,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
      * 添加Header
      */
     fun addHeader(name: String, value: String): Response {
-        raw.addHeader(name, value)
+        servletResponse.addHeader(name, value)
         return this
     }
 
@@ -93,7 +95,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
      * 向客户端发送服务器内部错误响应数据
      */
     fun sendError(text: String): Response {
-        raw.sendError(StatusCode.INTERNAL_SERVER_ERROR, text)
+        servletResponse.sendError(StatusCode.INTERNAL_SERVER_ERROR, text)
         return this
     }
 
@@ -101,7 +103,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
      * 重定向
      */
     fun redirect(location: String): Response {
-        raw.sendRedirect(location)
+        servletResponse.sendRedirect(location)
         return this
     }
 
@@ -132,7 +134,7 @@ class Response(val context: Context, val raw: HttpServletResponse) {
     @Throws(Exception::class)
     fun writeTextThrows(text: String) {
         checkNotNull(text)
-        raw.writer.write(text)
+        servletResponse.writer.write(text)
     }
 
     fun writeTextSilently(text: String): Response {

@@ -19,7 +19,7 @@ dependencies {
 apply plugin: 'kotlin'
 
 ext{
-    projVersion = '2.a.1'
+    projVersion = '2.a.2'
     projArtivactId = 'next-web-assets'
     projName = 'NextWebKotlin'
     projDesc = 'NextWebKotlin: A Servlet 3+ based micro web framework written in Kotlin'
