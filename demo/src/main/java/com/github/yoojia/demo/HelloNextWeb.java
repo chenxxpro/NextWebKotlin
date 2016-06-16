@@ -25,9 +25,14 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
         chain.interrupt();
     }
 
-    @GET("/{username}")
+    @GET("/{string:username}")
     public void dynamic(Request request, Response response) {
         response.sendText("Hello /{username} , username=" + request.dynamicParam("username"));
+    }
+
+    @GET("/{int:user_id}")
+    public void intDynamic(Request request, Response response) {
+        response.sendText("Hello /{user_id} , username=" + request.dynamicParam("user_id"));
     }
 
     @GET("/*")

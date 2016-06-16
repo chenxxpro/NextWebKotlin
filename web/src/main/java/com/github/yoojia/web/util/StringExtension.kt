@@ -1,7 +1,6 @@
 package com.github.yoojia.web.util
 
 import java.util.*
-import kotlin.reflect.KClass
 
 /**
  * 将URI按指定分隔符分割成字符数组。如指定分隔符为"/"，将 "/users/yoojia" 拆分成数组\["users", "yoojia" \]。
@@ -39,31 +38,5 @@ fun concat(root: String, path: String): String {
         path.substring(1)// Cut "/"
     }else{
         (if(ends || starts) "" else "/") + path
-    }
-}
-
-fun valueType(resource: String): Class<*> {
-    // resource is a shot string !!!
-    // Double: float, double is digits and '.'
-    // Long: int, long is all digits
-    // String: string, otherwise
-    var dotCount: Int = 0
-    var digitCount: Int = 0
-    val len = resource.length
-    resource.forEachIndexed { i, char ->
-        if('.'.equals(char)) {
-            dotCount += 1
-            if(dotCount > 1 /* 12..6 */|| i == 0/* .5 */ || i == (len - 1)/* 124. */) {
-                dotCount = -1
-                return@forEachIndexed
-            }
-        }else if(Character.isDigit(char)) {
-            digitCount += 1
-        }
-    }
-    when{
-        dotCount == 0 && digitCount == len -> return Long::class.java
-        dotCount == 1 && digitCount == (len - 1) -> return Double::class.java
-        else -> return String::class.java
     }
 }

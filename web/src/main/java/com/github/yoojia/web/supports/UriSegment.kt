@@ -1,16 +1,14 @@
 package com.github.yoojia.web.supports
 
-import com.github.yoojia.web.util.valueType
-
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.a.2
  */
-class UriSegment(segment: String) {
+class UriSegment(segment: String, absoluteType: Boolean = false) {
 
     val dynamic: Boolean
     val wildcard: Boolean
-    val type: Class<*>
+    val type: ValueType
     val name: String
 
     init {
@@ -18,25 +16,32 @@ class UriSegment(segment: String) {
 
         wildcard = !dynamic && "*".equals(segment)
 
-        val parseName = fun(offset: Int, segment: String): String {
+        val getName = fun(offset: Int, segment: String): String {
             return segment.substring(offset, segment.length - 1).trim()
         }
-        when{
-            dynamic && segment.startsWith("int:") -> {
-                type = Long::class.java
-                name = parseName(5, segment)
+
+        // {user-id} -> user-id
+        val unwrap = if(dynamic) segment.substring(1, segment.length - 1) else segment
+
+        if(!dynamic) {
+            name = segment
+            type = ValueType.get(name)
+        }else when{
+            unwrap.startsWith("int:") -> {
+                type = ValueType.Int
+                name = getName(5, unwrap)
             }
-            dynamic && segment.startsWith("float:") -> {
-                type = Double::class.java
-                name = parseName(7, segment)
+            unwrap.startsWith("float:") -> {
+                type = ValueType.Float
+                name = getName(7, unwrap)
             }
-            dynamic && segment.startsWith("string:") -> {
-                type = String::class.java
-                name = parseName(8, segment)
+            unwrap.startsWith("string:") -> {
+                type = ValueType.String
+                name = getName(8, unwrap)
             }
             else -> {
-                type = String::class.java
-                name = if(dynamic) parseName(1, segment) else segment
+                type = if(absoluteType) ValueType.String else ValueType.Any
+                name = unwrap
             }
         }
     }
@@ -54,8 +59,7 @@ class UriSegment(segment: String) {
                 val request = requests[i]
                 val match: Boolean
                 if(define.dynamic) {
-                    match = String::class.java.equals(define.type) ||
-                            define.type.equals(valueType(request.name))
+                    match = define.type.match(request.type)
                 }else{
                     match = define.name.equals(request.name, ignoreCase = false)
                 }
@@ -77,6 +81,51 @@ class UriSegment(segment: String) {
                 }
             }else{
                 return request.size == define.size && match(request, define)
+            }
+        }
+    }
+
+    enum class ValueType {
+
+        Any,
+        String,
+        Float,
+        Int;
+
+        fun match(other: ValueType): Boolean {
+            if(Any.equals(this) || Any.equals(other)) {
+                return true
+            }else{
+                return this.equals(other)
+            }
+        }
+
+        companion object {
+
+            fun get(resource: kotlin.String): ValueType {
+                // resource is a shot string !!!
+                // Double: float, double is digits and '.'
+                // Long: int, long is all digits
+                // String: string, otherwise
+                var dotCount: kotlin.Int = 0
+                var digitCount: kotlin.Int = 0
+                val len = resource.length
+                resource.forEachIndexed { i, char ->
+                    if('.'.equals(char)) {
+                        dotCount += 1
+                        if(dotCount > 1 /* 12..6 */|| i == 0/* .5 */ || i == (len - 1)/* 124. */) {
+                            dotCount = -1
+                            return@forEachIndexed
+                        }
+                    }else if(Character.isDigit(char)) {
+                        digitCount += 1
+                    }
+                }
+                when{
+                    dotCount == 0 && digitCount == len -> return Int
+                    dotCount == 1 && digitCount == (len - 1) -> return Float
+                    else -> return String
+                }
             }
         }
     }
