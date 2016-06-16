@@ -27,7 +27,7 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
 
     @GET("/{string:username}")
     public void dynamic(Request request, Response response) {
-        response.sendText("<br/>Handle by /{username} , username= " + request.dynamicParam("username"));
+        response.sendHtml("<br/>Handle by /{username} , username= " + request.dynamicParam("username"));
     }
 
     @GET("/{int:user_id}")
