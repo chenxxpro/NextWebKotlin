@@ -11,7 +11,7 @@ import com.github.yoojia.web.supports.ModuleHandler
 class BeforeHandler(classes: List<Class<*>>) :
         ModuleHandler("BeforeInterceptor", BeforeInterceptor::class.java, classes) {
 
-    override fun getBaseUri(hostType: Class<*>): String {
+    override fun getModuleConfigUri(hostType: Class<*>): String {
         return hostType.getAnnotation(BeforeInterceptor::class.java).base
     }
 
