@@ -1,6 +1,6 @@
 package com.github.yoojia.web.supports
 
-import kotlin.reflect.KClass
+import com.github.yoojia.web.util.valueType
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
@@ -10,7 +10,7 @@ class UriSegment(segment: String) {
 
     val dynamic: Boolean
     val wildcard: Boolean
-    val type: KClass<*>
+    val type: Class<*>
     val name: String
 
     init {
@@ -23,19 +23,19 @@ class UriSegment(segment: String) {
         }
         when{
             dynamic && segment.startsWith("int:") -> {
-                type = Long::class
+                type = Long::class.java
                 name = parseName(5, segment)
             }
             dynamic && segment.startsWith("float:") -> {
-                type = Double::class
+                type = Double::class.java
                 name = parseName(7, segment)
             }
             dynamic && segment.startsWith("string:") -> {
-                type = String::class
+                type = String::class.java
                 name = parseName(8, segment)
             }
             else -> {
-                type = String::class
+                type = String::class.java
                 name = if(dynamic) parseName(1, segment) else segment
             }
         }
@@ -43,13 +43,23 @@ class UriSegment(segment: String) {
 
     companion object {
 
-        private fun match(request: List<UriSegment>, define: List<UriSegment>): Boolean{
-            for(i in request.indices) {
-                val def = define[i]
-                val match = def.dynamic || def.name.equals(request[i].name)
-                if(!match) {
-                    return false
+        /**
+         * 在UriSegment资源长度相同的情况下，判断它们是否匹配；
+         * - 定义为动态参数：比较它们的类型是否相同，忽略资源名；定义为字符串类型时，可以匹配任意请求资源类型；
+         * - 定义为静态字段：比较资源名是否相同（大小写完全相同）；
+         */
+        private fun match(requests: List<UriSegment>, defines: List<UriSegment>): Boolean{
+            for(i in requests.indices) {
+                val define = defines[i]
+                val request = requests[i]
+                val match: Boolean
+                if(define.dynamic) {
+                    match = String::class.java.equals(define.type) ||
+                            define.type.equals(valueType(request.name))
+                }else{
+                    match = define.name.equals(request.name, ignoreCase = false)
                 }
+                if(!match) return false
             }
             return true
         }

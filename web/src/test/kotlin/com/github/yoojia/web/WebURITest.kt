@@ -76,7 +76,9 @@ class WebURITest {
     fun testURIMatched_1() {
         val req = "/users/yoojia/profile/10086"
         val define = "/not-match/{username}/profile/{id}"
-        Assert.assertEquals(false, RequestWrapper.define("get", req).isRequestMatchDefine(RequestWrapper.define("get", define)))
+        val reqWrap = RequestWrapper.define("get", req)
+        val defWrap = RequestWrapper.define("get", define)
+        Assert.assertEquals(false, reqWrap.isRequestMatchDefine(defWrap))
     }
 
     @Test
