@@ -12,7 +12,12 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
     val name: String
 
     init {
-        dynamic = segment.length >= 3/*{a}*/&& segment.startsWith("{") && segment.endsWith("}")
+        val starts = if(segment.startsWith('{')) 1 else 0
+        val ends = if(segment.endsWith('}')) 1 else 0
+        if(starts.xor(ends) == 1) {
+            throw IllegalArgumentException("Invalid uri segment: $segment")
+        }
+        dynamic = segment.length >= 3/*{a}*/&& starts.and(ends) == 1
 
         wildcard = !dynamic && "*".equals(segment)
 

@@ -11,6 +11,30 @@ import org.junit.Test
 class UriSegmentTest {
 
     @Test
+    fun testParseSuccess(){
+        UriSegment("abc")
+        UriSegment("{abc}")
+        UriSegment("{string:abc}")
+        UriSegment("{int:abc}")
+        UriSegment("{float:abc}")
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testParseFail1(){
+        UriSegment("{abc")
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testParseFail2(){
+        UriSegment("abc}")
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testParseFail3(){
+        UriSegment("string:abc}")
+    }
+
+    @Test
     fun test(){
         Assert.assertEquals(UriSegment.ValueType.Int, UriSegment("123").type)
         Assert.assertEquals(UriSegment.ValueType.Int, UriSegment("123").type)
