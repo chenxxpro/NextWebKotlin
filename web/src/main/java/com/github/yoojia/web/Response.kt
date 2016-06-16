@@ -12,8 +12,10 @@ import javax.servlet.http.HttpServletResponse
 class Response(val context: Context, val servletResponse: HttpServletResponse) {
 
     val args = AnyMap()
+    val createTime: Long
 
     init{
+        createTime = System.nanoTime()
         addHeader("X-Powered-By", "NextWeb(Java/Kotlin,2.5)")
     }
 

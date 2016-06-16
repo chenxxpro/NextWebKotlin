@@ -69,8 +69,8 @@ class Engine {
         val context = contextRef.get()
         // 默认情况下，HTTP状态码为 404 NOT FOUND。
         // 在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
-        val response = Response(context, res as HttpServletResponse)
         val request = Request(context, req as HttpServletRequest)
+        val response = Response(context, res as HttpServletResponse)
         Logger.info("NextEngine-Accepted: ${request.path}")
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
