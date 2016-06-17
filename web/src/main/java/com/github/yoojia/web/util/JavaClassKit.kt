@@ -1,5 +1,6 @@
 package com.github.yoojia.web.util
 
+import com.github.yoojia.web.supports.Filter
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -12,17 +13,17 @@ import java.util.*
 
 private val Logger = LoggerFactory.getLogger("JavaClass")
 
-fun findRuntimeNames(based: Path, filter: (String) -> Boolean): List<String> {
+fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
     val out = ArrayList<String>()
     Files.walkFileTree(based, object : SimpleFileVisitor<Path>() {
         @Throws(IOException::class)
         override fun visitFile(path: Path, attr: BasicFileAttributes): FileVisitResult {
             val pathName = based.relativize(path).toString()
             if(pathName.endsWith(".class")) {
-                val className = resolveClassName(pathName)
-                Logger.info("Found class: $className")
-                if(! filter.invoke(className)) {
-                    out.add(className);
+                val name = resolveClassName(pathName)
+                Logger.trace("Found class: $name")
+                if(filter.accept(name)) { // return true to accept
+                    out.add(name);
                 }
             }
             return FileVisitResult.CONTINUE
@@ -31,7 +32,7 @@ fun findRuntimeNames(based: Path, filter: (String) -> Boolean): List<String> {
     return out.toList()
 }
 
-fun findJarClassNames(acceptFilter: (String) -> Boolean): List<String> {
+fun findJarClassNames(filter: Filter<String>): List<String> {
     return emptyList() // TODO
 }
 
