@@ -67,7 +67,7 @@ private fun resolveClassName(path: String): String {
     val segments = splitToArray(path, File.separatorChar, false)
     val ret = StringBuilder()
     segments.forEach { seg ->
-        if (seg.contains(".class")) {
+        if (seg.endsWith(".class")) {
             ret.append(seg.substring(0, seg.length - 6)/* 6: .class */)
         } else {
             ret.append(seg).append('.')

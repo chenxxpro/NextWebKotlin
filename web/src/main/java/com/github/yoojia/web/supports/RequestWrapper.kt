@@ -32,12 +32,8 @@ class RequestWrapper {
 
     }
 
-    /**
-     * 注意顺序：客户端的RequestWrapper与开发者定义的RequestWrapper进行匹配。
-     */
     fun isRequestMatchDefine(define: RequestWrapper): Boolean {
         val request = this
-        // 定义的HTTP方法为ALL，可以匹配所有HTTP方法
         if("ALL".equals(define.method)) {
             return UriSegment.isRequestMatchDefine(request.segments, define.segments)
         }else{
