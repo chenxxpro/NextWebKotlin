@@ -4,10 +4,7 @@ import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;
 import com.github.yoojia.web.Response;
 import com.github.yoojia.web.http.Controller;
-import com.github.yoojia.web.supports.ModuleCachedListener;
-import com.github.yoojia.web.supports.GET;
-import com.github.yoojia.web.supports.ModuleRequestsListener;
-import com.github.yoojia.web.supports.POST;
+import com.github.yoojia.web.supports.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -44,6 +41,18 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
     @GET("/yoojia")
     public void statix(Request request, Response response) {
         response.sendHtml("<br/>Handle by /yoojia, username= " + request.param("username"));
+    }
+
+    @PUT("/yoojia")
+    public void put(Request request, Response response) {
+        response.sendHtml("<br/>Handle by PUT/yoojia, name= " + request.param("name") + ", body.data = " + request.bodyData());
+        response.sendHtml("<br/>Body.data = " + request.bodyData());
+    }
+
+    @DELETE("/yoojia")
+    public void delete(Request request, Response response) {
+        response.sendHtml("<br/>Handle by DELETE/yoojia, name= " + request.param("name") + ", body.data = " + request.bodyData());
+        response.sendHtml("<br/>Body.data = " + request.bodyData());
     }
 
     @Override

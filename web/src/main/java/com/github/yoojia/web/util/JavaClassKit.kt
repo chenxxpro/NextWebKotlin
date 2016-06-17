@@ -12,9 +12,6 @@ import java.util.*
 
 private val Logger = LoggerFactory.getLogger("JavaClass")
 
-/**
- * 查找运行时类名
- */
 fun findRuntimeNames(based: Path, filter: (String) -> Boolean): List<String> {
     val out = ArrayList<String>()
     Files.walkFileTree(based, object : SimpleFileVisitor<Path>() {
@@ -34,9 +31,6 @@ fun findRuntimeNames(based: Path, filter: (String) -> Boolean): List<String> {
     return out.toList()
 }
 
-/**
- * 查找Jar包类名
- */
 fun findJarClassNames(acceptFilter: (String) -> Boolean): List<String> {
     return emptyList() // TODO
 }
@@ -69,10 +63,7 @@ fun getClassLoader(): ClassLoader {
     return Thread.currentThread().contextClassLoader
 }
 
-// resolve "com/github/yoojia/web/demo/EmbeddedLauncher" to "com.github.yoojia.web.demo.EmbeddedLauncher"
 private fun resolveClassName(path: String): String {
-    // Not String.replace, String.replace/replaceAll use regex objects
-    // Here use a simple way: faster and lower memory
     val segments = splitToArray(path, File.separatorChar, false)
     val ret = StringBuilder()
     segments.forEach { seg ->

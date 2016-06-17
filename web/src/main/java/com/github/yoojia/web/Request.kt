@@ -3,6 +3,10 @@ package com.github.yoojia.web
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.util.AnyMap
 import com.github.yoojia.web.util.splitToArray
+import com.github.yoojia.web.util.streamCopy
+import java.io.InputStreamReader
+import java.io.StringWriter
+import java.net.URLDecoder
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
@@ -11,47 +15,64 @@ import javax.servlet.http.HttpServletRequest
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class Request{
+class Request(ctx: Context, request: HttpServletRequest){
 
-    // Servlet
     val servletRequest: HttpServletRequest
     val context: Context
-
-    // HTTP method
     val method: String
-
-    // Request path
     val path: String
-
-    // Request context path
     val contextPath: String
-
-    // Request create time
     val createTime: Long
-
-    // Path to array
     val resources: List<String>
 
-    // 整个请求范围内生效的参数：请求参数
-    private val scopeParams: MutableMap<String, MutableList<String>>
-
-    // 仅限于处理方法范围内有效的参数：动态参数
     private val dynamicParams = AnyMap()
+    private val scopeParams: MutableMap<String, MutableList<String>> by lazy {
+        val params: MutableMap<String, MutableList<String>> = HashMap()
+        for((key, value) in request.parameterMap) {
+            params.put(key, value.toMutableList())
+        }
+        if(request.method.toUpperCase() in setOf("PUT", "DELETE")) {
+            readBodyData()?.let { data ->
+                params.put(BODY_DATA, mutableListOf(data))
+                data.split('&').forEach { kvp ->
+                    val kv = kvp.split('=')
+                    if(kv.size != 2) throw IllegalArgumentException("Client request post invalid query string")
+                    putOrNew(kv[0], URLDecoder.decode(kv[1], "UTF-8"), params)
+                }
+            }
+        }
+        /* return */params
+    }
 
-    constructor(ctx: Context, request: HttpServletRequest) {
+    companion object {
+        @JvmStatic val BODY_DATA = "next-web.body[put|delete].data:key"
+    }
+
+    init {
         createTime = System.nanoTime()
         context = ctx
         servletRequest = request
         contextPath = request.contextPath
-        // 请求地址要去掉应用在容器中配置的ContextPath
         val uri = request.requestURI
         path = if ("/".equals(contextPath)) uri else uri.substring(contextPath.length)
-        method = request.method
+        method = request.method.toUpperCase()
         resources = splitToArray(path)
+    }
 
-        scopeParams = HashMap<String, MutableList<String>>()
-        for((key, value) in request.parameterMap) {
-            scopeParams.put(key, value.toMutableList())
+    /**
+     * 读取InputStream的文本数据
+     * @return 文本数据。如果不存在数据则返回 null
+     */
+    fun bodyData(): String? {
+        val cached = scopeParams[BODY_DATA]?.firstOrNull()
+        if(cached == null && method in setOf("GET", "POST")) {
+            val data = readBodyData()
+            data?.let {
+                scopeParams.put(BODY_DATA, mutableListOf(data))
+            }
+            return data
+        }else{
+            return cached
         }
     }
 
@@ -117,12 +138,7 @@ class Request{
      * 增加一个参数对到请求中，以便在后来的请求模块中使用。
      */
     fun putParam(name: String, value: String) {
-        val values = scopeParams[name]
-        if(values != null) {
-            values.add(value)
-        }else{
-            scopeParams.put(name, mutableListOf(value))
-        }
+        putOrNew(name, value, scopeParams)
     }
 
     /**
@@ -141,6 +157,22 @@ class Request{
 
     fun dynamicParam(name: String): String? {
         return dynamicParam(name, null)
+    }
+
+    private fun readBodyData(): String? {
+        val output = StringWriter()
+        val input = InputStreamReader(servletRequest.inputStream)
+        val count = streamCopy(from = input, to = output)
+        return if(count > 0) output.toString() else null
+    }
+
+    private fun putOrNew(name: String, value: String, map: MutableMap<String, MutableList<String>>) {
+        val values = map[name]
+        if(values != null) {
+            values.add(value)
+        }else{
+            map.put(name, mutableListOf(value))
+        }
     }
 
     /// framework methods

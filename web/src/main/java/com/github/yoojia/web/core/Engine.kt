@@ -28,8 +28,8 @@ class Engine {
     companion object {
         
         private val Logger = LoggerFactory.getLogger(Engine::class.java)
-        
-        const val VERSION = "NextEngine/2.a.2 (build Kotlin 1.0.2; Java 7/8)"
+
+        const val VERSION = "NextEngine/2.a.3 (build Kotlin 1.0.2; Java 7/8)"
 
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }

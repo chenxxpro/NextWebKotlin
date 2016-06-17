@@ -10,13 +10,8 @@ import java.util.*
  */
 class RequestWrapper {
 
-    // HTTP method
     val method: String
-
-    // HTTP request uri segments
     val segments: List<UriSegment>
-
-    // HTTP request uri
     val path: String
 
     private constructor(method: String, path: String, segments: List<UriSegment>) {
@@ -26,11 +21,11 @@ class RequestWrapper {
     }
 
     companion object {
-        /// 用于对客户端请求的封装
+
         fun request(method: String, uri: String, segments: List<String>): RequestWrapper {
             return RequestWrapper(method, uri, segments.map { seg -> UriSegment(seg, absoluteType = true/*请求参数的数值类型要求为绝对类型，不能为ValueType.Any*/) })
         }
-        /// 用户对开发程序定义的封装
+
         fun define(method: String, uri: String): RequestWrapper {
             return RequestWrapper(method, uri, splitToArray(uri).map { seg -> UriSegment(seg) })
         }
