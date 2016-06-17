@@ -118,7 +118,7 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
                             dotCount = -1
                             return@forEachIndexed
                         }
-                    }else if(Character.isDigit(char)) {
+                    }else if(Character.isDigit(char) || (i == 0 && '-'.equals(char))) {
                         digitCount += 1
                     }
                 }
