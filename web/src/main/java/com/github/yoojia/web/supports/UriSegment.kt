@@ -106,11 +106,11 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
 
         companion object {
 
+            // resource is a shot string !!!
+            // Double: float, double is digits and '.'
+            // Long: int, long is all digits
+            // String: string, otherwise
             fun get(resource: kotlin.String): ValueType {
-                // resource is a shot string !!!
-                // Double: float, double is digits and '.'
-                // Long: int, long is all digits
-                // String: string, otherwise
                 var dots = 0
                 var digits = 0
                 resource.forEachIndexed { i, char ->

@@ -70,8 +70,7 @@ abstract class ModuleHandler(val tag: String,
 
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
         Logger.trace("$tag-Accepted: ${request.path}")
-        val sorted = found.sortedBy { it.priority }
-        sorted.forEach { handler ->
+        found.sortedBy { it.priority }.forEach { handler ->
             request._resetDynamicScope()
             val dynamic = handler.request.parseDynamic(request.resources)
             if(dynamic.isNotEmpty()) {
