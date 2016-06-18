@@ -7,7 +7,6 @@ import java.lang.reflect.Method
 import java.util.*
 
 /**
- * 执行 Java method
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */

@@ -21,7 +21,7 @@ fun <E> List<E>.concat(b: List<E>): List<E> {
 fun streamCopy(from: Reader, to: Writer): Int {
     val buffer = CharArray(1024 * 4)
     var count = 0
-    var n = 0
+    var n: Int
     while (true) {
         n = from.read(buffer)
         if(n == -1) break

@@ -45,14 +45,14 @@ class RequestWrapper {
      * 从指定URI请求资源中，解析出动态参数
      */
     fun parseDynamic(sources: List<String>): Map<String, String> {
-        val out = HashMap<String, String>()
+        val output = HashMap<String, String>()
         for(i in segments.indices) {
-            val seg = segments[i]
-            if(seg.dynamic) {
-                out.put(seg.name, sources[i])
+            val segment = segments[i]
+            if(segment.dynamic) {
+                output.put(segment.name, sources[i])
             }
         }
-        return if(out.isEmpty()) emptyMap() else out
+        return if(output.isEmpty()) emptyMap() else output
     }
 
     override fun toString(): String {

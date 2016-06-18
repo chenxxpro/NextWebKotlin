@@ -35,7 +35,7 @@ internal fun checkArguments(method: Method) {
         throw IllegalArgumentException("@GET/@POST/@PUT/@DELETE methods must has 1..3 params, but was ${types.size} in method $method")
     }
     val used = arrayOf(false, false, false)
-    val checkDuplicate = fun (type: Class<*>, index: Int) {
+    val duplicate = fun (type: Class<*>, index: Int) {
         if(used[index]) {
             throw IllegalArgumentException("Duplicate arguments type <$type> in method $method")
         }
@@ -43,9 +43,9 @@ internal fun checkArguments(method: Method) {
     }
     types.forEach { type ->
         when {
-            type.equals(Request::class.java) -> checkDuplicate(type, 0)
-            type.equals(Response::class.java) -> checkDuplicate(type, 1)
-            type.equals(RequestChain::class.java) -> checkDuplicate(type, 2)
+            type.equals(Request::class.java) -> duplicate(type, 0)
+            type.equals(Response::class.java) -> duplicate(type, 1)
+            type.equals(RequestChain::class.java) -> duplicate(type, 2)
             else -> throw IllegalArgumentException("Unsupported argument type <$type> in method $method")
         }
     }
@@ -53,9 +53,9 @@ internal fun checkArguments(method: Method) {
 
 /**
  * 计算请求参数的优先级
- * - 首先使用用户设置自定义优先级(非 InternalPriority.INVALID 值)
- * - 短URI路径优先；
+ * - 短路径优先；
  * - 静态方法优先；
+ * - 动态参数：固定参数类型{int:user_id}优先于不定参数类型{user_id}
  */
 fun getRequestPriority(wrapper: RequestWrapper): Int {
     var priority = wrapper.segments.size

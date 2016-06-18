@@ -14,22 +14,22 @@ import java.util.*
 private val Logger = LoggerFactory.getLogger("JavaClass")
 
 fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
-    val out = ArrayList<String>()
+    val output = ArrayList<String>()
     Files.walkFileTree(based, object : SimpleFileVisitor<Path>() {
         @Throws(IOException::class)
         override fun visitFile(path: Path, attr: BasicFileAttributes): FileVisitResult {
-            val pathName = based.relativize(path).toString()
-            if(pathName.endsWith(".class")) {
-                val name = resolveClassName(pathName)
-                Logger.trace("Found class: $name")
-                if(filter.accept(name)) { // return true to accept
-                    out.add(name);
+            val name = based.relativize(path).toString()
+            if(name.endsWith(".class")) {
+                val clazz = resolveClassName(name)
+                Logger.trace("Found class: $clazz")
+                if(filter.accept(clazz)) { // return true to accept
+                    output.add(clazz);
                 }
             }
             return FileVisitResult.CONTINUE
         }
     })
-    return out.toList()
+    return output.toList()
 }
 
 fun findJarClassNames(filter: Filter<String>): List<String> {
@@ -46,13 +46,13 @@ fun loadClassByName(names: List<String>): List<Class<*>> {
 }
 
 fun loadClassByName(loader: ClassLoader, name: String): Class<*> {
-    val out: Class<*>
+    val output: Class<*>
     try{
-        out = loader.loadClass(name)
+        output = loader.loadClass(name)
     }catch(err: Exception) {
         throw IllegalAccessException("Fail to load: class<$name>, loader: $loader, message: ${err.message}")
     }
-    return out
+    return output
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -66,13 +66,13 @@ fun getClassLoader(): ClassLoader {
 
 private fun resolveClassName(path: String): String {
     val segments = splitToArray(path, File.separatorChar, false)
-    val ret = StringBuilder()
+    val buffer = StringBuilder()
     segments.forEach { seg ->
         if (seg.endsWith(".class")) {
-            ret.append(seg.substring(0, seg.length - 6)/* 6: .class */)
+            buffer.append(seg.substring(0, seg.length - 6)/* 6: .class */)
         } else {
-            ret.append(seg).append('.')
+            buffer.append(seg).append('.')
         }
     }
-    return ret.toString()
+    return buffer.toString()
 }

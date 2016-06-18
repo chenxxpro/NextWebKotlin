@@ -45,12 +45,12 @@ abstract class ModuleHandler(val tag: String,
     }
 
     override fun prepare(classes: List<Class<*>>): List<Class<*>> {
-        cachedClasses.forEach { objectType ->
-            val moduleUri = getModuleConfigUri(objectType)
-            annotatedMethods(objectType, action = { javaMethod, annotationType ->
+        cachedClasses.forEach { moduleType ->
+            val uri = getModuleUri(moduleType)
+            annotatedMethods(moduleType, action = { javaMethod, annotationType ->
                 checkReturnType(javaMethod)
                 checkArguments(javaMethod)
-                val handler = RequestHandler.create(moduleUri, objectType, javaMethod, annotationType)
+                val handler = RequestHandler.create(uri, moduleType, javaMethod, annotationType)
                 handlers.add(handler)
                 Logger.info("$tag-Module-Define: $handler")
             })
@@ -107,6 +107,6 @@ abstract class ModuleHandler(val tag: String,
         return found
     }
 
-    protected abstract fun getModuleConfigUri(hostType: Class<*>): String
+    protected abstract fun getModuleUri(hostType: Class<*>): String
 
 }
