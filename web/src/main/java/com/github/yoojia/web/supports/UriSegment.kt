@@ -10,6 +10,7 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
     val wildcard: Boolean
     val type: ValueType
     val name: String
+    val fixedType: Boolean
 
     init {
         val starts = if(segment.startsWith('{')) 1 else 0
@@ -23,11 +24,11 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
 
         // {user-id} -> user-id
         val unwrap = if(dynamic) segment.substring(1, segment.length-1) else segment
-
+        var isFixedValueType = true
         if(!dynamic) {
             name = segment
             type = ValueType.get(name)
-        }else when{
+        }else /* is dynamic */when{
             unwrap.startsWith("int:") -> {
                 type = ValueType.Int
                 name = unwrap.substring(4)
@@ -41,10 +42,12 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
                 name = unwrap.substring(7)
             }
             else -> {
+                isFixedValueType = false
                 type = if(absoluteType) ValueType.String else ValueType.Any
                 name = unwrap
             }
         }
+        fixedType = isFixedValueType
     }
 
     companion object {

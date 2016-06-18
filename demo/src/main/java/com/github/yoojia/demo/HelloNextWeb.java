@@ -22,14 +22,20 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
         chain.interrupt();
     }
 
+    @GET("/{username}")
+    public void dynamic(Request request, Response response, RequestChain chain) {
+        response.sendHtml("<br/>Handle by /{username}, username= " + request.dynamicParam("username"));
+        chain.interrupt();
+    }
+
     @GET("/{string:username}")
-    public void dynamic(Request request, Response response) {
-        response.sendHtml("<br/>Handle by /{username} , username= " + request.dynamicParam("username"));
+    public void dynamicTyped(Request request, Response response) {
+        response.sendHtml("<br/>Handle by /{string:username} , username= " + request.dynamicParam("username"));
     }
 
     @GET("/{int:user_id}")
     public void intDynamic(Request request, Response response) {
-        response.sendHtml("<br/>Handle by /{user_id} , user_id= " + request.dynamicParam("user_id"));
+        response.sendHtml("<br/>Handle by /{int:user_id} , user_id= " + request.dynamicParam("user_id"));
     }
 
     @GET("/*")

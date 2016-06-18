@@ -58,14 +58,13 @@ internal fun checkArguments(method: Method) {
  * - 静态方法优先；
  */
 fun getRequestPriority(wrapper: RequestWrapper): Int {
-
-    var priority = 0
+    var priority = wrapper.segments.size
     wrapper.segments.forEach { segment ->
         if(segment.wildcard) {
             priority += -1
         }else{
-            priority += if(segment.dynamic) 1 else 0
+            priority += if(segment.dynamic) {if(segment.fixedType) {1} else {2}} else {0}
         }
     }
-    return wrapper.segments.size + priority
+    return priority
 }
