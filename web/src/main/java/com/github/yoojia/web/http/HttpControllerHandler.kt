@@ -9,7 +9,6 @@ import com.github.yoojia.web.supports.ModuleHandler
 import com.github.yoojia.web.supports.RequestWrapper
 
 /**
- * HTTP 模块，处理HTTP请求
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */

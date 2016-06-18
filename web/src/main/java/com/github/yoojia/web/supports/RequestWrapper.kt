@@ -4,7 +4,6 @@ import com.github.yoojia.web.util.splitToArray
 import java.util.*
 
 /**
- * 客户端请求的元素封装类
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
