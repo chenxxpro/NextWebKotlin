@@ -21,10 +21,10 @@ class Config(val values: Map<String, Any>) {
     @Suppress("UNCHECKED_CAST")
     fun getConfigList(key: String): List<Config> {
         val out = ArrayList<Config>()
-        val value = values[key]
-        if(value != null) {
-            val list = value as ArrayList<LinkedHashMap<String, Any>>
-            list.forEach { out.add(Config(it)) }
+        values[key]?.let { value ->
+            (value as ArrayList<LinkedHashMap<String, Any>>).forEach {
+                out.add(Config(it))
+            }
         }
         return out.toList()
     }
