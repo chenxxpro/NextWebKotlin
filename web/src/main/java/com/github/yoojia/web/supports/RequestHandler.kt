@@ -22,14 +22,9 @@ class RequestHandler(
         return "{invoker: $invoker, request: $request, priority: $priority}"
     }
 
-
-
     companion object {
 
-        /**
-         * 创建方法的定义参数
-         */
-        fun create(rootUri: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): RequestHandler {
+        fun create(root: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): RequestHandler {
             val annotation = method.getAnnotation(annotationType)
             val params = when(annotation) {
                 is GET -> Pair("GET", annotation.value)
@@ -40,7 +35,7 @@ class RequestHandler(
                 else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
             }
             return RequestHandler(JavaMethodInvoker(moduleType, method),
-                    RequestWrapper.define(params.first/*method*/, concat(rootUri, params.second/*path*/)))
+                    RequestWrapper.define(params.first/*method*/, concat(root, params.second/*path*/)))
         }
     }
 }

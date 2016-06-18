@@ -5,9 +5,6 @@ import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
 import java.lang.reflect.Method
 
-/**
- * 查找@GET/POST/PUT/DELETE 的方法函数列表
- */
 internal fun annotatedMethods(hostType: Class<*>, action: (Method, Class<out Annotation>) -> Unit) {
     val ifFindAnnotated = fun(method: Method, annotationType: Class<out Annotation>) {
         if(method.isAnnotationPresent(annotationType)) {
@@ -26,18 +23,12 @@ internal fun annotatedMethods(hostType: Class<*>, action: (Method, Class<out Ann
     }
 }
 
-/**
- * 检查方法的返回类型
- */
 internal fun checkReturnType(method: Method) {
     if(!Void.TYPE.equals(method.returnType)) {
         throw IllegalArgumentException("Return type of @GET/@POST/@PUT/@DELETE methods must be <VOID>/<Unit> !")
     }
 }
 
-/**
- * 检查方法的参数要求
- */
 internal fun checkArguments(method: Method) {
     val types = method.parameterTypes
     if(types.size !in 1..3) {
@@ -67,14 +58,13 @@ internal fun checkArguments(method: Method) {
  * - 静态方法优先；
  */
 fun getRequestPriority(wrapper: RequestWrapper): Int {
-
-    var priority = 0
+    var priority = wrapper.segments.size
     wrapper.segments.forEach { segment ->
         if(segment.wildcard) {
             priority += -1
         }else{
-            priority += if(segment.dynamic) 1 else 0
+            priority += if(segment.dynamic) {if(segment.fixedType) {1} else {2}} else {0}
         }
     }
-    return wrapper.segments.size + priority
+    return priority
 }

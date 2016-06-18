@@ -7,15 +7,12 @@ package com.github.yoojia.web.supports
 class InternalPriority private constructor() {
 
     companion object {
-        val BEFORE_INTERCEPTOR = -1000
-        val AFTER_INTERCEPTOR = 1000
-        val HTTP = 0
-        val UPLOADS = HTTP - 100
-        val ASSETS = HTTP - 200
-        val DOWNLOADS = HTTP + 100
-        val VELOCITY = HTTP + 200
-
-        val INVALID = Int.MIN_VALUE
+        @JvmStatic val BEFORE_INTERCEPTOR = -1000
+        @JvmStatic val AFTER_INTERCEPTOR = 1000
+        @JvmStatic val HTTP = 0
+        @JvmStatic val ASSETS = HTTP - 200
+        @JvmStatic val VELOCITY = HTTP + 200
+        @JvmStatic val INVALID = Int.MIN_VALUE
     }
 
 }

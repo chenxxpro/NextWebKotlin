@@ -37,8 +37,11 @@ class UriSegmentTest {
     @Test
     fun test(){
         Assert.assertEquals(UriSegment.ValueType.Int, UriSegment("123").type)
-        Assert.assertEquals(UriSegment.ValueType.Int, UriSegment("123").type)
+        Assert.assertEquals(UriSegment.ValueType.Int, UriSegment("-123").type)
         Assert.assertEquals(UriSegment.ValueType.Float, UriSegment("123.0").type)
+        Assert.assertEquals(UriSegment.ValueType.Float, UriSegment("-123.0").type)
+        Assert.assertEquals(UriSegment.ValueType.String, UriSegment("+12").type)
+        Assert.assertEquals(UriSegment.ValueType.String, UriSegment("+123.0").type)
         Assert.assertEquals(UriSegment.ValueType.String, UriSegment("123abc").type)
         Assert.assertEquals(UriSegment.ValueType.String, UriSegment("/").type)
         Assert.assertEquals(UriSegment.ValueType.String, UriSegment("*").type)

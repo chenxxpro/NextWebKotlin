@@ -4,10 +4,7 @@ import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;
 import com.github.yoojia.web.Response;
 import com.github.yoojia.web.http.Controller;
-import com.github.yoojia.web.supports.ModuleCachedListener;
-import com.github.yoojia.web.supports.GET;
-import com.github.yoojia.web.supports.ModuleRequestsListener;
-import com.github.yoojia.web.supports.POST;
+import com.github.yoojia.web.supports.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -25,14 +22,20 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
         chain.interrupt();
     }
 
+    @GET("/{username}")
+    public void dynamic(Request request, Response response, RequestChain chain) {
+        response.sendHtml("<br/>Handle by /{username}, username= " + request.dynamicParam("username"));
+        chain.interrupt();
+    }
+
     @GET("/{string:username}")
-    public void dynamic(Request request, Response response) {
-        response.sendHtml("<br/>Handle by /{username} , username= " + request.dynamicParam("username"));
+    public void dynamicTyped(Request request, Response response) {
+        response.sendHtml("<br/>Handle by /{string:username} , username= " + request.dynamicParam("username"));
     }
 
     @GET("/{int:user_id}")
     public void intDynamic(Request request, Response response) {
-        response.sendHtml("<br/>Handle by /{user_id} , user_id= " + request.dynamicParam("user_id"));
+        response.sendHtml("<br/>Handle by /{int:user_id} , user_id= " + request.dynamicParam("user_id"));
     }
 
     @GET("/*")
@@ -44,6 +47,18 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
     @GET("/yoojia")
     public void statix(Request request, Response response) {
         response.sendHtml("<br/>Handle by /yoojia, username= " + request.param("username"));
+    }
+
+    @PUT("/yoojia")
+    public void put(Request request, Response response) {
+        response.sendHtml("<br/>Handle by PUT/yoojia, name= " + request.param("name") + ", body.data = " + request.bodyData());
+        response.sendHtml("<br/>Body.data = " + request.bodyData());
+    }
+
+    @DELETE("/yoojia")
+    public void delete(Request request, Response response) {
+        response.sendHtml("<br/>Handle by DELETE/yoojia, name= " + request.param("name") + ", body.data = " + request.bodyData());
+        response.sendHtml("<br/>Body.data = " + request.bodyData());
     }
 
     @Override

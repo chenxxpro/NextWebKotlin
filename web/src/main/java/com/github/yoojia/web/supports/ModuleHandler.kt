@@ -45,7 +45,6 @@ abstract class ModuleHandler(val tag: String,
     }
 
     override fun prepare(classes: List<Class<*>>): List<Class<*>> {
-        // 查找各个模块类的methods, 将模块类中用户定义的了注解@GET/POST/PUT/DELETE等方法，生成对应的RequestHandler
         cachedClasses.forEach { objectType ->
             val moduleUri = getModuleConfigUri(objectType)
             annotatedMethods(objectType, action = { javaMethod, annotationType ->
@@ -59,7 +58,6 @@ abstract class ModuleHandler(val tag: String,
         try{
             return cachedClasses.toList()
         }finally{
-            // prepare 完成之后可以清除缓存
             cachedClasses.clear()
         }
     }
@@ -71,22 +69,15 @@ abstract class ModuleHandler(val tag: String,
     }
 
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
-        Logger.trace("$tag-Module-Processing: ${request.path}")
-        // 根据优先级排序后处理
+        Logger.trace("$tag-Accepted: ${request.path}")
         val sorted = found.sortedBy { it.priority }
         sorted.forEach { handler ->
-            /*
-                每个模块处理器在执行之前，清除前面处理器的动态参数：
-                - 像 /users/{username} 中定义的动态参数 username 只对 @GET("/users/{username}") 所声明的方法函数有效，
-                - 而对其它同样匹配路径如 @GET("/users/ *") 来说，动态参数中如果突然出现 username 参数值将会显得非常怪异。
-            */
             request._resetDynamicScope()
-            //  每个@GET/POST/PUT/DELETE方法Handler定义了不同的处理URI地址, 这里需要解析动态URL，并保存到Request中
             val dynamic = handler.request.parseDynamic(request.resources)
             if(dynamic.isNotEmpty()) {
                 request._setDynamicScope(dynamic)
             }
-            Logger.trace("$tag-Working-Processor: $handler")
+            Logger.trace("$tag-Handler: $handler")
             val moduleObject = moduleObjectProvider.get(handler.invoker.hostType)
             val chain = RequestChain()
             // 插入一些特殊处理过程接口的调用
@@ -100,11 +91,9 @@ abstract class ModuleHandler(val tag: String,
             }else{
                 handler.invoker.invoke(request, response, chain, moduleObject)
             }
-            // 处理器要求中断
             if(chain.isInterrupted()) return@forEach
             if(chain.isStopDispatching()) return
         }
-        // 继续下一级模块的处理
         dispatch.next(request, response, dispatch)
     }
 

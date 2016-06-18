@@ -1,5 +1,6 @@
 package com.github.yoojia.web.core
 
+import com.github.yoojia.web.supports.Filter
 import com.github.yoojia.web.util.*
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
@@ -28,11 +29,13 @@ internal class ClassScanner : ClassProvider {
     override fun get(context: Context): List<Class<*>> {
         val scanStart = now()
         // 查找所有Java Class文件
-        val filter = fun(name: String): Boolean {
-            DEFAULT_SYSTEM_CLASSES.forEach {
-                if(name.startsWith(it)) return true
+        val filter = object : Filter<String> {
+            override fun accept(value: String): Boolean {
+                DEFAULT_SYSTEM_CLASSES.forEach {
+                    if(value.startsWith(it)) return false
+                }
+                return true
             }
-            return false
         }
         val runtime = findRuntimeNames(getClassPath(), filter)
         val jar = findJarClassNames(filter)

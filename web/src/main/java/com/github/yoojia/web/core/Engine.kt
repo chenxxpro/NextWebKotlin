@@ -28,8 +28,8 @@ class Engine {
     companion object {
         
         private val Logger = LoggerFactory.getLogger(Engine::class.java)
-        
-        const val VERSION = "NextEngine/2.a.2 (build Kotlin 1.0.2; Java 7/8)"
+
+        const val VERSION = "NextEngine/2.a.3 (build Kotlin 1.0.2; Java 7/8)"
 
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
@@ -71,7 +71,6 @@ class Engine {
         // 在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
         val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
-        Logger.info("NextEngine-Accepted: ${request.path}")
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
             dispatchChain.process(request, response)

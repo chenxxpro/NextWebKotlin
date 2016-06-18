@@ -5,7 +5,6 @@ import com.github.yoojia.web.Response
 import java.lang.reflect.Method
 
 /**
- * 模块内各个方法触发执行监听接口
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.3
  */

@@ -1,5 +1,6 @@
 package com.github.yoojia.web.util
 
+import com.github.yoojia.web.supports.Filter
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -12,20 +13,17 @@ import java.util.*
 
 private val Logger = LoggerFactory.getLogger("JavaClass")
 
-/**
- * 查找运行时类名
- */
-fun findRuntimeNames(based: Path, filter: (String) -> Boolean): List<String> {
+fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
     val out = ArrayList<String>()
     Files.walkFileTree(based, object : SimpleFileVisitor<Path>() {
         @Throws(IOException::class)
         override fun visitFile(path: Path, attr: BasicFileAttributes): FileVisitResult {
             val pathName = based.relativize(path).toString()
             if(pathName.endsWith(".class")) {
-                val className = resolveClassName(pathName)
-                Logger.info("Found class: $className")
-                if(! filter.invoke(className)) {
-                    out.add(className);
+                val name = resolveClassName(pathName)
+                Logger.trace("Found class: $name")
+                if(filter.accept(name)) { // return true to accept
+                    out.add(name);
                 }
             }
             return FileVisitResult.CONTINUE
@@ -34,10 +32,7 @@ fun findRuntimeNames(based: Path, filter: (String) -> Boolean): List<String> {
     return out.toList()
 }
 
-/**
- * 查找Jar包类名
- */
-fun findJarClassNames(acceptFilter: (String) -> Boolean): List<String> {
+fun findJarClassNames(filter: Filter<String>): List<String> {
     return emptyList() // TODO
 }
 
@@ -69,14 +64,11 @@ fun getClassLoader(): ClassLoader {
     return Thread.currentThread().contextClassLoader
 }
 
-// resolve "com/github/yoojia/web/demo/EmbeddedLauncher" to "com.github.yoojia.web.demo.EmbeddedLauncher"
 private fun resolveClassName(path: String): String {
-    // Not String.replace, String.replace/replaceAll use regex objects
-    // Here use a simple way: faster and lower memory
     val segments = splitToArray(path, File.separatorChar, false)
     val ret = StringBuilder()
     segments.forEach { seg ->
-        if (seg.contains(".class")) {
+        if (seg.endsWith(".class")) {
             ret.append(seg.substring(0, seg.length - 6)/* 6: .class */)
         } else {
             ret.append(seg).append('.')
