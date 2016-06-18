@@ -71,7 +71,6 @@ class Engine {
         // 在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
         val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
-        Logger.info("NextEngine-Accepted: ${request.path}")
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
             dispatchChain.process(request, response)

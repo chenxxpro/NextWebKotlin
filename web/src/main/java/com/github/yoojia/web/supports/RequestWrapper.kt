@@ -57,6 +57,6 @@ class RequestWrapper {
     }
 
     override fun toString(): String {
-        return "{method: $method, path: $path}"
+        return "$method $path"
     }
 }

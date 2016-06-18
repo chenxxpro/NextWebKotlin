@@ -35,7 +35,7 @@ class JavaMethodInvoker(val hostType: Class<*>, val method: Method) {
     }
 
     override fun toString(): String{
-        return "{class: ${hostType.name}, method:${method.name} }"
+        return "${hostType.name}.${method.name}()"
     }
 
 }
