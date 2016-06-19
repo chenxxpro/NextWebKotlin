@@ -21,13 +21,17 @@ class ConfigTest {
         map1.put("age", 123)
         map1.put("age1", 123.0f)
         map2.put("name", "chen")
+        map.put("haha", "hoho")
         map.put("key", map1)
         map.put("list", arrayListOf(map1, map2))
-        Assert.assertEquals("yoojia", Config(map).getConfig("key").getString("name"))
-        Assert.assertEquals(true, Config(map).getConfig("key").getBoolean("checked"))
-        Assert.assertEquals(123, Config(map).getConfig("key").getInt("age"))
-        Assert.assertEquals(123.0f, Config(map).getConfig("key").getFloat("age1"))
-        Assert.assertEquals(2, Config(map).getConfigList("list").size)
-        Assert.assertEquals("chen", Config(map).getConfigList("list")[1].getString("name"))
+        val config = Config(map)
+        Assert.assertEquals("yoojia", config.getConfig("key").getString("name"))
+        Assert.assertEquals(true, config.getConfig("key").getBoolean("checked"))
+        Assert.assertEquals(123, config.getConfig("key").getInt("age"))
+        Assert.assertEquals(123.0f, config.getConfig("key").getFloat("age1"))
+        Assert.assertEquals(2, config.getConfigList("list").size)
+        Assert.assertEquals("chen", config.getConfigList("list")[1].getString("name"))
+        
+        Assert.assertEquals("hoho", config.getChecked("haha", "hehe", String::class))
     }
 }

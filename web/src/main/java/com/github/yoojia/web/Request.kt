@@ -34,8 +34,8 @@ class Request(ctx: Context, request: HttpServletRequest){
         if(request.method.toUpperCase() in setOf("PUT", "DELETE")) {
             readBodyData()?.let { data ->
                 params.put(BODY_DATA, mutableListOf(data))
-                data.split('&').forEach { kvp ->
-                    val kv = kvp.split('=')
+                data.split('&').forEach { pair ->
+                    val kv = pair.split('=')
                     if(kv.size != 2) throw IllegalArgumentException("Client request post invalid query string")
                     putOrNew(kv[0], URLDecoder.decode(kv[1], "UTF-8"), params)
                 }
@@ -71,8 +71,10 @@ class Request(ctx: Context, request: HttpServletRequest){
         val cached = scopeParams[BODY_DATA]?.firstOrNull()
         if(cached == null && method in setOf("GET", "POST")) {
             val data = readBodyData()
-            data?.let {
+            if(data != null) {
                 scopeParams.put(BODY_DATA, mutableListOf(data))
+            }else{
+                scopeParams.put(BODY_DATA, mutableListOf(/*empty*/))
             }
             return data
         }else{
@@ -86,8 +88,10 @@ class Request(ctx: Context, request: HttpServletRequest){
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun param(key: String): String? {
-        val values = scopeParams[key]
-        return if(values != null && values.isNotEmpty()) values.first() else null
+        scopeParams[key]?.let { values ->
+            return values.firstOrNull()
+        }
+        return null
     }
 
     /**
