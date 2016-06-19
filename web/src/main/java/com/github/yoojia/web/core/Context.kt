@@ -15,16 +15,10 @@ class Context(val webPath: String, val config: Config, val servletContext: Servl
         if(path.isNullOrEmpty()) "/" else path
     }
 
-    /**
-     * 解析路径
-     */
     fun resolvePath(path: Path): Path {
         return resolvePath(path.toString())
     }
 
-    /**
-     * 解析路径
-     */
     fun resolvePath(path: String): Path {
         return Paths.get(webPath, path)
     }

@@ -34,8 +34,8 @@ class Request(ctx: Context, request: HttpServletRequest){
         if(request.method.toUpperCase() in setOf("PUT", "DELETE")) {
             readBodyData()?.let { data ->
                 params.put(BODY_DATA, mutableListOf(data))
-                data.split('&').forEach { kvp ->
-                    val kv = kvp.split('=')
+                data.split('&').forEach { pair ->
+                    val kv = pair.split('=')
                     if(kv.size != 2) throw IllegalArgumentException("Client request post invalid query string")
                     putOrNew(kv[0], URLDecoder.decode(kv[1], "UTF-8"), params)
                 }
@@ -60,15 +60,21 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     /**
-     * 读取InputStream的文本数据
+     * 读取BodyData (InputStream) 的文本数据。
+     * 允许重复读取。第一次读取BodyData后，Request会将数据缓存到 scopeParams.BODY_DATA 中。
+     * HTTP 的各个方法的数据读取逻辑：
+     * - GET/POST 在调用bodyData()时检查；
+     * - PUT/DELETE 在调用任意params相关接口时才检查和加载（LazyLoad）
      * @return 文本数据。如果不存在数据则返回 null
      */
     fun bodyData(): String? {
         val cached = scopeParams[BODY_DATA]?.firstOrNull()
         if(cached == null && method in setOf("GET", "POST")) {
             val data = readBodyData()
-            data?.let {
+            if(data != null) {
                 scopeParams.put(BODY_DATA, mutableListOf(data))
+            }else{
+                scopeParams.put(BODY_DATA, mutableListOf(/*empty*/))
             }
             return data
         }else{
@@ -82,14 +88,16 @@ class Request(ctx: Context, request: HttpServletRequest){
      * @return 字符值，如果请求中不存在此name的值则返回 null
      */
     fun param(key: String): String? {
-        val values = scopeParams[key]
-        return if(values != null && values.isNotEmpty()) values.first() else null
+        scopeParams[key]?.let { values ->
+            return values.firstOrNull()
+        }
+        return null
     }
 
     /**
      * 获取所有参数。
-     * - 单个数值的参数以 String 返回
-     * - 多个数值的参数以 List<String> 形式返回
+     * - 单个数值的参数以 String 类型返回
+     * - 多个数值的参数以 List<String> 类型返回
      * @return 非空AnyMap对象
      */
     fun params(): AnyMap {
@@ -126,7 +134,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     /**
-     * 增加多个参数对到请求中，以便在后来的请求模块中使用。
+     * 增加多个参数对到请求中
      */
     fun putParam(params: Map<String, String>) {
         for((k, v) in params) {
@@ -135,7 +143,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     /**
-     * 增加一个参数对到请求中，以便在后来的请求模块中使用。
+     * 增加一个参数对到请求中
      */
     fun putParam(name: String, value: String) {
         putOrNew(name, value, scopeParams)
@@ -143,7 +151,7 @@ class Request(ctx: Context, request: HttpServletRequest){
 
     /**
      * 获取动态参数值，如果不存在则返回默认值。
-     * 注意：动态参数的有效范围是 @GET/POST/PUT/DELETE 标注的模块，离开模块范围后动态参数失效。
+     * 注意：动态参数的有效范围是 @GET/POST/PUT/DELETE 标注的模块方法(Java Method)，离开模块方法范围后动态参数失效。
      * @return 字符值，如果请求中不存在此name的值则返回默认值
      */
     fun dynamicParam(name: String, defaultValue: String? = null): String? {

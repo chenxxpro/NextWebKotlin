@@ -26,7 +26,7 @@ class RequestHandler(
 
         fun create(root: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): RequestHandler {
             val annotation = method.getAnnotation(annotationType)
-            val params = when(annotation) {
+            val arg = when(annotation) {
                 is GET -> Pair("GET", annotation.value)
                 is POST -> Pair("POST", annotation.value)
                 is PUT -> Pair("PUT", annotation.value)
@@ -35,7 +35,7 @@ class RequestHandler(
                 else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
             }
             return RequestHandler(JavaMethodInvoker(moduleType, method),
-                    RequestWrapper.define(params.first/*method*/, concat(root, params.second/*path*/)))
+                    RequestWrapper.define(arg.first/*method*/, concat(root, arg.second/*path*/)))
         }
     }
 }

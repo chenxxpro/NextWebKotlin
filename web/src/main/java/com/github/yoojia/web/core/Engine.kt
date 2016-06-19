@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
- * NextWeb framework Engine
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
@@ -29,7 +28,7 @@ class Engine {
         
         private val Logger = LoggerFactory.getLogger(Engine::class.java)
 
-        const val VERSION = "NextEngine/2.a.3 (build Kotlin 1.0.2; Java 7/8)"
+        const val VERSION = "NextEngine/2.a.3-1 (build Kotlin 1.0.2; Java 7/8)"
 
         private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
     }
@@ -47,30 +46,30 @@ class Engine {
         Logger.debug("Config-File: ${config.getString(KEY_CONFIG_PATH)}")
         Logger.debug("Config-Load-State: ${config.getString(KEY_CONFIG_STATE)}")
         Logger.debug("Config-Load-Time: ${escape(start)}ms")
+
         val ctx = Context(webPath, config, servletContext)
         contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context: ${ctx.contextPath}")
-        // 初始化所有需要加载的模块类
+
         initModules(ctx, classProvider.get(ctx).toMutableList())
-        // 核心模块/插件注册到Chain中
         kernelManager.allModules { module ->
             dispatchChain.add(module)
         }
         Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
         Logger.debug("Loaded-Plugins: ${kernelManager.pluginCount()}")
-        // 启动全部内核模块
+
         kernelManager.onCreated(ctx)
+
         Logger.debug("Engine-Boot: ${escape(start)}ms")
         Logger.debug("<-- NextEngine started successfully")
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {
         val context = contextRef.get()
-        // 默认情况下，HTTP状态码为 404 NOT FOUND。
-        // 在不同模块中有不同的默认HTTP状态码逻辑，由各个模块定夺。
         val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
+        // Default: 404
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
             dispatchChain.process(request, response)
@@ -99,13 +98,15 @@ class Engine {
             Logger.debug("$tag-Prepare: ${escape(start)}ms")
             kernelManager.register(module, priority, rootConfig.getConfig(config))
         }
-        // Kernel modules
+
+        // Kernel
         register("BeforeInterceptor", BeforeHandler(classes), BeforeHandler.DEFAULT_PRIORITY, "before-interceptor")
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
         register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
-        // Build-in
+
         tryBuildInModules(context, classes)
-        // User modules
+
+        // User
         val classLoader = getClassLoader()
         val modulesStart = now()
         val modules = rootConfig.getConfigList("modules")
@@ -117,7 +118,7 @@ class Engine {
             kernelManager.register(module, args.priority, args.args)
         }
         Logger.debug("User-Modules-Prepare: ${escape(modulesStart)}ms")
-        // 从配置文件中加载用户插件
+
         val pluginStart = now()
         val pluginConfigs = rootConfig.getConfigList("plugins")
         pluginConfigs.forEach { config ->
@@ -129,7 +130,6 @@ class Engine {
     }
 
     /**
-        尝试加载内部实现模块：
         - 资源： com.github.yoojia.web.Assets
         - 模板： com.github.yoojia.web.VelocityTemplates
     */
@@ -148,6 +148,7 @@ class Engine {
                 Logger.debug("$tagName-Prepare: ${escape(start)}ms")
             }
         }
+
         // Assets
         ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
             val priority: Int
@@ -159,6 +160,7 @@ class Engine {
             }
             priority
         })
+
         // Templates
         ifExistsThenLoad("com.github.yoojia.web.VelocityTemplates", "templates", "Templates", { define ->
             val priority: Int

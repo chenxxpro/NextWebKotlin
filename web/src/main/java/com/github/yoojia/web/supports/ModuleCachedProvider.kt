@@ -12,32 +12,32 @@ class ModuleCachedProvider(guessSize: Int) {
     private val mCached = object: LinkedHashMap<Class<*>, Any>(guessSize, 0.75f, true){
 
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Class<*>, Any>?): Boolean {
-            val toRemove = this.size > guessSize
-            if(toRemove && eldest?.value is ModuleCachedListener) {
+            val remove = this.size > guessSize
+            if(remove && eldest?.value is ModuleCachedListener) {
                 (eldest!!.value as ModuleCachedListener).onRemoved()
             }
-            return toRemove
+            return remove
         }
 
     }
 
     fun get(type: Class<*>): Any {
-        var isCachedAction = false
-        var tmpObject: Any? = null
+        var isCached = false
+        var obj: Any? = null
         synchronized(mCached) {
             var cached = mCached[type]
             if(cached == null) {
                 cached = newClassInstance(type)
                 mCached.put(type, cached!!)
-                isCachedAction = true
+                isCached = true
             }
-            tmpObject = cached
+            obj = cached
         }
-        val module = tmpObject!!
+        val module = obj!!
         try{
             return module
         }finally{
-            if(isCachedAction && module is ModuleCachedListener) {
+            if(isCached && module is ModuleCachedListener) {
                 module.onCached()
             }
         }

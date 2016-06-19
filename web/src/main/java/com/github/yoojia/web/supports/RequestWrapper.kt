@@ -4,7 +4,6 @@ import com.github.yoojia.web.util.splitToArray
 import java.util.*
 
 /**
- * 客户端请求的元素封装类
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
@@ -46,14 +45,14 @@ class RequestWrapper {
      * 从指定URI请求资源中，解析出动态参数
      */
     fun parseDynamic(sources: List<String>): Map<String, String> {
-        val out = HashMap<String, String>()
+        val output = HashMap<String, String>()
         for(i in segments.indices) {
-            val seg = segments[i]
-            if(seg.dynamic) {
-                out.put(seg.name, sources[i])
+            val segment = segments[i]
+            if(segment.dynamic) {
+                output.put(segment.name, sources[i])
             }
         }
-        return if(out.isEmpty()) emptyMap() else out
+        return if(output.isEmpty()) emptyMap() else output
     }
 
     override fun toString(): String {

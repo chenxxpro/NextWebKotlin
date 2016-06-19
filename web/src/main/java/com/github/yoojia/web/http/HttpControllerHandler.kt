@@ -9,13 +9,12 @@ import com.github.yoojia.web.supports.ModuleHandler
 import com.github.yoojia.web.supports.RequestWrapper
 
 /**
- * HTTP 模块，处理HTTP请求
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
 class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpController", Controller::class.java, classes) {
 
-    override fun getModuleConfigUri(hostType: Class<*>): String {
+    override fun getModuleUri(hostType: Class<*>): String {
         return hostType.getAnnotation(Controller::class.java).value
     }
 

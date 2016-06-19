@@ -28,7 +28,6 @@ internal class ClassScanner : ClassProvider {
 
     override fun get(context: Context): List<Class<*>> {
         val scanStart = now()
-        // 查找所有Java Class文件
         val filter = object : Filter<String> {
             override fun accept(value: String): Boolean {
                 DEFAULT_SYSTEM_CLASSES.forEach {

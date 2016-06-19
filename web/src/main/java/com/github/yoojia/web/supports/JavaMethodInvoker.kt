@@ -7,7 +7,6 @@ import java.lang.reflect.Method
 import java.util.*
 
 /**
- * 执行 Java method
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
@@ -23,8 +22,7 @@ class JavaMethodInvoker(val hostType: Class<*>, val method: Method) {
 
     private fun varargs(request: Request, response: Response, chain: RequestChain): Array<Any> {
         val out = ArrayList<Any>()
-        val types = method.parameterTypes
-        types.forEach { type ->
+        method.parameterTypes.forEach { type ->
             when {
                 type.equals(Request::class.java) -> out.add(request)
                 type.equals(Response::class.java) -> out.add(response)

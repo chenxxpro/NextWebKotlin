@@ -77,11 +77,11 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
          */
         fun isRequestMatchDefine(request: List<UriSegment>, define: List<UriSegment>): Boolean {
             if(define.last().wildcard) {
-                val defineIndex = define.size - 1
-                if(request.size < defineIndex) {
+                val index = define.size - 1
+                if(request.size < index) {
                     return false
                 }else{
-                    return match(request.subList(0, defineIndex), define.subList(0, defineIndex))
+                    return match(request.subList(0, index), define.subList(0, index))
                 }
             }else{
                 return request.size == define.size && match(request, define)
@@ -106,28 +106,27 @@ class UriSegment(segment: String, absoluteType: Boolean = false) {
 
         companion object {
 
+            // resource is a shot string !!!
+            // Double: float, double is digits and '.'
+            // Long: int, long is all digits
+            // String: string, otherwise
             fun get(resource: kotlin.String): ValueType {
-                // resource is a shot string !!!
-                // Double: float, double is digits and '.'
-                // Long: int, long is all digits
-                // String: string, otherwise
-                var dotCount: kotlin.Int = 0
-                var digitCount: kotlin.Int = 0
-                val len = resource.length
+                var dots = 0
+                var digits = 0
                 resource.forEachIndexed { i, char ->
                     if('.'.equals(char)) {
-                        dotCount += 1
-                        if(dotCount > 1 /* 12..6 */|| i == 0/* .5 */ || i == (len - 1)/* 124. */) {
-                            dotCount = -1
+                        dots += 1
+                        if(dots > 1 /* 12..6 */|| i == 0/* .5 */ || i == (resource.length - 1)/* 124. */) {
+                            dots = -1
                             return@forEachIndexed
                         }
                     }else if(Character.isDigit(char) || (i == 0 && '-'.equals(char))) {
-                        digitCount += 1
+                        digits += 1
                     }
                 }
                 when{
-                    dotCount == 0 && digitCount == len -> return Int
-                    dotCount == 1 && digitCount == (len - 1) -> return Float
+                    dots == 0 && digits == resource.length -> return Int
+                    dots == 1 && digits == (resource.length - 1) -> return Float
                     else -> return String
                 }
             }

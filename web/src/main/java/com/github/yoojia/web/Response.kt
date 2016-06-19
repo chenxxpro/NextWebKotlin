@@ -16,8 +16,8 @@ class Response(val context: Context, val servletResponse: HttpServletResponse) {
     val createTime: Long
 
     init{
-        addHeader("X-Powered-By", Engine.VERSION)
         createTime = System.nanoTime()
+        addHeader("X-Powered-By", Engine.VERSION)
     }
 
     /**
