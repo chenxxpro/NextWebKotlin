@@ -3,6 +3,7 @@ package com.github.yoojia.web.util
 import java.io.Reader
 import java.io.Writer
 import java.util.*
+import kotlin.reflect.KClass
 
 fun now(): Long {
     return System.currentTimeMillis()
@@ -28,4 +29,10 @@ fun streamCopy(from: Reader, to: Writer): Int {
         n = from.read(buffer)
     }
     return count
+}
+
+fun checkObjectType(value: Any, type: KClass<*>) {
+    if(! type.javaObjectType.isAssignableFrom(value.javaClass)) {
+        throw IllegalArgumentException("Unexpected type, expected: <${type.java}>, was: <${value.javaClass}>")
+    }
 }

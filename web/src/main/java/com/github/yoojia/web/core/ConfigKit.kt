@@ -26,28 +26,21 @@ internal const val KEY_CONFIG_STATE = "config-state"
 @Suppress("UNCHECKED_CAST")
 fun loadConfig(path: Path): Config {
     if(! Files.exists(path)) {
-        val values: LinkedHashMap<String, Any>
-        values = LinkedHashMap<String, Any>(2)
-        values.put(KEY_CONFIG_PATH, path.toString())
-        values.put(KEY_CONFIG_STATE, "FILE-NOT-EXISTS")
-        return Config(values)
+        val map = LinkedHashMap<String, Any>(2)
+        map.put(KEY_CONFIG_PATH, path.toString())
+        map.put(KEY_CONFIG_STATE, "FILE-NOT-EXISTS")
+        return Config(map)
     }else{
+        val map: MutableMap<String, Any>
         val stream = FileInputStream(path.toFile())
-        val values: LinkedHashMap<String, Any>
         try{
-            val map = Yaml().load(stream)
-            if(map == null) {
-                values = LinkedHashMap<String, Any>()
-                values.put(KEY_CONFIG_STATE, "LOAD-FAIL")
-            }else{
-                values = map as LinkedHashMap<String, Any>
-                values.put(KEY_CONFIG_STATE, "LOAD-SUCCESS")
-            }
+            map = Yaml().load(stream) as MutableMap<String, Any>
         }finally{
             stream.close()
         }
-        values.put(KEY_CONFIG_PATH, path.toString())
-        return Config(values)
+        map.put(KEY_CONFIG_STATE, "LOAD-SUCCESS")
+        map.put(KEY_CONFIG_PATH, path.toString())
+        return Config(map)
     }
 }
 

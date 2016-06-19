@@ -1,6 +1,8 @@
 package com.github.yoojia.web.core
 
+import com.github.yoojia.web.util.checkObjectType
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * @author Yoojia Chen (yoojia.chen@gmail.com)
@@ -9,34 +11,18 @@ import java.util.*
 class Config(val values: Map<String, Any>) {
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> getTypedList(key: String): List<T> {
-        val value = values[key]
-        if(value != null) {
-            return (value as ArrayList<T>).toList()
-        }else{
-            return emptyList()
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
     fun getConfigList(key: String): List<Config> {
         val out = ArrayList<Config>()
-        values[key]?.let { value ->
-            (value as ArrayList<LinkedHashMap<String, Any>>).forEach {
-                out.add(Config(it))
-            }
+        getTypedList<Map<String, Any>>(key).forEach { map->
+            out.add(Config(map))
         }
         return out.toList()
     }
 
     @Suppress("UNCHECKED_CAST")
     fun getConfig(key: String): Config {
-        val value = values[key]
-        if(value != null) {
-            return Config(value as LinkedHashMap<String, Any>)
-        }else{
-            return Config(emptyMap())
-        }
+        val map = getChecked(key, emptyMap<String, Any>(), Map::class)
+        return Config(map)
     }
 
     fun getString(key: String): String {
@@ -44,12 +30,7 @@ class Config(val values: Map<String, Any>) {
     }
 
     fun getString(key: String, def: String): String {
-        val value = values[key]
-        if(value != null) {
-            return value as String
-        }else{
-            return def
-        }
+        return getChecked(key, def, String::class)
     }
 
     fun getInt(key: String): Int {
@@ -57,12 +38,15 @@ class Config(val values: Map<String, Any>) {
     }
 
     fun getInt(key: String, def: Int): Int {
-        val value = values[key]
-        if(value != null) {
-            return value as Int
-        }else{
-            return def
-        }
+        return getChecked(key, def, Int::class)
+    }
+
+    fun getLong(key: String): Long {
+        return getLong(key, 0)
+    }
+
+    fun getLong(key: String, def: Long): Long {
+        return getChecked(key, def, Long::class)
     }
 
     fun getBoolean(key: String): Boolean {
@@ -70,12 +54,7 @@ class Config(val values: Map<String, Any>) {
     }
 
     fun getBoolean(key: String, def: Boolean): Boolean {
-        val value = values[key]
-        if(value != null) {
-            return value as Boolean
-        }else{
-            return def
-        }
+        return getChecked(key, def, Boolean::class)
     }
 
     fun getFloat(key: String): Float {
@@ -83,12 +62,29 @@ class Config(val values: Map<String, Any>) {
     }
 
     fun getFloat(key: String, def: Float): Float {
-        val value = values[key]
-        if(value != null) {
-            return value as Float
-        }else{
-            return def
+        return getChecked(key, def, Float::class)
+    }
+
+    fun getDouble(key: String): Double {
+        return getDouble(key, 0.0)
+    }
+
+    fun getDouble(key: String, def: Double): Double {
+        return getChecked(key, def, Double::class)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getTypedList(key: String): List<T> {
+        return getChecked(key, emptyList(), List::class)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getChecked(key: String, def: T, type: KClass<*>): T {
+        values[key]?.let { value ->
+            checkObjectType(value, type)
+            return value as T
         }
+        return def
     }
 
     fun containsKey(key: String): Boolean {
