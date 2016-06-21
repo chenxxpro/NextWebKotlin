@@ -11,18 +11,16 @@ import javax.servlet.*
  */
 class BootstrapServlet : Servlet {
 
-    private val engine = Engine()
-
     override fun destroy() {
-        engine.stop()
+        Engine.shutdown()
     }
 
     override fun init(config: ServletConfig?) {
-        engine.start(config?.servletContext!!, ClassScanner())
+        Engine.boot(config?.servletContext!!, ClassScanner())
     }
 
     fun init(context: ServletContext, classProvider: ClassProvider) {
-        engine.start(context, classProvider)
+        Engine.boot(context, classProvider)
     }
 
     override fun getServletConfig(): ServletConfig? {
@@ -34,6 +32,6 @@ class BootstrapServlet : Servlet {
     }
 
     override fun service(request: ServletRequest?, response: ServletResponse?) {
-        engine.process(request!!, response!!)
+        Engine.process(request!!, response!!)
     }
 }

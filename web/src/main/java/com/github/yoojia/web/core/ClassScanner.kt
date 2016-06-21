@@ -36,16 +36,14 @@ internal class ClassScanner : ClassProvider {
                 return true
             }
         }
-        val runtime = findRuntimeNames(getClassPath(), filter)
+        val classPath = Paths.get(Engine::class.java.getResource("/").toURI())
+        Logger.debug("Class-Path: $classPath")
+        val runtime = findRuntimeNames(classPath, filter)
         val jar = findJarClassNames(filter)
         val classes = ArrayList<Class<*>>(loadClassByName(runtime.concat(jar)))
-        Logger.debug("Classes-Scan: ${escape(scanStart)}ms")
-        Logger.debug("Classes-Count: ${classes.size}")
+        Logger.debug("Class-Count: ${classes.size}")
+        Logger.debug("Scan-Time: ${escape(scanStart)}ms")
         return classes
-    }
-
-    private fun getClassPath(): Path {
-        return Paths.get(Engine::class.java.getResource("/").toURI())
     }
 
 }

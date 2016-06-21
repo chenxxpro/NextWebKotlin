@@ -22,31 +22,27 @@ import javax.servlet.http.HttpServletResponse
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class Engine {
+object Engine {
 
-    companion object {
-        
-        private val Logger = LoggerFactory.getLogger(Engine::class.java)
+    const val VERSION = "NextEngine/2.a.4 (Kotlin 1.0.2; Java 7/8)"
+    private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
-        const val VERSION = "NextEngine/2.a.3-1 (build Kotlin 1.0.2; Java 7/8)"
+    private val Logger = LoggerFactory.getLogger(Engine::class.java)
 
-        private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
-    }
-
-    private val dispatchChain = DispatchChain()
+    private val dispatcher = DispatchChain()
     private val kernelManager = KernelManager()
     private val contextRef = AtomicReference<Context>()
 
-    fun start(servletContext: ServletContext, classProvider: ClassProvider) {
-        val start = now()
-        Logger.debug("--> NextEngine starting")
+    fun boot(servletContext: ServletContext, classProvider: ClassProvider) {
+        if("main".notEquals(Thread.currentThread().name)) {
+            throw IllegalStateException("Engine must boot on <MAIN> thread")
+        }
+        Logger.debug("===> NextEngine BOOTING")
         Logger.debug("Engine-Version: $VERSION")
         val webPath = servletContext.getRealPath("/")
-        val config = loadConfig(Paths.get(webPath, CONFIG_FILE))
-        Logger.debug("Config-File: ${config.getString(KEY_CONFIG_PATH)}")
-        Logger.debug("Config-Load-State: ${config.getString(KEY_CONFIG_STATE)}")
-        Logger.debug("Config-Load-Time: ${escape(start)}ms")
+        val config = loadConfig(webPath)
 
+        val _start = now()
         val ctx = Context(webPath, config, servletContext)
         contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
@@ -54,15 +50,15 @@ class Engine {
 
         initModules(ctx, classProvider.get(ctx).toMutableList())
         kernelManager.allModules { module ->
-            dispatchChain.add(module)
+            dispatcher.add(module)
         }
         Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
         Logger.debug("Loaded-Plugins: ${kernelManager.pluginCount()}")
 
         kernelManager.onCreated(ctx)
 
-        Logger.debug("Engine-Boot: ${escape(start)}ms")
-        Logger.debug("<-- NextEngine started successfully")
+        Logger.debug("Boot-Time: ${escape(_start)}ms")
+        Logger.debug("<=== NextEngine BOOT SUCCESSFUL")
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {
@@ -72,7 +68,7 @@ class Engine {
         // Default: 404
         response.setStatusCode(StatusCode.NOT_FOUND)
         try{
-            dispatchChain.process(request, response)
+            dispatcher.route(request, response)
         }catch(err: Throwable) {
             Logger.error("Error when processing request", err)
             try{
@@ -83,9 +79,18 @@ class Engine {
         }
     }
 
-    fun stop() {
-        dispatchChain.clear()
+    fun shutdown() {
+        dispatcher.clear()
         kernelManager.onDestroy()
+    }
+
+    private fun loadConfig(webPath: String): Config{
+        val start = now()
+        val config = loadConfig(Paths.get(webPath, CONFIG_FILE))
+        Logger.debug("Config-File: ${config.getString(KEY_CONFIG_PATH)}")
+        Logger.debug("Load-State: ${config.getString(KEY_CONFIG_STATE)}")
+        Logger.debug("Load-Time: ${escape(start)}ms")
+        return config
     }
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>) {
