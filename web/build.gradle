@@ -23,7 +23,7 @@ dependencies {
 }
 
 ext{
-    projVersion = '2.a.3-1'
+    projVersion = '2.a.4'
     projArtivactId = 'next-web'
     projName = 'NextWebKotlin'
     projDesc = 'NextWebKotlin: A Servlet 3+ based micro web framework written in Kotlin'

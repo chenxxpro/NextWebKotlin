@@ -11,22 +11,26 @@ import java.util.*
 class DispatchChain {
 
     private val modules = ArrayList<Module>()
+    private val threadIndex = ThreadLocal.withInitial { 0 }
 
     fun add(module: Module) {
         modules.add(module)
     }
 
     @Throws(Exception::class)
-    fun process(request: Request, response: Response) {
-        next(request, response, this)
-        threadedIndex.set(0)
+    fun route(request: Request, response: Response) {
+        try{
+            next(request, response, this)
+        }finally{
+            threadIndex.set(0/* reset */)
+        }
     }
 
     @Throws(Exception::class)
     fun next(request: Request, response: Response, chain: DispatchChain) {
-        val index = threadedIndex.get()
+        val index = threadIndex.get()
         if (index != modules.size) {
-            threadedIndex.set(index + 1)
+            threadIndex.set(index + 1)
             modules[index].process(request, response, chain)
         }
     }
@@ -35,13 +39,4 @@ class DispatchChain {
         modules.clear()
     }
 
-    companion object {
-
-        private val threadedIndex = object : ThreadLocal<Int>() {
-            override fun initialValue(): Int {
-                return 0
-            }
-        }
-
-    }
 }

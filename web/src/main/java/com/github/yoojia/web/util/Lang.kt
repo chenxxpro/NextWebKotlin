@@ -36,3 +36,7 @@ fun checkObjectType(value: Any, type: KClass<*>) {
         throw IllegalArgumentException("Unexpected type, expected: <${type.java}>, was: <${value.javaClass}>")
     }
 }
+
+fun String.notEquals(other: String): Boolean {
+    return !this.equals(other)
+}
