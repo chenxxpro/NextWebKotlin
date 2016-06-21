@@ -11,7 +11,11 @@ import java.util.*
 class DispatchChain {
 
     private val modules = ArrayList<Module>()
-    private val threadIndex = ThreadLocal.withInitial { 0 }
+    private val threadIndex = object : ThreadLocal<Int>() {
+        override fun initialValue(): Int? {
+            return 0
+        }
+    }
 
     fun add(module: Module) {
         modules.add(module)
