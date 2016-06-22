@@ -1,9 +1,11 @@
 package com.github.yoojia.web.server;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import javax.servlet.Servlet;
+import java.net.InetSocketAddress;
 
 /**
  * @author YOOJIA.CHEN (yoojia.chen@gmail.com)
@@ -11,17 +13,25 @@ import javax.servlet.Servlet;
 public class EmbeddedServer {
 
     private final String webApp;
-    private final int port;
     private final Server server;
+    private final InetSocketAddress address;
 
     public EmbeddedServer(String webApp, int port) {
-        this.server = new Server(port);
+        this.address = InetSocketAddress.createUnresolved("localhost", port);
+        this.server = new Server(address);
         this.webApp = webApp;
-        this.port = port;
+    }
+
+    public EmbeddedServer(int port) {
+        this(".", port);
     }
 
     public void runAsWebApp() throws Exception {
         runAsWebApp("/");
+    }
+
+    public InetSocketAddress getAddress() {
+        return address;
     }
 
     /**
@@ -31,22 +41,27 @@ public class EmbeddedServer {
     public void runAsWebApp(String contextPath) throws Exception {
         checkRunning();
         server.setHandler(new WebAppContext(webApp, contextPath));
-        System.out.println("Embedded-Server run as WebApp on port: " + port);
+        System.out.println("Embedded-Server RunAsWebApp on: " + address);
         server.start();
         server.join();
         server.stop();
     }
 
-    public void init(Class<? extends Servlet> servletClass){
+    public void setBootstrapServlet(Class<? extends Servlet> servletClass){
         checkRunning();
-        final WebAppContext appContext = new WebAppContext(webApp, "/");
-        appContext.addServlet(servletClass, "/*");
-        server.setHandler(appContext);
+        final WebAppContext context = new WebAppContext(webApp, "/");
+        context.addServlet(servletClass, "/*").setInitOrder(0);
+        server.setHandler(context);
     }
 
     public void start() throws Exception {
         checkRunning();
+        System.out.println("Embedded-Server START on: " + address);
         server.start();
+    }
+
+    public void join() throws Exception{
+        server.join();
     }
 
     public void stop() throws Exception {

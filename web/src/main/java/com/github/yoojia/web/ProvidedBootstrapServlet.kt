@@ -1,6 +1,6 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.ClassScanner
+import com.github.yoojia.web.core.ClassProvider
 import com.github.yoojia.web.core.Engine
 import javax.servlet.Servlet
 import javax.servlet.ServletConfig
@@ -9,16 +9,16 @@ import javax.servlet.ServletResponse
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
- * @since 2.0
+ * @since 2.a.5
  */
-class BootstrapServlet : Servlet {
+abstract class ProvidedBootstrapServlet : Servlet, ClassProvider {
 
     override fun destroy() {
         Engine.shutdown()
     }
 
     override fun init(config: ServletConfig?) {
-        Engine.boot(config?.servletContext!!, ClassScanner())
+        Engine.boot(config?.servletContext!!, this)
     }
 
     override fun getServletConfig(): ServletConfig? {
