@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object Engine {
 
-    const val VERSION = "NextEngine/2.a.4 (Kotlin 1.0.2; Java 7/8)"
+    const val VERSION = "NextEngine/2.a.7 (Kotlin 1.0.2-1; Java 7/8)"
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Engine::class.java)
@@ -34,11 +34,7 @@ object Engine {
     private val contextRef = AtomicReference<Context>()
 
     fun boot(servletContext: ServletContext, classProvider: ClassProvider) {
-        if("main".notEquals(Thread.currentThread().name)) {
-            throw IllegalStateException("Engine must boot on <MAIN> thread")
-        }
-        Logger.debug("===> NextEngine BOOTING")
-        Logger.debug("Engine-Version: $VERSION")
+        Logger.warn("===> NextEngine BOOTING, Version: $VERSION")
         val webPath = servletContext.getRealPath("/")
         val config = loadConfig(webPath)
 
@@ -57,8 +53,7 @@ object Engine {
 
         kernelManager.onCreated(ctx)
 
-        Logger.debug("Boot-Time: ${escape(_start)}ms")
-        Logger.debug("<=== NextEngine BOOT SUCCESSFUL")
+        Logger.warn("<=== NextEngine BOOT SUCCESSFUL, Boot time: ${escape(_start)}ms")
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {
