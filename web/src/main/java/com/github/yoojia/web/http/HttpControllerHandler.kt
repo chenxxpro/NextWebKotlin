@@ -29,6 +29,6 @@ class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpContro
     }
 
     companion object {
-        val DEFAULT_PRIORITY = InternalPriority.HTTP
+        @JvmField val DEFAULT_PRIORITY = InternalPriority.HTTP
     }
 }
