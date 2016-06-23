@@ -122,16 +122,20 @@ object Engine {
             classes.removeAll(moduleUsed)
             kernelManager.register(module, args.priority, args.args)
         }
-        Logger.debug("User-Modules-Prepare: ${escape(modulesStart)}ms")
+        if(modules.isNotEmpty()) {
+            Logger.debug("User-Modules-Prepare: ${escape(modulesStart)}ms")
+        }
 
         val pluginStart = now()
-        val pluginConfigs = rootConfig.getConfigList("plugins")
-        pluginConfigs.forEach { config ->
+        val plugins = rootConfig.getConfigList("plugins")
+        plugins.forEach { config ->
             val args = parseConfig(config)
             val plugin = newClassInstance<Plugin>(loadClassByName(classLoader, args.className))
             kernelManager.register(plugin, args.priority, args.args)
         }
-        Logger.debug("User-Plugins-Prepare: ${escape(pluginStart)}ms")
+        if(plugins.isNotEmpty()) {
+            Logger.debug("User-Plugins-Prepare: ${escape(pluginStart)}ms")
+        }
     }
 
     /**
