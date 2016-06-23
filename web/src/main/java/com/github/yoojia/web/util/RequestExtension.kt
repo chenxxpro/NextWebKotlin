@@ -2,7 +2,6 @@ package com.github.yoojia.web.util
 
 import com.github.yoojia.web.Request
 
-
 fun Request.param(key: String, def: String): String {
     val value = param(key)
     if(value.isNullOrEmpty()) {

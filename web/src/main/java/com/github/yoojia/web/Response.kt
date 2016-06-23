@@ -10,10 +10,10 @@ import javax.servlet.http.HttpServletResponse
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class Response(val context: Context, val servletResponse: HttpServletResponse) {
+class Response(@JvmField val context: Context, @JvmField val servletResponse: HttpServletResponse) {
 
-    val args = AnyMap()
-    val createTime: Long
+    @JvmField val args = AnyMap()
+    @JvmField val createTime: Long
 
     init{
         createTime = System.nanoTime()

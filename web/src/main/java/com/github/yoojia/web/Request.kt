@@ -17,13 +17,13 @@ import javax.servlet.http.HttpServletRequest
  */
 class Request(ctx: Context, request: HttpServletRequest){
 
-    val servletRequest: HttpServletRequest
-    val context: Context
-    val method: String
-    val path: String
-    val contextPath: String
-    val createTime: Long
-    val resources: List<String>
+    @JvmField val servletRequest: HttpServletRequest
+    @JvmField val context: Context
+    @JvmField val method: String
+    @JvmField val path: String
+    @JvmField val contextPath: String
+    @JvmField val createTime: Long
+    @JvmField val resources: List<String>
 
     private val dynamicParams = AnyMap()
     private val scopeParams: MutableMap<String, MutableList<String>> by lazy {
@@ -45,7 +45,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     companion object {
-        @JvmStatic val BODY_DATA = "next-web.body[put|delete].data:key"
+        @JvmField val BODY_DATA = "next-web.body[put|delete].data:key"
     }
 
     init {

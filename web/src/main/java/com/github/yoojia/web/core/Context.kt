@@ -8,7 +8,9 @@ import javax.servlet.ServletContext
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class Context(val webPath: String, val config: Config, val servletContext: ServletContext) {
+class Context(@JvmField val webPath: String,
+              @JvmField val config: Config,
+              @JvmField val servletContext: ServletContext) {
 
     val contextPath: String by lazy {
         val path = servletContext.contextPath
