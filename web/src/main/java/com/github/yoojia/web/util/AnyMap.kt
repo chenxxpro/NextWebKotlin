@@ -60,7 +60,7 @@ open class AnyMap(val realMap: MutableMap<String, Any>) : MutableMap<String, Any
     /// A: For Java usage
 
     fun get(key: String, defValue: String = ""): String {
-        return getCastType(key, defValue)
+        return getString(key, defValue)
     }
 
     fun get(key: String, defValue: Int = 0): Int {
@@ -80,6 +80,34 @@ open class AnyMap(val realMap: MutableMap<String, Any>) : MutableMap<String, Any
     }
 
     fun get(key: String, defValue: Boolean = false): Boolean {
+        return getCastType(key, defValue)
+    }
+
+    // get value and parse it to
+
+    fun getInt(key: String, defValue: Int = 0): Int {
+        return getString(key, defValue.toString()).toInt()
+    }
+
+    fun getLong(key: String, defValue: Long = 0): Long {
+        return getString(key, defValue.toString()).toLong()
+    }
+
+    fun getFloat(key: String, defValue: Float= 0f): Float {
+        return getString(key, defValue.toString()).toFloat()
+    }
+
+    fun getDouble(key: String, defValue: Double = 0.0): Double {
+        return getString(key, defValue.toString()).toDouble()
+    }
+
+    fun getBoolean(key: String, defValue: Boolean = false): Boolean {
+        return getString(key, defValue.toString()).toBoolean()
+    }
+
+    // get String
+
+    fun getString(key: String, defValue: String = ""): String {
         return getCastType(key, defValue)
     }
 

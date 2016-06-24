@@ -11,11 +11,11 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-internal class ClassScanner : ClassProvider {
+internal class ClassesLoader : ClassProvider {
 
     companion object{
 
-        private val Logger = LoggerFactory.getLogger(ClassScanner::class.java)
+        private val Logger = LoggerFactory.getLogger(ClassesLoader::class.java)
 
         private val DEFAULT_SYSTEM_CLASSES = arrayOf(
                 "com.github.yoojia.web.",
