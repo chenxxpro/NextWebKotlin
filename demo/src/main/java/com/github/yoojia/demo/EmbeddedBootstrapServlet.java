@@ -1,15 +1,10 @@
 package com.github.yoojia.demo;
 
 import com.github.yoojia.web.ProvidedBootstrapServlet;
-import com.github.yoojia.web.core.Config;
 import com.github.yoojia.web.core.Context;
 import com.github.yoojia.web.server.EmbeddedServer;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -21,13 +16,11 @@ public class EmbeddedBootstrapServlet extends ProvidedBootstrapServlet{
     @NotNull
     @Override
     public List<Class<?>> get(@NotNull Context context) {
-        final List<Class<?>> classes = new ArrayList<>();
-        classes.add(HelloAfterInterceptor.class);
-        classes.add(HelloBeforeInterceptor.class);
-        classes.add(HelloNextWeb.class);
-        classes.add(HelloPlugin.class);
-        classes.add(HelloTemplate.class);
-        return classes;
+        return from(HelloAfterInterceptor.class,
+                HelloBeforeInterceptor.class,
+                HelloNextWeb.class,
+                HelloPlugin.class,
+                HelloTemplate.class);
     }
 
     public static void main(String[] args) throws Exception {
@@ -38,9 +31,4 @@ public class EmbeddedBootstrapServlet extends ProvidedBootstrapServlet{
         server.stop();
     }
 
-    @NotNull
-    @Override
-    public Config get(@NotNull Path path) {
-        return Config.empty();
-    }
 }

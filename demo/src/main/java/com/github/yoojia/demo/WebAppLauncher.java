@@ -1,6 +1,6 @@
 package com.github.yoojia.demo;
 
-import com.github.yoojia.web.server.EmbeddedServer;
+import com.github.yoojia.web.server.WebAppServer;
 
 /**
  * @author YOOJIA.CHEN (yoojia.chen@gmail.com)
@@ -8,7 +8,7 @@ import com.github.yoojia.web.server.EmbeddedServer;
 public class WebAppLauncher {
 
     public static void main(String[] args) throws Exception {
-        EmbeddedServer server = new EmbeddedServer("src/main/webapp", 8080);
-        server.runAsWebApp();
+        WebAppServer server = new WebAppServer(8080);
+        server.run("src/main/webapp");
     }
 }

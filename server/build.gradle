@@ -15,7 +15,7 @@ dependencies {
 }
 
 ext{
-    projVersion = '2.a.1'
+    projVersion = '2.a.2'
     projArtivactId = 'next-web-server'
     projName = 'NextWebKotlin'
     projDesc = 'NextWebKotlin: A Servlet 3+ based micro web framework written in Kotlin'
@@ -23,4 +23,4 @@ ext{
     projVCS = "https://github.com/yoojia/NextWebKotlin.git"
 }
 
-//apply from: '../publish.gradle'
+apply from: '../publish.gradle'
