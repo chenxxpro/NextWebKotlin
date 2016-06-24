@@ -1,11 +1,15 @@
 package com.github.yoojia.demo;
 
 import com.github.yoojia.web.ProvidedBootstrapServlet;
+import com.github.yoojia.web.core.Config;
 import com.github.yoojia.web.core.Context;
 import com.github.yoojia.web.server.EmbeddedServer;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,5 +36,11 @@ public class EmbeddedBootstrapServlet extends ProvidedBootstrapServlet{
         server.start();
         server.join();
         server.stop();
+    }
+
+    @NotNull
+    @Override
+    public Config get(@NotNull Path path) {
+        return Config.empty();
     }
 }
