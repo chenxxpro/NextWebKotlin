@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object Engine {
 
-    const val VERSION = "NextEngine/2.a.7 (Kotlin 1.0.2-1; Java 7/8)"
+    const val VERSION = "NextEngine/2.a.8 (Kotlin 1.0.2-1; Java 7/8)"
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Engine::class.java)
@@ -33,16 +33,22 @@ object Engine {
     private val kernelManager = KernelManager()
     private val contextRef = AtomicReference<Context>()
 
-    fun boot(servletContext: ServletContext, classProvider: ClassProvider) {
-        Logger.warn("===> NextEngine BOOTING, Version: $VERSION")
-        val webPath = servletContext.getRealPath("/")
-        val config = loadConfig(webPath)
+    fun boot(servletContext: ServletContext) {
+        boot(servletContext, ConfigLoader(), ClassesLoader())
+    }
 
+    fun boot(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
+        Logger.warn("===> NextEngine BOOTING, Version: $VERSION")
         val _start = now()
-        val ctx = Context(webPath, config, servletContext)
+        val directory = servletContext.getRealPath("/")
+        val config = configProvider.get(Paths.get(directory, CONFIG_FILE))
+        Engine.Logger.debug("Config-From : ${config.getString(ConfigLoader.KEY_CONFIG_PATH)}")
+        Engine.Logger.debug("Config-State: ${config.getString(ConfigLoader.KEY_CONFIG_STATE)}")
+        Engine.Logger.debug("Config-Time : ${escape(_start)}ms")
+        val ctx = Context(directory, config, servletContext)
         contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
-        Logger.debug("Web-Context: ${ctx.contextPath}")
+        Logger.debug("Web-Context  : ${ctx.contextPath}")
 
         initModules(ctx, classProvider.get(ctx).toMutableList())
         kernelManager.allModules { module ->
@@ -77,15 +83,6 @@ object Engine {
     fun shutdown() {
         dispatcher.clear()
         kernelManager.onDestroy()
-    }
-
-    private fun loadConfig(webPath: String): Config{
-        val start = now()
-        val config = loadConfig(Paths.get(webPath, CONFIG_FILE))
-        Logger.debug("Config-File: ${config.getString(KEY_CONFIG_PATH)}")
-        Logger.debug("Load-State: ${config.getString(KEY_CONFIG_STATE)}")
-        Logger.debug("Load-Time: ${escape(start)}ms")
-        return config
     }
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>) {
@@ -185,6 +182,20 @@ object Engine {
         }catch(err: Exception) {
             return false
         }
+    }
+
+    /**
+     * 配置参数数据包装.不使用Triple的是为使得参数意义更新清晰.
+     */
+    private data class ConfigStruct(val className: String, val priority: Int, val args: Config)
+
+    /**
+     * 解析配置条目
+     */
+    private fun parseConfig(config: Config): ConfigStruct {
+        return ConfigStruct(config.getString("class"),
+                config.getInt("priority"),
+                config.getConfig("args"))
     }
 
 }

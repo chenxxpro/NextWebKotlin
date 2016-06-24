@@ -10,6 +10,12 @@ import kotlin.reflect.KClass
  */
 class Config(val values: Map<String, Any>) {
 
+    companion object {
+        @JvmStatic fun empty(): Config{
+            return Config(emptyMap());
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     fun getConfigList(key: String): List<Config> {
         val out = ArrayList<Config>()

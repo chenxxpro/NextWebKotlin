@@ -1,6 +1,6 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.ClassScanner
+import com.github.yoojia.web.core.ClassesLoader
 import com.github.yoojia.web.core.Engine
 import javax.servlet.Servlet
 import javax.servlet.ServletConfig
@@ -18,7 +18,7 @@ class BootstrapServlet : Servlet {
     }
 
     override fun init(config: ServletConfig?) {
-        Engine.boot(config?.servletContext!!, ClassScanner())
+        Engine.boot(config?.servletContext!!)
     }
 
     override fun getServletConfig(): ServletConfig? {

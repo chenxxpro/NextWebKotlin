@@ -34,6 +34,7 @@ class Request(ctx: Context, request: HttpServletRequest){
         if(request.method.toUpperCase() in setOf("PUT", "DELETE")) {
             readBodyData()?.let { data ->
                 params.put(BODY_DATA, mutableListOf(data))
+                // TODO 检查是否为表单格式数据
                 data.split('&').forEach { pair ->
                     val kv = pair.split('=')
                     if(kv.size != 2) throw IllegalArgumentException("Client request post invalid query string")
@@ -45,7 +46,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     companion object {
-        @JvmField val BODY_DATA = "next-web.body[put|delete].data:key"
+        @JvmField val BODY_DATA = "#@#next-web.body.data:key"
     }
 
     init {
