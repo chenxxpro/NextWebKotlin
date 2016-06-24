@@ -1,8 +1,10 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.core.ClassProvider
+import com.github.yoojia.web.core.Config
 import com.github.yoojia.web.core.ConfigProvider
 import com.github.yoojia.web.core.Engine
+import java.nio.file.Path
 import javax.servlet.Servlet
 import javax.servlet.ServletConfig
 import javax.servlet.ServletRequest
@@ -32,5 +34,16 @@ abstract class ProvidedBootstrapServlet : Servlet, ClassProvider, ConfigProvider
 
     override fun service(request: ServletRequest?, response: ServletResponse?) {
         Engine.process(request!!, response!!)
+    }
+
+    override fun get(path: Path): Config {
+        return Config.empty()
+    }
+
+    companion object {
+
+        @JvmStatic fun from(vararg classes: Class<*>) : List<Class<*>> {
+            return classes.toList()
+        }
     }
 }
