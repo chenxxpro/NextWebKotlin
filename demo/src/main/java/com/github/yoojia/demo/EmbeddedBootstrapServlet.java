@@ -25,6 +25,7 @@ public class EmbeddedBootstrapServlet extends ProvidedBootstrapServlet{
 
     public static void main(String[] args) throws Exception {
         final EmbeddedServer server = new EmbeddedServer(8082);
+        System.out.println("Base url = " + server.getBaseUrl());
         server.setBootstrapServlet(EmbeddedBootstrapServlet.class);
         server.start();
         server.join();

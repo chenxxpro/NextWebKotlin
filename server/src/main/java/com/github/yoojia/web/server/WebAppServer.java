@@ -6,7 +6,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
  * @author YOOJIA.CHEN (yoojia.chen@gmail.com)
  * @since 2.a.2
  */
-public class WebAppServer extends JettyServer{
+public class WebAppServer extends JettyServer {
 
     public WebAppServer(String host, int port) {
         super(host, port);
