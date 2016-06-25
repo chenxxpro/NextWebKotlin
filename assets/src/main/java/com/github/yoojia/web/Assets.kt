@@ -55,10 +55,10 @@ class Assets : Module {
 
     private fun match(resource: List<String>): Boolean {
         //request: /assets/js/boot.js
-        val request = resource.map { UriSegment(it) }
+        val request = resource.map { UriSegment.fromRequest(it) }
         for(asset in mAssetsDefine) {
             //define: /assets/js/*
-            val define = asset.map { UriSegment(it) }
+            val define = asset.map { UriSegment.fromDefine(it) }
             return UriSegment.isRequestMatchDefine(request, define)
         }
         return false

@@ -64,7 +64,7 @@ abstract class ModuleHandler(val tag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatched(RequestWrapper.request(request.method, request.path, request.resources))
+        val found = findMatched(RequestWrapper.fromClient(request.method, request.path, request.resources))
         processFound(found, request, response, dispatch)
     }
 

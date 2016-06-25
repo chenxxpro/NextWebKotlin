@@ -1,6 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.supports.UriSegment
+import com.github.yoojia.web.supports.UriValueType
 import org.junit.Assert
 import org.junit.Test
 
@@ -12,64 +13,65 @@ class UriSegmentTest {
 
     @Test
     fun testParseSuccess(){
-        UriSegment("abc")
-        UriSegment("{abc}")
-        UriSegment("{string:abc}")
-        UriSegment("{int:abc}")
-        UriSegment("{float:abc}")
+        UriSegment.fromDefine("abc")
+        UriSegment.fromRequest("abc")
+        UriSegment.fromDefine("{abc}")
+        UriSegment.fromDefine("{string:abc}")
+        UriSegment.fromDefine("{int:abc}")
+        UriSegment.fromDefine("{float:abc}")
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testParseFail1(){
-        UriSegment("{abc")
+        UriSegment.fromDefine("{abc")
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testParseFail2(){
-        UriSegment("abc}")
+        UriSegment.fromDefine("abc}")
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testParseFail3(){
-        UriSegment("string:abc}")
+        UriSegment.fromDefine("string:abc}")
     }
 
     @Test
     fun test(){
-        Assert.assertEquals(UriSegment.ValueType.Int, UriSegment("123").type)
-        Assert.assertEquals(UriSegment.ValueType.Int, UriSegment("-123").type)
-        Assert.assertEquals(UriSegment.ValueType.Float, UriSegment("123.0").type)
-        Assert.assertEquals(UriSegment.ValueType.Float, UriSegment("-123.0").type)
-        Assert.assertEquals(UriSegment.ValueType.String, UriSegment("+12").type)
-        Assert.assertEquals(UriSegment.ValueType.String, UriSegment("+123.0").type)
-        Assert.assertEquals(UriSegment.ValueType.String, UriSegment("123abc").type)
-        Assert.assertEquals(UriSegment.ValueType.String, UriSegment("/").type)
-        Assert.assertEquals(UriSegment.ValueType.String, UriSegment("*").type)
+        Assert.assertEquals(UriValueType.Int, UriSegment.fromRequest("123").type)
+        Assert.assertEquals(UriValueType.Int, UriSegment.fromRequest("-123").type)
+        Assert.assertEquals(UriValueType.Float, UriSegment.fromRequest("123.0").type)
+        Assert.assertEquals(UriValueType.Float, UriSegment.fromRequest("-123.0").type)
+        Assert.assertEquals(UriValueType.String, UriSegment.fromRequest("+12").type)
+        Assert.assertEquals(UriValueType.String, UriSegment.fromRequest("+123.0").type)
+        Assert.assertEquals(UriValueType.String, UriSegment.fromRequest("123abc").type)
+        Assert.assertEquals(UriValueType.String, UriSegment.fromRequest("/").type)
+        Assert.assertEquals(UriValueType.String, UriSegment.fromRequest("*").type)
     }
 
     @Test
     fun testDynamic(){
-        Assert.assertEquals(UriSegment.ValueType.Int, UriSegment("{int:id}").type)
-        Assert.assertEquals(UriSegment.ValueType.Float, UriSegment("{float:id}").type)
-        Assert.assertEquals(UriSegment.ValueType.String, UriSegment("{string:id}").type)
-        Assert.assertEquals(UriSegment.ValueType.Any, UriSegment("{id}").type)
+        Assert.assertEquals(UriValueType.Int, UriSegment.fromDefine("{int:id}").type)
+        Assert.assertEquals(UriValueType.Float, UriSegment.fromDefine("{float:id}").type)
+        Assert.assertEquals(UriValueType.String, UriSegment.fromDefine("{string:id}").type)
+        Assert.assertEquals(UriValueType.Any, UriSegment.fromDefine("{id}").type)
     }
 
     @Test
     fun testResourceName(){
-        val id = UriSegment("id")
-        Assert.assertEquals("id", id.name)
+        val id = UriSegment.fromDefine("id")
+        Assert.assertEquals("id", id.segment)
 
-        val user = UriSegment("{user}")
-        Assert.assertEquals("user", user.name)
+        val user = UriSegment.fromDefine("{user}")
+        Assert.assertEquals("user", user.segment)
 
-        val pass = UriSegment("{string:pass}")
-        Assert.assertEquals("pass", pass.name)
+        val pass = UriSegment.fromDefine("{string:pass}")
+        Assert.assertEquals("pass", pass.segment)
 
-        val age = UriSegment("{int:age}")
-        Assert.assertEquals("age", age.name)
+        val age = UriSegment.fromDefine("{int:age}")
+        Assert.assertEquals("age", age.segment)
 
-        val weight = UriSegment("{float:weight}")
-        Assert.assertEquals("weight", weight.name)
+        val weight = UriSegment.fromDefine("{float:weight}")
+        Assert.assertEquals("weight", weight.segment)
     }
 }

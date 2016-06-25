@@ -21,12 +21,16 @@ class RequestWrapper {
 
     companion object {
 
-        fun request(method: String, uri: String, segments: List<String>): RequestWrapper {
-            return RequestWrapper(method, uri, segments.map { seg -> UriSegment(seg, absoluteType = true/*请求参数的数值类型要求为绝对类型，不能为ValueType.Any*/) })
+        fun fromClient(method: String, uri: String, segments: List<String>): RequestWrapper {
+            return RequestWrapper(method, uri, segments.map {
+                seg -> UriSegment.fromRequest(seg)
+            })
         }
 
-        fun define(method: String, uri: String): RequestWrapper {
-            return RequestWrapper(method, uri, splitToArray(uri).map { seg -> UriSegment(seg) })
+        fun fromDefine(method: String, uri: String): RequestWrapper {
+            return RequestWrapper(method, uri, splitToArray(uri).map {
+                seg -> UriSegment.fromDefine(seg)
+            })
         }
 
     }
@@ -49,7 +53,7 @@ class RequestWrapper {
         for(i in segments.indices) {
             val segment = segments[i]
             if(segment.dynamic) {
-                output.put(segment.name, sources[i])
+                output.put(segment.segment, sources[i])
             }
         }
         return if(output.isEmpty()) emptyMap() else output
