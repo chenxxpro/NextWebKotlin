@@ -20,37 +20,44 @@ class UriSegment private constructor(val dynamic: Boolean,
             }
             val dynamic = segment.length >= 3/*{a}*/&& starts.and(ends) == 1
             val wildcard = !dynamic && "*".equals(segment)
-            val name: String
-            val type: UriValueType
+            val _segment: String
+            val valueType: UriValueType
+            var fixedType: Boolean = true
             // {user-id} -> user-id
-            val unwrap = if(dynamic) segment.substring(1, segment.length-1) else segment
-            if(!dynamic) {
-                name = segment
-                type = UriValueType.get(name)
-            }else /* is dynamic */when{
-                unwrap.startsWith("int:") -> {
-                    type = UriValueType.Int
-                    name = unwrap.substring(4)
+            if(dynamic) {
+                val unwrap = if(dynamic) segment.substring(1, segment.length-1) else segment
+                when {
+                    unwrap.startsWith("int:") -> {
+                        valueType = UriValueType.Int
+                        _segment = unwrap.substring(4)
+                    }
+                    unwrap.startsWith("float:") -> {
+                        valueType = UriValueType.Float
+                        _segment = unwrap.substring(6)
+                    }
+                    unwrap.startsWith("string:") -> {
+                        valueType = UriValueType.String
+                        _segment = unwrap.substring(7)
+                    }
+                    else -> {
+                        fixedType = false
+                        valueType = UriValueType.Any
+                        _segment = unwrap
+                    }
                 }
-                unwrap.startsWith("float:") -> {
-                    type = UriValueType.Float
-                    name = unwrap.substring(6)
-                }
-                unwrap.startsWith("string:") -> {
-                    type = UriValueType.String
-                    name = unwrap.substring(7)
-                }
-                else -> {
-                    type = UriValueType.Any
-                    name = unwrap
-                }
+            }else {
+                _segment = segment
+                valueType = UriValueType.parse(_segment)
             }
-            return UriSegment(dynamic, wildcard, type, false, name)
+            return UriSegment(dynamic, wildcard, valueType, fixedType, _segment)
         }
 
         fun fromRequest(segment: String): UriSegment {
-            /*请求参数的数值类型要求为绝对类型，不能为ValueType.Any*/
-            return UriSegment(dynamic = false, wildcard = false, type = UriValueType.get(segment), fixedType = true, segment = segment)
+            return UriSegment(dynamic = false,
+                    wildcard = false,
+                    type = UriValueType.parse(segment),
+                    fixedType = true, /*请求参数的数值类型要求为绝对类型，不能为ValueType.Any*/
+                    segment = segment)
         }
 
         /**

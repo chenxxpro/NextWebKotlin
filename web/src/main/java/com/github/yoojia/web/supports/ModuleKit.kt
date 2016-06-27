@@ -25,14 +25,14 @@ internal fun annotatedMethods(hostType: Class<*>, action: (Method, Class<out Ann
 
 internal fun checkReturnType(method: Method) {
     if(!Void.TYPE.equals(method.returnType)) {
-        throw IllegalArgumentException("Return type of @GET/@POST/@PUT/@DELETE methods must be <VOID>/<Unit> !")
+        throw IllegalArgumentException("Return type of @GET/@POST/@PUT/@DELETE methods must be <VOID> or <UNIT> !")
     }
 }
 
 internal fun checkArguments(method: Method) {
     val types = method.parameterTypes
     if(types.size !in 1..3) {
-        throw IllegalArgumentException("@GET/@POST/@PUT/@DELETE methods must has 1..3 params, but was ${types.size} in method $method")
+        throw IllegalArgumentException("@GET/@POST/@PUT/@DELETE methods must has 1..3 params, was ${types.size} in method $method")
     }
     val used = arrayOf(false, false, false)
     val duplicate = fun (type: Class<*>, index: Int) {

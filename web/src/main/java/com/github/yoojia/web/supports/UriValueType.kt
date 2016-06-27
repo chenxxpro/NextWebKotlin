@@ -2,7 +2,7 @@ package com.github.yoojia.web.supports
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
- * @since 0.1
+ * @since 2.a.9
  */
 
 enum class UriValueType {
@@ -22,28 +22,44 @@ enum class UriValueType {
 
     companion object {
 
-        // resource is a shot string !!!
-        // Double: float, double is digits and '.'
-        // Long: int, long is all digits
-        // String: string, otherwise
-        fun get(resource: kotlin.String): UriValueType {
-            var dots = 0
-            var digits = 0
-            resource.forEachIndexed { i, char ->
-                if('.'.equals(char)) {
-                    dots += 1
-                    if(dots > 1 /* 12..6 */|| i == 0/* .5 */ || i == (resource.length - 1)/* 124. */) {
-                        dots = -1
-                        return@forEachIndexed
-                    }
-                }else if(Character.isDigit(char) || (i == 0 && '-'.equals(char))) {
+        private val INT_MAX_LENGTH = Long.MAX_VALUE.toString().length
+
+        fun parse(resource: kotlin.String): UriValueType {
+            val lastIndex = resource.lastIndex
+            var dots = 0; var digits = 0; var emarks = 0; var signs = 0
+            resource.forEachIndexed { index, char ->
+                if(Character.isDigit(char)) {
                     digits += 1
+                }else if('E'.equals(char, ignoreCase = true)) {
+                    emarks += 1
+                    if(0 == index || index == lastIndex) return String //: e123, 123E
+                }else if('-'.equals(char) || '+'.equals(char)) {
+                    signs += 1
+                    if(index == lastIndex) return String //: 123-
+                }else if('.'.equals(char)) {
+                    dots += 1
+                    if(0 == index || index == lastIndex) return String //: .123 , 123.
+                }
+                if(emarks > 1 || signs > 1 || dots > 1) {
+                    return String
+                }else{
+                    // Check: contains other chars: -1A.B
+                    val total = emarks + signs + dots + digits
+                    if(total < index + 1) {
+                        return String
+                    }
                 }
             }
-            when{
-                dots == 0 && digits == resource.length -> return Int
-                dots == 1 && digits == (resource.length - 1) -> return Float
-                else -> return String
+            if(emarks == 0 && dots == 0) {
+                val _digits = resource.length - signs
+                if(_digits > INT_MAX_LENGTH) {
+                    return String
+                }else {
+                    return if(digits == _digits) Int else String
+                }
+            }else{//: emarks:0/1, dots:0/1
+                val _digits = resource.length - signs - emarks - dots
+                return if(digits == _digits) Float else String
             }
         }
     }
