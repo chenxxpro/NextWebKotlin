@@ -21,15 +21,15 @@ class RequestWrapper {
 
     companion object {
 
-        fun fromClient(method: String, uri: String, segments: List<String>): RequestWrapper {
+        fun createFromClient(method: String, uri: String, segments: List<String>): RequestWrapper {
             return RequestWrapper(method, uri, segments.map {
-                seg -> UriSegment.fromRequest(seg)
+                seg -> createRequestUriSegment(seg)
             })
         }
 
-        fun fromDefine(method: String, uri: String): RequestWrapper {
+        fun createFromDefine(method: String, uri: String): RequestWrapper {
             return RequestWrapper(method, uri, splitToArray(uri).map {
-                seg -> UriSegment.fromDefine(seg)
+                seg -> createDefineUriSegment(seg)
             })
         }
 
@@ -38,10 +38,10 @@ class RequestWrapper {
     fun isRequestMatchDefine(define: RequestWrapper): Boolean {
         val request = this
         if("ALL".equals(define.method)) {
-            return UriSegment.isRequestMatchDefine(request.segments, define.segments)
+            return isUriSegmentMatch(requests = request.segments, defines = define.segments)
         }else{
             return request.method.equals(define.method)
-            && UriSegment.isRequestMatchDefine(request.segments, define.segments)
+            && isUriSegmentMatch(requests = request.segments, defines = define.segments)
         }
     }
 
@@ -52,7 +52,7 @@ class RequestWrapper {
         val output = HashMap<String, String>()
         for(i in segments.indices) {
             val segment = segments[i]
-            if(segment.dynamic) {
+            if(segment.isDynamic) {
                 output.put(segment.segment, sources[i])
             }
         }

@@ -20,7 +20,7 @@ class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpContro
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatched(RequestWrapper.fromClient(request.method, request.path, request.resources));
+        val found = findMatched(RequestWrapper.createFromClient(request.method, request.path, request.resources));
         // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
         if(found.isNotEmpty()) {
             response.setStatusCode(StatusCode.ACCEPTED)

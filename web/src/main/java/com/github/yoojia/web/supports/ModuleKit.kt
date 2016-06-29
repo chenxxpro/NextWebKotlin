@@ -60,10 +60,10 @@ internal fun checkArguments(method: Method) {
 fun getRequestPriority(wrapper: RequestWrapper): Int {
     var priority = wrapper.segments.size
     wrapper.segments.forEach { segment ->
-        if(segment.wildcard) {
+        if(segment.isWildcard) {
             priority += -1
         }else{
-            priority += if(segment.dynamic) {if(segment.fixedType) {1} else {2}} else {0}
+            priority += if(segment.isDynamic) {if(segment.isFixedType) {1} else {2}} else {0}
         }
     }
     return priority

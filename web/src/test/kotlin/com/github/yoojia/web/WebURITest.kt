@@ -34,7 +34,7 @@ class WebURITest {
     fun testIsDynamic() {
         val req = "/users/yoojia/profile"
         val define = "/users/{username}/profile"
-        val params = RequestWrapper.fromDefine("all", define).parseDynamic(splitToArray(req))
+        val params = RequestWrapper.createFromDefine("all", define).parseDynamic(splitToArray(req))
         Assert.assertEquals(true, params.isNotEmpty())
         Assert.assertEquals(true, params.contains("username"))
         Assert.assertEquals("yoojia", params["username"])
@@ -44,7 +44,7 @@ class WebURITest {
     fun testIsDynamic_1() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/profile/{id}"
-        val params = RequestWrapper.fromDefine("all", define).parseDynamic(splitToArray(req))
+        val params = RequestWrapper.createFromDefine("all", define).parseDynamic(splitToArray(req))
         Assert.assertEquals(true, params.isNotEmpty())
         Assert.assertEquals(true, params.contains("username"))
         Assert.assertEquals(true, params.contains("id"))
@@ -56,28 +56,28 @@ class WebURITest {
     fun testURIMatched() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/profile/{id}"
-        Assert.assertEquals(true, RequestWrapper.fromClient("post", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("all", define)))
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("all", define)))
-        Assert.assertEquals(true, RequestWrapper.fromClient("put", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("all", define)))
-        Assert.assertEquals(true, RequestWrapper.fromClient("delete", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("all", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("post", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("all", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("all", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("put", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("all", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("delete", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("all", define)))
     }
 
     @Test
     fun testURIMatched0() {
         val req = "/users/yoojia/"
         val define = "/users/{username}"
-        Assert.assertEquals(true, RequestWrapper.fromClient("post", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("post", define)))
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("post", define)))
-        Assert.assertEquals(false, RequestWrapper.fromClient("delete", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("post", define)))
-        Assert.assertEquals(false, RequestWrapper.fromClient("put", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("post", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("post", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("post", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("post", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("delete", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("post", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("put", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("post", define)))
     }
 
     @Test
     fun testURIMatched_1() {
         val req = "/users/yoojia/profile/10086"
         val define = "/not-match/{username}/profile/{id}"
-        val reqWrap = RequestWrapper.fromClient("get", req, splitToArray(req))
-        val defWrap = RequestWrapper.fromDefine("get", define)
+        val reqWrap = RequestWrapper.createFromClient("get", req, splitToArray(req))
+        val defWrap = RequestWrapper.createFromDefine("get", define)
         Assert.assertEquals(false, reqWrap.isRequestMatchDefine(defWrap))
     }
 
@@ -85,72 +85,72 @@ class WebURITest {
     fun testURIMatched_2() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/"
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("all", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("all", define)))
     }
 
     @Test
     fun testURIMatched_3() {
         val req = "/users/yoojia/profile/10086"
         val define = "/users/{username}/*"
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("all", define)))
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("post", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("all", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("post", define)))
     }
 
     @Test
     fun testURIMatched_4() {
         val req = "/"
         val define = "/admin/*"
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_5() {
         val req = "/admin"
         val define = "/admin/permission/access/*"
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_6() {
         val req = "/admin/10086"
         val define = "/admin/{int:user_id}"
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_7() {
         val req = "/admin/123.456"
         val define = "/admin/{float:user_id}"
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_8() {
         val req = "/admin/yoojia"
         val define = "/admin/{string:user_id}"
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_9() {
         val req = "/admin/yoojia"
         val define = "/admin/{user_id}"
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_10() {
         val req = "/admin/123456"
         val define = "/admin/{user_id}"
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
     fun testURIMatched_11() {
         val req = "/admin/123456.0"
         val define = "/admin/{user_id}"
-        Assert.assertEquals(true, RequestWrapper.fromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(true, RequestWrapper.createFromClient("get", req, splitToArray(req)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
@@ -158,8 +158,8 @@ class WebURITest {
         val define = "/admin/{int:user_id}"
         val req1 = "/admin/123.0"
         val req2 = "/admin/abc"
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req1, splitToArray(req1)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req2, splitToArray(req2)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req1, splitToArray(req1)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req2, splitToArray(req2)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
@@ -167,8 +167,8 @@ class WebURITest {
         val define = "/admin/{float:user_id}"
         val req1 = "/admin/123"
         val req2 = "/admin/abc"
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req1, splitToArray(req1)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req2, splitToArray(req2)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req1, splitToArray(req1)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req2, splitToArray(req2)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
     @Test
@@ -176,8 +176,8 @@ class WebURITest {
         val define = "/admin/{string:user_id}"
         val req1 = "/admin/123"
         val req2 = "/admin/123.456"
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req1, splitToArray(req1)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
-        Assert.assertEquals(false, RequestWrapper.fromClient("get", req2, splitToArray(req2)).isRequestMatchDefine(RequestWrapper.fromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req1, splitToArray(req1)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
+        Assert.assertEquals(false, RequestWrapper.createFromClient("get", req2, splitToArray(req2)).isRequestMatchDefine(RequestWrapper.createFromDefine("get", define)))
     }
 
 }
