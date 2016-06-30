@@ -25,21 +25,29 @@ fun createDefineUriSegment(segment: String): UriSegment {
         // unwrap: {user-id} -> user-id
         val unwrap = if(dynamic) segment.substring(1/*{*/, segment.lastIndex/*}*/) else segment
         when {
-            unwrap.startsWith(UriValueType.Int.prefix) -> {
-                valueType = UriValueType.Int
-                _segment = unwrap.substring(UriValueType.Int.offset)
+            unwrap.startsWith(UriValueType.INT.prefix) -> {
+                valueType = UriValueType.INT
+                _segment = unwrap.substring(UriValueType.INT.offset)
             }
-            unwrap.startsWith(UriValueType.Float.prefix) -> {
-                valueType = UriValueType.Float
-                _segment = unwrap.substring(UriValueType.Float.offset)
+            unwrap.startsWith(UriValueType.FLOAT.prefix) -> {
+                valueType = UriValueType.FLOAT
+                _segment = unwrap.substring(UriValueType.FLOAT.offset)
             }
-            unwrap.startsWith(UriValueType.String.prefix) -> {
-                valueType = UriValueType.String
-                _segment = unwrap.substring(UriValueType.String.offset)
+            unwrap.startsWith(UriValueType.LONG.prefix) -> {
+                valueType = UriValueType.LONG
+                _segment = unwrap.substring(UriValueType.LONG.offset)
+            }
+            unwrap.startsWith(UriValueType.DOUBLE.prefix) -> {
+                valueType = UriValueType.DOUBLE
+                _segment = unwrap.substring(UriValueType.DOUBLE.offset)
+            }
+            unwrap.startsWith(UriValueType.STRING.prefix) -> {
+                valueType = UriValueType.STRING
+                _segment = unwrap.substring(UriValueType.STRING.offset)
             }
             else -> {
                 fixedType = false
-                valueType = UriValueType.Any
+                valueType = UriValueType.UNDEFINED
                 _segment = unwrap
             }
         }

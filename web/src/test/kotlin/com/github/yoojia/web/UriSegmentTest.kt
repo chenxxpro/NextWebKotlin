@@ -39,23 +39,23 @@ class UriSegmentTest {
 
     @Test
     fun test(){
-        Assert.assertEquals(UriValueType.Int, createRequestUriSegment("123").valueType)
-        Assert.assertEquals(UriValueType.Int, createRequestUriSegment("-123").valueType)
-        Assert.assertEquals(UriValueType.Float, createRequestUriSegment("123.0").valueType)
-        Assert.assertEquals(UriValueType.Float, createRequestUriSegment("-123.0").valueType)
-        Assert.assertEquals(UriValueType.Int, createRequestUriSegment("+12").valueType)
-        Assert.assertEquals(UriValueType.Float, createRequestUriSegment("+123.0").valueType)
-        Assert.assertEquals(UriValueType.String, createRequestUriSegment("123abc").valueType)
-        Assert.assertEquals(UriValueType.String, createRequestUriSegment("/").valueType)
-        Assert.assertEquals(UriValueType.String, createRequestUriSegment("*").valueType)
+        Assert.assertEquals(UriValueType.INT, createRequestUriSegment("123").valueType)
+        Assert.assertEquals(UriValueType.INT, createRequestUriSegment("-123").valueType)
+        Assert.assertEquals(UriValueType.FLOAT, createRequestUriSegment("123.0").valueType)
+        Assert.assertEquals(UriValueType.FLOAT, createRequestUriSegment("-123.0").valueType)
+        Assert.assertEquals(UriValueType.INT, createRequestUriSegment("+12").valueType)
+        Assert.assertEquals(UriValueType.FLOAT, createRequestUriSegment("+123.0").valueType)
+        Assert.assertEquals(UriValueType.STRING, createRequestUriSegment("123abc").valueType)
+        Assert.assertEquals(UriValueType.STRING, createRequestUriSegment("/").valueType)
+        Assert.assertEquals(UriValueType.STRING, createRequestUriSegment("*").valueType)
     }
 
     @Test
     fun testDynamic(){
-        Assert.assertEquals(UriValueType.Int, createDefineUriSegment("{int:id}").valueType)
-        Assert.assertEquals(UriValueType.Float, createDefineUriSegment("{float:id}").valueType)
-        Assert.assertEquals(UriValueType.String, createDefineUriSegment("{string:id}").valueType)
-        Assert.assertEquals(UriValueType.Any, createDefineUriSegment("{id}").valueType)
+        Assert.assertEquals(UriValueType.INT, createDefineUriSegment("{int:id}").valueType)
+        Assert.assertEquals(UriValueType.FLOAT, createDefineUriSegment("{float:id}").valueType)
+        Assert.assertEquals(UriValueType.STRING, createDefineUriSegment("{string:id}").valueType)
+        Assert.assertEquals(UriValueType.UNDEFINED, createDefineUriSegment("{id}").valueType)
     }
 
     @Test
