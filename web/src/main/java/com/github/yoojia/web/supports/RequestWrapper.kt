@@ -35,7 +35,7 @@ class RequestWrapper {
 
     }
 
-    fun isRequestMatchDefine(define: RequestWrapper): Boolean {
+    fun isMatchDefine(define: RequestWrapper): Boolean {
         val request = this
         if("ALL".equals(define.method)) {
             return isUriSegmentMatch(requests = request.segments, defines = define.segments)

@@ -23,9 +23,9 @@ abstract class ModuleHandler(val tag: String,
         private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
     }
 
-    private val handlers = ArrayList<RequestHandler>()
-    private val moduleObjectProvider: ModuleCachedProvider
+    protected  val handlers = ArrayList<RequestHandler>()
 
+    private val moduleObjectProvider: ModuleCachedProvider
     private val cachedClasses: ArrayList<Class<*>>
 
     init{
@@ -96,10 +96,10 @@ abstract class ModuleHandler(val tag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected fun findMatched(request: RequestWrapper): List<RequestHandler> {
+    protected open fun findMatched(request: RequestWrapper): List<RequestHandler> {
         val found = ArrayList<RequestHandler>()
         handlers.forEach { define ->
-            if(request.isRequestMatchDefine(define.request)) {
+            if(request.isMatchDefine(define.request)) {
                 found.add(define)
             }
         }
