@@ -4,6 +4,7 @@ import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;
 import com.github.yoojia.web.Response;
 import com.github.yoojia.web.interceptor.BeforeInterceptor;
+import com.github.yoojia.web.interceptor.Ignore;
 import com.github.yoojia.web.supports.GET;
 
 /**
@@ -14,7 +15,9 @@ import com.github.yoojia.web.supports.GET;
 public class HelloBeforeInterceptor {
 
     @GET("/*")
+    @Ignore("/templates/*")
     public void used(Request request, Response response, RequestChain chain){
+        System.out.println("- path: " + request.path);
 //        response.sendText("Before interceptor");
 //        chain.stop();
     }

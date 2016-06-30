@@ -10,6 +10,7 @@ import java.lang.reflect.Method
  * @since 2.0
  */
 class RequestHandler(
+        val root: String,
         val invoker: JavaMethodInvoker,
         val request: RequestWrapper,
         val priority: Int = getRequestPriority(request)) {
@@ -24,7 +25,7 @@ class RequestHandler(
 
     companion object {
 
-        fun create(root: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): RequestHandler {
+        internal fun create(root: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): RequestHandler {
             val annotation = method.getAnnotation(annotationType)
             val arg = when(annotation) {
                 is GET -> Pair("GET", annotation.value)
@@ -34,7 +35,7 @@ class RequestHandler(
                 is ALL -> Pair("ALL", annotation.value)
                 else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
             }
-            return RequestHandler(JavaMethodInvoker(moduleType, method),
+            return RequestHandler(root, JavaMethodInvoker(moduleType, method),
                     RequestWrapper.createFromDefine(arg.first/*method*/, concat(root, arg.second/*path*/)))
         }
     }
