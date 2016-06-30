@@ -19,14 +19,14 @@ abstract class ModuleHandler(val tag: String,
                              val annotation: Class<out Annotation>,
                              classes: List<Class<*>>) : Module {
 
+    companion object {
+        private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
+    }
+
     private val handlers = ArrayList<RequestHandler>()
     private val moduleObjectProvider: ModuleCachedProvider
 
     private val cachedClasses: ArrayList<Class<*>>
-    
-    companion object {
-        private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
-    }
 
     init{
         val accepted = classes.filter {
@@ -64,7 +64,7 @@ abstract class ModuleHandler(val tag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatched(RequestWrapper.request(request.method, request.path, request.resources))
+        val found = findMatched(RequestWrapper.createFromClient(request.method, request.path, request.resources))
         processFound(found, request, response, dispatch)
     }
 

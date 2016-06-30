@@ -1,6 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.ClassesLoader
 import com.github.yoojia.web.core.Engine
 import javax.servlet.Servlet
 import javax.servlet.ServletConfig

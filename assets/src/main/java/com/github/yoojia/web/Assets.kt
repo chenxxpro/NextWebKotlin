@@ -4,7 +4,9 @@ import com.github.yoojia.web.core.Config
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.core.DispatchChain
 import com.github.yoojia.web.core.Module
-import com.github.yoojia.web.supports.UriSegment
+import com.github.yoojia.web.supports.createDefineUriSegment
+import com.github.yoojia.web.supports.createRequestUriSegment
+import com.github.yoojia.web.supports.isUriSegmentMatch
 import com.github.yoojia.web.util.splitToArray
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
@@ -54,12 +56,12 @@ class Assets : Module {
     }
 
     private fun match(resource: List<String>): Boolean {
-        //request: /assets/js/boot.js
-        val request = resource.map { UriSegment(it) }
+        //req: /assets/js/boot.js
+        val req = resource.map { createRequestUriSegment(it) }
         for(asset in mAssetsDefine) {
             //define: /assets/js/*
-            val define = asset.map { UriSegment(it) }
-            return UriSegment.isRequestMatchDefine(request, define)
+            val def = asset.map { createDefineUriSegment(it) }
+            return isUriSegmentMatch(requests = req, defines = def)
         }
         return false
     }

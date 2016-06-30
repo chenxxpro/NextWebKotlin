@@ -35,7 +35,7 @@ class RequestHandler(
                 else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
             }
             return RequestHandler(JavaMethodInvoker(moduleType, method),
-                    RequestWrapper.define(arg.first/*method*/, concat(root, arg.second/*path*/)))
+                    RequestWrapper.createFromDefine(arg.first/*method*/, concat(root, arg.second/*path*/)))
         }
     }
 }
