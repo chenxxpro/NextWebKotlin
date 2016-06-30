@@ -4,6 +4,7 @@ import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;
 import com.github.yoojia.web.Response;
 import com.github.yoojia.web.interceptor.AfterInterceptor;
+import com.github.yoojia.web.interceptor.Ignore;
 import com.github.yoojia.web.supports.GET;
 
 /**
