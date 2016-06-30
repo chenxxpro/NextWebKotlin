@@ -17,8 +17,6 @@ public class HelloBeforeInterceptor {
     @GET("/*")
     @Ignore("/templates/*")
     public void used(Request request, Response response, RequestChain chain){
-        System.out.println("- path: " + request.path);
-//        response.sendText("Before interceptor");
-//        chain.stop();
+        response.sendText("<br/> BeforeInterceptor prcessed");
     }
 }
