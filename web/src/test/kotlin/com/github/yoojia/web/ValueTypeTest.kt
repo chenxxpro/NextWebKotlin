@@ -25,16 +25,21 @@ class ValueTypeTest {
         Assert.assertEquals(UriValueType.STRING, UriValueType.parse("123.a"))
         Assert.assertEquals(UriValueType.STRING, UriValueType.parse("a.a"))
 
+        Assert.assertEquals(UriValueType.FLOAT, UriValueType.parse("-123.0"))
         Assert.assertEquals(UriValueType.FLOAT, UriValueType.parse("123.0"))
         Assert.assertEquals(UriValueType.FLOAT, UriValueType.parse("123.01"))
         Assert.assertEquals(UriValueType.FLOAT, UriValueType.parse("0.12"))
         Assert.assertEquals(UriValueType.FLOAT, UriValueType.parse(Float.MAX_VALUE.toString()))
         Assert.assertEquals(UriValueType.FLOAT, UriValueType.parse(Float.MIN_VALUE.toString()))
+        Assert.assertEquals(UriValueType.FLOAT, UriValueType.parse("-" + Float.MAX_VALUE.toString()))
+        Assert.assertEquals(UriValueType.FLOAT, UriValueType.parse("-" + Float.MIN_VALUE.toString()))
 
         Assert.assertEquals(UriValueType.DOUBLE, UriValueType.parse(Float.MIN_VALUE.toString() + "1"))
         Assert.assertEquals(UriValueType.DOUBLE, UriValueType.parse(Float.MAX_VALUE.toString() + "9"))
         Assert.assertEquals(UriValueType.DOUBLE, UriValueType.parse(Double.MAX_VALUE.toString()))
         Assert.assertEquals(UriValueType.DOUBLE, UriValueType.parse(Double.MIN_VALUE.toString()))
+        Assert.assertEquals(UriValueType.DOUBLE, UriValueType.parse("-" + Double.MAX_VALUE.toString()))
+        Assert.assertEquals(UriValueType.DOUBLE, UriValueType.parse("-" + Double.MIN_VALUE.toString()))
 
         Assert.assertEquals(UriValueType.INT, UriValueType.parse("2"))
         Assert.assertEquals(UriValueType.INT, UriValueType.parse("+12"))

@@ -40,20 +40,29 @@ enum class UriValueType {
         fun parse(resource: kotlin.String): UriValueType {
             val lastIndex = resource.lastIndex
             var dots = 0; var digits = 0; var marks = 0; var signs = 0
+            var markIndex = -1
             resource.forEachIndexed { index, char ->
                 if(Character.isDigit(char)) {
                     digits += 1
                 }else if('E'.equals(char, ignoreCase = true)) {
-                    marks += 1
                     if(0 == index || index == lastIndex) return STRING //: e123, 123E
-                }else if('-'.equals(char) || '+'.equals(char)) {
-                    signs += 1
+                    marks += 1
+                    markIndex = index
+                }else if('-'.equals(char)) {
                     if(index == lastIndex) return STRING //: 123-
+                    if(index != 0 && index == (markIndex + 1)) {
+                        marks += 1 // 1.4E-23
+                    }else{
+                        signs += 1
+                    }
+                }else if('+'.equals(char)) {
+                    if(index == lastIndex) return STRING //: 123+
+                    signs += 1
                 }else if('.'.equals(char)) {
-                    dots += 1
                     if(0 == index || index == lastIndex) return STRING //: .123 , 123.
+                    dots += 1
                 }
-                if(marks > 1 || signs > 1 || dots > 1) {
+                if(marks/*[E, -]*/ > 2 || signs > 1 || dots > 1) {
                     return STRING
                 }else{
                     // Check: contains other chars: -1A.BCDEFGHAHAHA
@@ -66,14 +75,13 @@ enum class UriValueType {
             if(marks == 0 && dots == 0) {
                 val _digits = resource.length - signs
                 if(digits == _digits) {
-                    // All decimal digits
                     val value: Long
                     try{
                         value = resource.toLong()
                     }catch(err: NumberFormatException) {
                         return STRING
                     }
-                    if(Int.MIN_VALUE <= value && value <= Int.MAX_VALUE) {
+                    if(value in Int.MIN_VALUE..Int.MAX_VALUE) {
                         return INT
                     }else{
                         return LONG
@@ -82,7 +90,7 @@ enum class UriValueType {
                     return STRING
                 }
             }else{//: marks:0/1, dots:0/1
-                val _digits = resource.length - signs - marks - dots
+                val _digits = resource.length - (signs + marks + dots)
                 if(digits == _digits) {
                     val value: Double
                     try{
@@ -90,8 +98,7 @@ enum class UriValueType {
                     }catch(err: NumberFormatException) {
                         return STRING
                     }
-                    val _float = value.toFloat()
-                    if(Float.MIN_VALUE <= _float && _float <= Float.MAX_VALUE) {
+                    if(Math.abs(value.toFloat()) in Float.MIN_VALUE..Float.MAX_VALUE) {
                         return FLOAT
                     }else{
                         return DOUBLE
