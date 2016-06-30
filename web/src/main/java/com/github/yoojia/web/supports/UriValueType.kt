@@ -37,9 +37,6 @@ enum class UriValueType {
 
     companion object {
 
-        private const val INT_MAX_LENGTH = Int.MAX_VALUE.toString().length
-        private const val LONG_MAX_LENGTH = Long.MAX_VALUE.toString().length
-
         fun parse(resource: kotlin.String): UriValueType {
             val lastIndex = resource.lastIndex
             var dots = 0; var digits = 0; var marks = 0; var signs = 0
@@ -69,18 +66,39 @@ enum class UriValueType {
             if(marks == 0 && dots == 0) {
                 val _digits = resource.length - signs
                 if(digits == _digits) {
-                    return when {
-                        _digits <= INT_MAX_LENGTH -> INT
-                        _digits <= LONG_MAX_LENGTH -> LONG
-                        else -> STRING
+                    // All decimal digits
+                    val value: Long
+                    try{
+                        value = resource.toLong()
+                    }catch(err: NumberFormatException) {
+                        return STRING
+                    }
+                    if(Int.MIN_VALUE <= value && value <= Int.MAX_VALUE) {
+                        return INT
+                    }else{
+                        return LONG
                     }
                 }else{
                     return STRING
                 }
             }else{//: marks:0/1, dots:0/1
                 val _digits = resource.length - signs - marks - dots
-                // 根据
-                return if(digits == _digits) FLOAT else STRING
+                if(digits == _digits) {
+                    val value: Double
+                    try{
+                        value = resource.toDouble()
+                    }catch(err: NumberFormatException) {
+                        return STRING
+                    }
+                    val _float = value.toFloat()
+                    if(Float.MIN_VALUE <= _float && _float <= Float.MAX_VALUE) {
+                        return FLOAT
+                    }else{
+                        return DOUBLE
+                    }
+                }else{
+                    return STRING
+                }
             }
         }
     }
