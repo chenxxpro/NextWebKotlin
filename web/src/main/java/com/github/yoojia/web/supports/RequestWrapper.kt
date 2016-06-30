@@ -21,12 +21,16 @@ class RequestWrapper {
 
     companion object {
 
-        fun request(method: String, uri: String, segments: List<String>): RequestWrapper {
-            return RequestWrapper(method, uri, segments.map { seg -> UriSegment(seg, absoluteType = true/*请求参数的数值类型要求为绝对类型，不能为ValueType.Any*/) })
+        fun createFromClient(method: String, uri: String, segments: List<String>): RequestWrapper {
+            return RequestWrapper(method, uri, segments.map {
+                seg -> createRequestUriSegment(seg)
+            })
         }
 
-        fun define(method: String, uri: String): RequestWrapper {
-            return RequestWrapper(method, uri, splitToArray(uri).map { seg -> UriSegment(seg) })
+        fun createFromDefine(method: String, uri: String): RequestWrapper {
+            return RequestWrapper(method, uri, splitToArray(uri).map {
+                seg -> createDefineUriSegment(seg)
+            })
         }
 
     }
@@ -34,10 +38,10 @@ class RequestWrapper {
     fun isRequestMatchDefine(define: RequestWrapper): Boolean {
         val request = this
         if("ALL".equals(define.method)) {
-            return UriSegment.isRequestMatchDefine(request.segments, define.segments)
+            return isUriSegmentMatch(requests = request.segments, defines = define.segments)
         }else{
             return request.method.equals(define.method)
-            && UriSegment.isRequestMatchDefine(request.segments, define.segments)
+            && isUriSegmentMatch(requests = request.segments, defines = define.segments)
         }
     }
 
@@ -48,8 +52,8 @@ class RequestWrapper {
         val output = HashMap<String, String>()
         for(i in segments.indices) {
             val segment = segments[i]
-            if(segment.dynamic) {
-                output.put(segment.name, sources[i])
+            if(segment.isDynamic) {
+                output.put(segment.segment, sources[i])
             }
         }
         return if(output.isEmpty()) emptyMap() else output

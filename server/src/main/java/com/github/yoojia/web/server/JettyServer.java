@@ -3,6 +3,8 @@ package com.github.yoojia.web.server;
 import org.eclipse.jetty.server.Server;
 
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
@@ -24,6 +26,22 @@ public class JettyServer {
 
     public InetSocketAddress getAddress() {
         return mAddress;
+    }
+
+    public URL getBaseUrl(boolean ssl){
+        try {
+            return new URL("http" + (ssl?"s":"") + "://" + mAddress.toString());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("IT CAN'T BE");
+        }
+    }
+
+    public String getBaseUrl() {
+        return getBaseUrl(false).toString();
+    }
+
+    public String getSSLBaseUrl(){
+        return getBaseUrl(true).toString();
     }
 
     public void start() throws Exception {
