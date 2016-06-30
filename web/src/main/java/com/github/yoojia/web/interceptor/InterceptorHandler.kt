@@ -20,9 +20,9 @@ abstract class InterceptorHandler(tag: String,
 
     private val ignores = ArrayList<RequestWrapper>()
 
-    override fun prepare(classes: List<Class<*>>): List<Class<*>> {
+    override fun prepare(inputs: List<Class<*>>): List<Class<*>> {
         try{
-            return super.prepare(classes)
+            return super.prepare(inputs)
         }finally{
             handlers.forEach { handler->
                 val method = handler.javaMethod
@@ -31,7 +31,7 @@ abstract class InterceptorHandler(tag: String,
                     if(annotation.value.isEmpty()) {
                         throw IllegalArgumentException("@Ignore must noted that which uri to ignore")
                     }
-                    annotation.value.forEach { uri->
+                    annotation.value.forEach { uri ->
                         val wrapper = RequestWrapper.createFromDefine(handler.request.method, concat(handler.root, uri))
                         ignores.add(wrapper)
                         Logger.info("$tag-Ignore-Define: $wrapper , based: ${handler.request}")

@@ -14,7 +14,7 @@ import java.util.*
 private val Logger = LoggerFactory.getLogger("JavaClass")
 
 fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
-    val output = ArrayList<String>()
+    val found = ArrayList<String>()
     Files.walkFileTree(based, object : SimpleFileVisitor<Path>() {
         @Throws(IOException::class)
         override fun visitFile(path: Path, attr: BasicFileAttributes): FileVisitResult {
@@ -23,13 +23,13 @@ fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
                 val clazz = resolveClassName(name)
                 Logger.trace("-> $clazz")
                 if(filter.accept(clazz)) { // return true to accept
-                    output.add(clazz);
+                    found.add(clazz);
                 }
             }
             return FileVisitResult.CONTINUE
         }
     })
-    return output.toList()
+    return found.toList()
 }
 
 fun findJarClassNames(filter: Filter<String>): List<String> {
@@ -37,12 +37,12 @@ fun findJarClassNames(filter: Filter<String>): List<String> {
 }
 
 fun loadClassByName(names: List<String>): List<Class<*>> {
+    val output = ArrayList<Class<*>>()
     val classLoader = getClassLoader()
-    val out = ArrayList<Class<*>>()
     names.forEach { name ->
-        out.add(loadClassByName(classLoader, name))
+        output.add(loadClassByName(classLoader, name))
     }
-    return out.toList()
+    return output.toList()
 }
 
 fun loadClassByName(loader: ClassLoader, name: String): Class<*> {

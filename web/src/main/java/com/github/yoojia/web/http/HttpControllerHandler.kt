@@ -14,18 +14,18 @@ import com.github.yoojia.web.supports.RequestWrapper
  */
 class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpController", Controller::class.java, classes) {
 
-    override fun getModuleUri(hostType: Class<*>): String {
+    override fun getRootUri(hostType: Class<*>): String {
         return hostType.getAnnotation(Controller::class.java).value
     }
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatched(RequestWrapper.createFromClient(request.method, request.path, request.resources));
+        val matches = findMatched(RequestWrapper.createFromClient(request.method, request.path, request.resources));
         // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
-        if(found.isNotEmpty()) {
+        if(matches.isNotEmpty()) {
             response.setStatusCode(StatusCode.ACCEPTED)
         }
-        processFound(found, request, response, dispatch)
+        processFound(matches, request, response, dispatch)
     }
 
     companion object {

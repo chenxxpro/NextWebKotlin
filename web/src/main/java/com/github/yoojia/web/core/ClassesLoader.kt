@@ -26,7 +26,7 @@ internal class ClassesLoader : ClassProvider {
     }
 
     override fun get(context: Context): List<Class<*>> {
-        val scanStart = now()
+        val start = now()
         val filter = object : Filter<String> {
             override fun accept(value: String): Boolean {
                 DEFAULT_SYSTEM_CLASSES.forEach {
@@ -41,7 +41,7 @@ internal class ClassesLoader : ClassProvider {
         val jar = findJarClassNames(filter)
         val classes = ArrayList<Class<*>>(loadClassByName(runtime.concat(jar)))
         Logger.debug("Class-Count: ${classes.size}")
-        Logger.debug("Scan-Time: ${escape(scanStart)}ms")
+        Logger.debug("Scan-Time: ${escape(start)}ms")
         return classes
     }
 
