@@ -32,13 +32,14 @@ class Request(ctx: Context, request: HttpServletRequest){
             params.put(key, value.toMutableList())
         }
         if(request.method.toUpperCase() in setOf("PUT", "DELETE")) {
-            readBodyData()?.let { data ->
+            readBodyStream()?.let { data ->
                 params.put(BODY_DATA, mutableListOf(data))
-                // TODO 检查是否为表单格式数据
-                data.split('&').forEach { pair ->
-                    val kv = pair.split('=')
-                    if(kv.size != 2) throw IllegalArgumentException("Client request post invalid query string")
-                    putOrNew(kv[0], URLDecoder.decode(kv[1], "UTF-8"), params)
+                if("application/x-www-form-urlencoded".equals(request.contentType, ignoreCase = true)) {
+                    data.split('&').forEach { pair ->
+                        val kv = pair.split('=')
+                        if(kv.size != 2) throw IllegalArgumentException("Client request post invalid query string")
+                        putOrNew(kv[0], URLDecoder.decode(kv[1], "UTF-8"), params)
+                    }
                 }
             }
         }
@@ -71,7 +72,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     fun bodyData(): String? {
         val cached = scopeParams[BODY_DATA]?.firstOrNull()
         if(cached == null && method in setOf("GET", "POST")) {
-            val data = readBodyData()
+            val data = readBodyStream()
             if(data != null) {
                 scopeParams.put(BODY_DATA, mutableListOf(data))
             }else{
@@ -168,7 +169,7 @@ class Request(ctx: Context, request: HttpServletRequest){
         return dynamicParam(name, null)
     }
 
-    private fun readBodyData(): String? {
+    private fun readBodyStream(): String? {
         val output = StringWriter()
         val input = InputStreamReader(servletRequest.inputStream)
         val count = streamCopy(from = input, to = output)

@@ -38,8 +38,8 @@ abstract class ModuleHandler(val tag: String,
         // NOP
     }
 
-    override fun prepare(inputs: List<Class<*>>): List<Class<*>> {
-        inputs.forEach { clazz ->
+    override fun prepare(/*Ignore*/inputs: List<Class<*>>): List<Class<*>> {
+        classes.forEach { clazz ->
             val root = getRootUri(clazz)
             findAnnotated(clazz, action = { javaMethod, annotationType ->
                 checkReturnType(javaMethod)
@@ -50,7 +50,7 @@ abstract class ModuleHandler(val tag: String,
             })
         }
         try{
-            return inputs.toList()
+            return classes.toList()
         }finally{
             classes.clear()
         }
@@ -62,7 +62,7 @@ abstract class ModuleHandler(val tag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatched(RequestWrapper.createFromClient(request.method, request.path, request.resources))
+        val found = findMatches(RequestWrapper.createFromClient(request.method, request.path, request.resources))
         processFound(found, request, response, dispatch)
     }
 
@@ -94,14 +94,8 @@ abstract class ModuleHandler(val tag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected open fun findMatched(request: RequestWrapper): List<RequestHandler> {
-        val found = ArrayList<RequestHandler>()
-        handlers.forEach { define ->
-            if(request.isMatchDefine(define.request)) {
-                found.add(define)
-            }
-        }
-        return found
+    protected open fun findMatches(request: RequestWrapper): List<RequestHandler> {
+        return handlers.filter { define -> request.isMatchDefine(define.request) }
     }
 
     protected abstract fun getRootUri(hostType: Class<*>): String

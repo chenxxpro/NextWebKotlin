@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object Engine {
 
-    const val VERSION = "NextEngine/2.a.10 (Kotlin 1.0.2-1; Java 7/8)"
+    const val VERSION = "NextEngine/2.a.11 (Kotlin 1.0.2-1; Java 7/8)"
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Engine::class.java)

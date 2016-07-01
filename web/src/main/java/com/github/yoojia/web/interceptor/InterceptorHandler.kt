@@ -29,9 +29,10 @@ abstract class InterceptorHandler(tag: String,
                 if(method.isAnnotationPresent(Ignore::class.java)) {
                     val annotation = method.getAnnotation(Ignore::class.java)
                     if(annotation.value.isEmpty()) {
-                        throw IllegalArgumentException("@Ignore must noted that which uri to ignore")
+                        throw IllegalArgumentException("@Ignore must gives which URI to be ignore")
                     }
                     annotation.value.forEach { uri ->
+                        if(uri.isNullOrEmpty()) throw IllegalArgumentException("URI must not be null or empty")
                         val wrapper = RequestWrapper.createFromDefine(handler.request.method, concat(handler.root, uri))
                         ignores.add(wrapper)
                         Logger.info("$tag-Ignore-Define: $wrapper , based: ${handler.request}")
@@ -41,12 +42,12 @@ abstract class InterceptorHandler(tag: String,
         }
     }
 
-    override fun findMatched(request: RequestWrapper): List<RequestHandler> {
+    override fun findMatches(request: RequestWrapper): List<RequestHandler> {
         ignores.forEach { define ->
             if(request.isMatchDefine(define)) {
                 return emptyList()
             }
         }
-        return super.findMatched(request)
+        return super.findMatches(request)
     }
 }

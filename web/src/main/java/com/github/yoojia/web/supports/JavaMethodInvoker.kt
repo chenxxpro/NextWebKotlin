@@ -21,15 +21,15 @@ class JavaMethodInvoker(val hostType: Class<*>, val method: Method) {
     }
 
     private fun varargs(request: Request, response: Response, chain: RequestChain): Array<Any> {
-        val out = ArrayList<Any>()
+        val output = ArrayList<Any>()
         method.parameterTypes.forEach { type ->
             when {
-                type.equals(Request::class.java) -> out.add(request)
-                type.equals(Response::class.java) -> out.add(response)
-                type.equals(RequestChain::class.java) -> out.add(chain)
+                type.equals(Request::class.java) -> output.add(request)
+                type.equals(Response::class.java) -> output.add(response)
+                type.equals(RequestChain::class.java) -> output.add(chain)
             }
         }
-        return out.toArray()
+        return output.toArray()
     }
 
     override fun toString(): String{
