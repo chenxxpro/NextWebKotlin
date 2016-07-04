@@ -67,14 +67,13 @@ abstract class ModuleHandler(val tag: String,
     }
 
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
-        Logger.trace("$tag-Accepted: ${request.path}")
         found.sortedBy { it.priority }.forEach { handler ->
             request._resetDynamicScope()
             val dynamic = handler.request.parseDynamic(request.resources)
             if(dynamic.isNotEmpty()) {
                 request._setDynamicScope(dynamic)
             }
-            Logger.trace("$tag-Handler: $handler")
+            Logger.trace("$tag-Processing-Handler: $handler")
             val moduleObject = objectProvider.get(handler.invoker.hostType)
             val chain = RequestChain()
             // 插入一些特殊处理过程接口的调用
