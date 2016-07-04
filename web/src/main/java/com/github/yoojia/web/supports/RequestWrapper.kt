@@ -22,15 +22,11 @@ class RequestWrapper {
     companion object {
 
         fun createFromClient(method: String, uri: String, segments: List<String>): RequestWrapper {
-            return RequestWrapper(method, uri, segments.map {
-                seg -> createRequestUriSegment(seg)
-            })
+            return RequestWrapper(method, uri, segments.map { createRequestUriSegment(it) })
         }
 
         fun createFromDefine(method: String, uri: String): RequestWrapper {
-            return RequestWrapper(method, uri, splitToArray(uri).map {
-                seg -> createDefineUriSegment(seg)
-            })
+            return RequestWrapper(method, uri, splitToArray(uri).map { createDefineUriSegment(it) })
         }
 
     }

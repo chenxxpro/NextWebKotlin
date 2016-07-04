@@ -41,8 +41,16 @@ class UriSegmentTest {
     fun test(){
         Assert.assertEquals(UriValueType.INT, createRequestUriSegment("123").valueType)
         Assert.assertEquals(UriValueType.INT, createRequestUriSegment("-123").valueType)
+        Assert.assertEquals(UriValueType.INT, createRequestUriSegment(Int.MIN_VALUE.toString()).valueType)
+        Assert.assertEquals(UriValueType.INT, createRequestUriSegment(Int.MAX_VALUE.toString()).valueType)
+        Assert.assertEquals(UriValueType.LONG, createRequestUriSegment(Long.MIN_VALUE.toString()).valueType)
+        Assert.assertEquals(UriValueType.LONG, createRequestUriSegment(Long.MAX_VALUE.toString()).valueType)
         Assert.assertEquals(UriValueType.FLOAT, createRequestUriSegment("123.0").valueType)
         Assert.assertEquals(UriValueType.FLOAT, createRequestUriSegment("-123.0").valueType)
+        Assert.assertEquals(UriValueType.FLOAT, createRequestUriSegment(Float.MIN_VALUE.toString()).valueType)
+        Assert.assertEquals(UriValueType.FLOAT, createRequestUriSegment(Float.MAX_VALUE.toString()).valueType)
+        Assert.assertEquals(UriValueType.DOUBLE, createRequestUriSegment(Double.MIN_VALUE.toString()).valueType)
+        Assert.assertEquals(UriValueType.DOUBLE, createRequestUriSegment(Double.MAX_VALUE.toString()).valueType)
         Assert.assertEquals(UriValueType.INT, createRequestUriSegment("+12").valueType)
         Assert.assertEquals(UriValueType.FLOAT, createRequestUriSegment("+123.0").valueType)
         Assert.assertEquals(UriValueType.STRING, createRequestUriSegment("123abc").valueType)
@@ -53,7 +61,9 @@ class UriSegmentTest {
     @Test
     fun testDynamic(){
         Assert.assertEquals(UriValueType.INT, createDefineUriSegment("{int:id}").valueType)
+        Assert.assertEquals(UriValueType.LONG, createDefineUriSegment("{long:id}").valueType)
         Assert.assertEquals(UriValueType.FLOAT, createDefineUriSegment("{float:id}").valueType)
+        Assert.assertEquals(UriValueType.DOUBLE, createDefineUriSegment("{double:id}").valueType)
         Assert.assertEquals(UriValueType.STRING, createDefineUriSegment("{string:id}").valueType)
         Assert.assertEquals(UriValueType.UNDEFINED, createDefineUriSegment("{id}").valueType)
     }
@@ -72,7 +82,13 @@ class UriSegmentTest {
         val age = createDefineUriSegment("{int:age}")
         Assert.assertEquals("age", age.segment)
 
+        val total = createDefineUriSegment("{long:total}")
+        Assert.assertEquals("total", total.segment)
+
         val weight = createDefineUriSegment("{float:weight}")
         Assert.assertEquals("weight", weight.segment)
+
+        val width = createDefineUriSegment("{double:width}")
+        Assert.assertEquals("width", width.segment)
     }
 }

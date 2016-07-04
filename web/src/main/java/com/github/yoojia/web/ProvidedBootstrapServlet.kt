@@ -16,10 +16,6 @@ import javax.servlet.ServletResponse
  */
 abstract class ProvidedBootstrapServlet : Servlet, ClassProvider, ConfigProvider {
 
-    override fun destroy() {
-        Engine.shutdown()
-    }
-
     override fun init(config: ServletConfig?) {
         Engine.boot(config?.servletContext!!, this, this)
     }
@@ -38,6 +34,10 @@ abstract class ProvidedBootstrapServlet : Servlet, ClassProvider, ConfigProvider
 
     override fun get(path: Path): Config {
         return Config.empty()
+    }
+
+    override fun destroy() {
+        Engine.shutdown()
     }
 
     companion object {

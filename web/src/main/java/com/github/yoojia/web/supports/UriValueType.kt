@@ -64,8 +64,7 @@ enum class UriValueType {
                 }
                 if(marks/*[E, -]*/ > 2 || signs > 1 || dots > 1) {
                     return STRING
-                }else{
-                    // Check: contains other chars: -1A.BCDEFGHAHAHA
+                }else{ // Check: contains other chars
                     val total = marks + signs + dots + digits
                     if(total < index + 1) {
                         return STRING

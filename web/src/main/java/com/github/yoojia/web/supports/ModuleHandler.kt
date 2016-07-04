@@ -17,7 +17,7 @@ import java.util.*
  */
 abstract class ModuleHandler(val tag: String,
                              val annotation: Class<out Annotation>,
-                             classes: List<Class<*>>) : Module {
+                             inputs: List<Class<*>>) : Module {
 
     companion object {
         private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
@@ -25,46 +25,44 @@ abstract class ModuleHandler(val tag: String,
 
     protected  val handlers = ArrayList<RequestHandler>()
 
-    private val moduleObjectProvider: ModuleCachedProvider
-    private val cachedClasses: ArrayList<Class<*>>
+    private val objectProvider: ModuleCachedProvider
+    private val classes: ArrayList<Class<*>>
 
     init{
-        val accepted = classes.filter {
-            it.isAnnotationPresent(annotation)
-        }
-        moduleObjectProvider = ModuleCachedProvider(accepted.size)
-        cachedClasses = ArrayList(accepted)
+        val found = inputs.filter { it.isAnnotationPresent(annotation) }
+        objectProvider = ModuleCachedProvider(found.size)
+        classes = ArrayList(found)
     }
 
     override fun onCreated(context: Context, config: Config) {
         // NOP
     }
 
-    override fun onDestroy() {
-        handlers.clear()
-    }
-
-    override fun prepare(classes: List<Class<*>>): List<Class<*>> {
-        cachedClasses.forEach { moduleType ->
-            val uri = getModuleUri(moduleType)
-            annotatedMethods(moduleType, action = { javaMethod, annotationType ->
+    override fun prepare(/*Ignore*/inputs: List<Class<*>>): List<Class<*>> {
+        classes.forEach { clazz ->
+            val root = getRootUri(clazz)
+            findAnnotated(clazz, action = { javaMethod, annotationType ->
                 checkReturnType(javaMethod)
                 checkArguments(javaMethod)
-                val handler = RequestHandler.create(uri, moduleType, javaMethod, annotationType)
+                val handler = RequestHandler.create(root, clazz, javaMethod, annotationType)
                 handlers.add(handler)
                 Logger.info("$tag-Module-Define: $handler")
             })
         }
         try{
-            return cachedClasses.toList()
+            return classes.toList()
         }finally{
-            cachedClasses.clear()
+            classes.clear()
         }
+    }
+
+    override fun onDestroy() {
+        handlers.clear()
     }
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatched(RequestWrapper.createFromClient(request.method, request.path, request.resources))
+        val found = findMatches(RequestWrapper.createFromClient(request.method, request.path, request.resources))
         processFound(found, request, response, dispatch)
     }
 
@@ -77,7 +75,7 @@ abstract class ModuleHandler(val tag: String,
                 request._setDynamicScope(dynamic)
             }
             Logger.trace("$tag-Handler: $handler")
-            val moduleObject = moduleObjectProvider.get(handler.invoker.hostType)
+            val moduleObject = objectProvider.get(handler.invoker.hostType)
             val chain = RequestChain()
             // 插入一些特殊处理过程接口的调用
             if(moduleObject is ModuleRequestsListener) {
@@ -96,16 +94,10 @@ abstract class ModuleHandler(val tag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected open fun findMatched(request: RequestWrapper): List<RequestHandler> {
-        val found = ArrayList<RequestHandler>()
-        handlers.forEach { define ->
-            if(request.isMatchDefine(define.request)) {
-                found.add(define)
-            }
-        }
-        return found
+    protected open fun findMatches(request: RequestWrapper): List<RequestHandler> {
+        return handlers.filter { define -> request.isMatchDefine(define.request) }
     }
 
-    protected abstract fun getModuleUri(hostType: Class<*>): String
+    protected abstract fun getRootUri(hostType: Class<*>): String
 
 }

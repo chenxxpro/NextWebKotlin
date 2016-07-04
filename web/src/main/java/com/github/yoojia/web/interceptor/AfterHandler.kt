@@ -11,7 +11,7 @@ import com.github.yoojia.web.supports.ModuleHandler
 class AfterHandler(classes: List<Class<*>>) :
         InterceptorHandler("AfterInterceptor", AfterInterceptor::class.java, classes) {
 
-    override fun getModuleUri(hostType: Class<*>): String {
+    override fun getRootUri(hostType: Class<*>): String {
         return hostType.getAnnotation(AfterInterceptor::class.java).base
     }
 

@@ -12,10 +12,6 @@ import javax.servlet.ServletResponse
  */
 class BootstrapServlet : Servlet {
 
-    override fun destroy() {
-        Engine.shutdown()
-    }
-
     override fun init(config: ServletConfig?) {
         Engine.boot(config?.servletContext!!)
     }
@@ -26,6 +22,10 @@ class BootstrapServlet : Servlet {
 
     override fun getServletInfo(): String? {
         return Engine.VERSION
+    }
+
+    override fun destroy() {
+        Engine.shutdown()
     }
 
     override fun service(request: ServletRequest?, response: ServletResponse?) {

@@ -5,20 +5,20 @@ import com.github.yoojia.web.RequestChain
 import com.github.yoojia.web.Response
 import java.lang.reflect.Method
 
-internal fun annotatedMethods(hostType: Class<*>, action: (Method, Class<out Annotation>) -> Unit) {
-    val ifFindAnnotated = fun(method: Method, annotationType: Class<out Annotation>) {
+internal fun findAnnotated(hostType: Class<*>, action: (Method, Class<out Annotation>) -> Unit) {
+    val ifAnnotated = fun(method: Method, annotationType: Class<out Annotation>) {
         if(method.isAnnotationPresent(annotationType)) {
             action.invoke(method, annotationType)
         }
     }
-    hostType.declaredMethods.forEach {
-        if(!it.isBridge && !it.isSynthetic) {
+    hostType.declaredMethods.forEach { method ->
+        if(!method.isBridge && !method.isSynthetic) {
             // 允许一个方法定义多种HTTP Method
-            ifFindAnnotated(it, GET::class.java)
-            ifFindAnnotated(it, POST::class.java)
-            ifFindAnnotated(it, PUT::class.java)
-            ifFindAnnotated(it, DELETE::class.java)
-            ifFindAnnotated(it, ALL::class.java)
+            ifAnnotated(method, GET::class.java)
+            ifAnnotated(method, POST::class.java)
+            ifAnnotated(method, PUT::class.java)
+            ifAnnotated(method, DELETE::class.java)
+            ifAnnotated(method, ALL::class.java)
         }
     }
 }
@@ -32,14 +32,14 @@ internal fun checkReturnType(method: Method) {
 internal fun checkArguments(method: Method) {
     val types = method.parameterTypes
     if(types.size !in 1..3) {
-        throw IllegalArgumentException("@GET/@POST/@PUT/@DELETE methods must has 1..3 params, was ${types.size} in method $method")
+        throw IllegalArgumentException("@GET/@POST/@PUT/@DELETE methods must has 1 to 3 params, was ${types.size} in method $method")
     }
-    val used = arrayOf(false, false, false)
+    val marks = arrayOf(false, false, false)
     val duplicate = fun (type: Class<*>, index: Int) {
-        if(used[index]) {
+        if(marks[index]) {
             throw IllegalArgumentException("Duplicate arguments type <$type> in method $method")
         }
-        used[index] = true
+        marks[index] = true
     }
     types.forEach { type ->
         when {
@@ -57,9 +57,9 @@ internal fun checkArguments(method: Method) {
  * - 静态方法优先；
  * - 动态参数：固定参数类型{int:user_id}优先于不定参数类型{user_id}
  */
-fun getRequestPriority(wrapper: RequestWrapper): Int {
-    var priority = wrapper.segments.size
-    wrapper.segments.forEach { segment ->
+fun getRequestPriority(request: RequestWrapper): Int {
+    var priority = request.segments.size
+    request.segments.forEach { segment ->
         if(segment.isWildcard) {
             priority += -1
         }else{
