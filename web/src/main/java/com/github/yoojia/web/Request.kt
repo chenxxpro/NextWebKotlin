@@ -25,6 +25,9 @@ class Request(ctx: Context, request: HttpServletRequest){
     @JvmField val createTime: Long
     @JvmField val resources: List<String>
 
+    @JvmField val CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
+    @JvmField val CONTENT_TYPE_MULTIPART = "multipart/form-data"
+
     private val dynamicParams = AnyMap()
     private val scopeParams: MutableMap<String, MutableList<String>> by lazy {
         val params: MutableMap<String, MutableList<String>> = HashMap()
@@ -34,7 +37,7 @@ class Request(ctx: Context, request: HttpServletRequest){
         if(request.method.toUpperCase() in setOf("PUT", "DELETE")) {
             readBodyStream()?.let { data ->
                 params.put(BODY_DATA, mutableListOf(data))
-                if("application/x-www-form-urlencoded".equals(request.contentType, ignoreCase = true)) {
+                if(CONTENT_TYPE_FORM.equals(request.contentType, ignoreCase = true)) {
                     data.split('&').forEach { pair ->
                         val kv = pair.split('=')
                         if(kv.size != 2) throw IllegalArgumentException("Client request post invalid query string")
@@ -47,7 +50,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     companion object {
-        @JvmField val BODY_DATA = "#@#next-web.body.data:key"
+        @JvmField val BODY_DATA = "<next-web::body.data:raw-data:key>"
     }
 
     init {

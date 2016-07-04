@@ -49,16 +49,13 @@ object Engine {
         contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context  : ${ctx.contextPath}")
-
         initModules(ctx, classProvider.get(ctx).toMutableList())
         kernelManager.allModules { module ->
             dispatcher.add(module)
         }
         Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
         Logger.debug("Loaded-Plugins: ${kernelManager.pluginCount()}")
-
         kernelManager.onCreated(ctx)
-
         Logger.warn("<=== NextEngine BOOT SUCCESSFUL, Boot time: ${escape(_start)}ms")
     }
 
@@ -66,8 +63,7 @@ object Engine {
         val context = contextRef.get()
         val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
-        // Default: 404
-        response.setStatusCode(StatusCode.NOT_FOUND)
+        response.setStatusCode(StatusCode.NOT_FOUND) // Default: 404
         try{
             dispatcher.route(request, response)
         }catch(err: Throwable) {
@@ -87,7 +83,6 @@ object Engine {
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>) {
         val rootConfig = context.config;
-
         val register = fun(tag: String, module: Module, priority: Int, config: String){
             val start = now()
             val preUsed = module.prepare(classes);
@@ -95,14 +90,12 @@ object Engine {
             Logger.debug("$tag-Prepare: ${escape(start)}ms")
             kernelManager.register(module, priority, rootConfig.getConfig(config))
         }
-
         // Kernel
         register("BeforeInterceptor", BeforeHandler(classes), BeforeHandler.DEFAULT_PRIORITY, "before-interceptor")
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
         register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
-
+        // Bind in
         tryBuildInModules(context, classes)
-
         // User
         val classLoader = getClassLoader()
         val modulesStart = now()
