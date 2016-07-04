@@ -11,6 +11,7 @@ import com.github.yoojia.web.util.*
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Paths
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -61,11 +62,10 @@ object Engine {
 
     fun process(req: ServletRequest, res: ServletResponse) {
         val context = contextRef.get()
-        val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
         response.setStatusCode(StatusCode.NOT_FOUND) // Default: 404
         try{
-            dispatcher.route(request, response)
+            dispatcher.route(Request(context, req as HttpServletRequest), response)
         }catch(err: Throwable) {
             Logger.error("Error when processing request", err)
             try{
@@ -82,20 +82,22 @@ object Engine {
     }
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>) {
-        val rootConfig = context.config;
+        val rootConfig = context.config
         val register = fun(tag: String, module: Module, priority: Int, config: String){
             val start = now()
-            val preUsed = module.prepare(classes);
+            val preUsed = module.prepare(classes)
             classes.removeAll(preUsed)
             Logger.debug("$tag-Prepare: ${escape(start)}ms")
             kernelManager.register(module, priority, rootConfig.getConfig(config))
         }
+        // Try load build in
+        tryBuildIns(classes)
         // Kernel
         register("BeforeInterceptor", BeforeHandler(classes), BeforeHandler.DEFAULT_PRIORITY, "before-interceptor")
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
         register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
-        // Bind in
-        tryBuildInModules(context, classes)
+        // extensions
+        tryExtensions(context, classes)
         // User
         val classLoader = getClassLoader()
         val modulesStart = now()
@@ -124,10 +126,22 @@ object Engine {
     }
 
     /**
+     * 内置日志处理器
+     */
+    private fun tryBuildIns(classes: MutableList<Class<*>>) {
+        val before = "com.github.yoojia.web.logging.BeforeLoggingHandler"
+        val after = "com.github.yoojia.web.logging.AfterLoggingHandler"
+        if(classExists(before) && classExists(after)) {
+            classes.add(loadClassByName(getClassLoader(), before))
+            classes.add(loadClassByName(getClassLoader(), after))
+        }
+    }
+
+    /**
         - 资源： com.github.yoojia.web.Assets
         - 模板： com.github.yoojia.web.VelocityTemplates
     */
-    private fun tryBuildInModules(context: Context, classes: MutableList<Class<*>>) {
+    private fun tryExtensions(context: Context, classes: MutableList<Class<*>>) {
         val classLoader = getClassLoader()
         val httpPriority = HttpControllerHandler.DEFAULT_PRIORITY
         val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){

@@ -126,6 +126,25 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     /**
+     * 获取所有Header
+     * - 单个数值的参数以 String 类型返回
+     * - 多个数值的参数以 List<String> 类型返回
+     * @return 非空AnyMap对象
+     */
+    fun headers(): AnyMap {
+        val map = AnyMap()
+        for (name in servletRequest.headerNames) {
+            val headers = servletRequest.getHeaders(name).toList()
+            if(headers.size == 1) {
+                map.put(name, headers.first())
+            }else{
+                map.put(name, headers.toList())
+            }
+        }
+        return map
+    }
+
+    /**
      * 返回指定name值的Cookie。
      * @return Cookie 对象，如果请求中不存在此Cookie则返回 null
      */
@@ -136,6 +155,10 @@ class Request(ctx: Context, request: HttpServletRequest){
             }
         }
         return null
+    }
+
+    fun cookies(): List<Cookie> {
+        return servletRequest.cookies.toList()
     }
 
     /**
