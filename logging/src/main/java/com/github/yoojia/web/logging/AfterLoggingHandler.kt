@@ -20,18 +20,22 @@ class AfterLoggingHandler {
 
         fun prepareLog(response: Response): String {
             val buff = StringBuilder()
-            buff.append("Response-Code:").append(response.servletResponse.status)
-            buff.append("Content-Type").append(" = ").append(response.servletResponse.contentType).append("\r\n")
-            buff.append("Response-End: ").append(Date(response.createTime)).append("\r\n")
+            buff.append("Response-At: ").append(FORMATTER.format(Date(response.createTime))).append("\r\n")
+            buff.append("Status-Code: ").append(response.servletResponse.status).append("\r\n")
+            buff.append("Content-Type: ").append(response.servletResponse.contentType).append("\r\n")
             return buff.toString()
         }
     }
 
     @ALL("/*")
     fun loggingAfter(request: Request, response: Response) {
-        val buff = StringBuilder(request.param(LOGGING_KEY))
-        buff.append(prepareLog(response))
-        Logger.debug(buff.toString())
+        val pre = request.param(LOGGING_KEY, "")
+        if(!pre.isNullOrEmpty()) {
+            val buff = StringBuilder(pre)
+            buff.append(prepareLog(response))
+            buff.append("<=== END")
+            Logger.debug(buff.toString())
+        }
     }
 
 }

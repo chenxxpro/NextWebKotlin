@@ -132,7 +132,7 @@ object Engine {
         val before = "com.github.yoojia.web.logging.BeforeLoggingHandler"
         val after = "com.github.yoojia.web.logging.AfterLoggingHandler"
         if(classExists(before) && classExists(after)) {
-            classes.add(loadClassByName(getClassLoader(), before))
+            classes.add(0, loadClassByName(getClassLoader(), before))
             classes.add(loadClassByName(getClassLoader(), after))
         }
     }

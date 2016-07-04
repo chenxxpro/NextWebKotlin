@@ -15,27 +15,30 @@ class BeforeLoggingHandler {
     companion object {
 
         @JvmStatic fun prepareLogText(request: Request): String {
-            val buff = StringBuilder()
-            buff.append("Request-Start: ").append(Date(request.createTime)).append("\r\n")
+            val buff = StringBuilder("===> START").append("\r\n")
+            buff.append("Request-At: ").append(FORMATTER.format(Date(request.createTime))).append("\r\n")
             buff.append("Request-Uri: ").append(request.path).append("\r\n")
             buff.append("Request-Method: ").append(request.method).append("\r\n")
-
+            val addSub = fun(name: String, value: Any) {
+                buff.append("    ").append(name).append(": ").append(value).append("\r\n")
+            }
             // headers
-            buff.append("Request-Headers:").append("\r\n")
-            for((name, value) in request.headers()) {
-                buff.append("    ").append(name).append(" = ").append(value).append("\r\n")
+            val headers = request.headers()
+            if (headers.isNotEmpty()) {
+                buff.append("Headers:").append("\r\n")
+                for((name, value) in request.headers()) { addSub(name, value) }
             }
-
             // Cookies
-            buff.append("Request-Cookies:").append("\r\n")
-            request.cookies().forEach { cookie ->
-                buff.append("    ").append(cookie).append("\r\n")
+            val cookies = request.cookies()
+            if(cookies.isNotEmpty()) {
+                buff.append("Cookies:").append("\r\n")
+                request.cookies().forEach { cookie -> addSub(cookie.name, cookie.value) }
             }
-
             // params
-            buff.append("Request-Params:").append("\r\n")
-            for((name, value) in request.params()) {
-                buff.append("    ").append(name).append(" = ").append(value).append("\r\n")
+            val params = request.params()
+            if(params.isNotEmpty()) {
+                buff.append("Query-Parameters:").append("\r\n")
+                for((name, value) in request.params()) { addSub(name, value) }
             }
             return buff.toString()
         }
