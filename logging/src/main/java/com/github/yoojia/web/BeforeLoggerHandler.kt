@@ -71,8 +71,8 @@ class BeforeLoggerHandler : LoggerModule() {
             }
         }
         if(enabled) {
-            request.putParam(LOGGING_ENABLED_NAME, true)
             request.putParam(LOGGING_TEXT_NAME, prepareRequestLog(request))
+            request.putParam(LOGGING_ENABLED_NAME, true)
         }
         super.process(request, response, dispatch)
     }

@@ -42,6 +42,8 @@ class AfterLoggerHandler : LoggerModule() {
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
         val prepared = request.param(LOGGING_ENABLED_NAME, false)
         val text = request.param(LOGGING_TEXT_NAME, "")
+        request.removeParam(LOGGING_ENABLED_NAME)
+        request.removeParam(LOGGING_TEXT_NAME)
         if(prepared && text.isNotEmpty()) {
             val buff = StringBuilder(text)
             buff.append(prepareResponseLog(response))

@@ -188,6 +188,13 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     /**
+     * 移除一个参数
+     */
+    fun removeParam(name: String) {
+        scopeParams.remove(name)
+    }
+
+    /**
      * 获取动态参数值，如果不存在则返回默认值。
      * 注意：动态参数的有效范围是 @GET/POST/PUT/DELETE 标注的模块方法(Java Method)，离开模块方法范围后动态参数失效。
      * @return 字符值，如果请求中不存在此name的值则返回默认值
