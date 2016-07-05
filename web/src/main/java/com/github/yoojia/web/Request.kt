@@ -1,6 +1,7 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.core.Context
+import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.util.AnyMap
 import com.github.yoojia.web.util.splitToArray
 import com.github.yoojia.web.util.streamCopy
@@ -23,10 +24,9 @@ class Request(ctx: Context, request: HttpServletRequest){
     @JvmField val path: String
     @JvmField val contextPath: String
     @JvmField val createTime: Long
-    @JvmField val resources: List<String>
 
-    @JvmField val CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
-    @JvmField val CONTENT_TYPE_MULTIPART = "multipart/form-data"
+    val resources: List<String>
+    val comparator: Comparator
 
     private val dynamicParams = AnyMap()
     private val scopeParams: MutableMap<String, MutableList<String>> by lazy {
@@ -36,7 +36,7 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
         if(request.method.toUpperCase() in setOf("PUT", "DELETE")) {
             readBodyStream()?.let { data ->
-                params.put(BODY_DATA, mutableListOf(data))
+                params.put(BODY_DATA_NAME, mutableListOf(data))
                 if(CONTENT_TYPE_FORM.equals(request.contentType, ignoreCase = true)) {
                     data.split('&').forEach { pair ->
                         val kv = pair.split('=')
@@ -50,11 +50,13 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     companion object {
-        @JvmField val BODY_DATA = "<next-web::body.data:raw-data:key>"
+        @JvmField val CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
+        @JvmField val CONTENT_TYPE_MULTIPART = "multipart/form-data"
+        @JvmField val BODY_DATA_NAME = "<next-web::body.data:raw-data:key>"
     }
 
     init {
-        createTime = System.nanoTime()
+        createTime = System.currentTimeMillis()
         context = ctx
         servletRequest = request
         contextPath = request.contextPath
@@ -62,24 +64,25 @@ class Request(ctx: Context, request: HttpServletRequest){
         path = if ("/".equals(contextPath)) uri else uri.substring(contextPath.length)
         method = request.method.toUpperCase()
         resources = splitToArray(path)
+        comparator = Comparator.createRequest(method, path, resources)
     }
 
     /**
      * 读取BodyData (InputStream) 的文本数据。
-     * 允许重复读取。第一次读取BodyData后，Request会将数据缓存到 scopeParams.BODY_DATA 中。
+     * 允许重复读取。第一次读取BodyData后，Request会将数据缓存到 scopeParams.BODY_DATA_NAME 中。
      * HTTP 的各个方法的数据读取逻辑：
      * - GET/POST 在调用bodyData()时检查；
      * - PUT/DELETE 在调用任意params相关接口时才检查和加载（LazyLoad）
      * @return 文本数据。如果不存在数据则返回 null
      */
     fun bodyData(): String? {
-        val cached = scopeParams[BODY_DATA]?.firstOrNull()
+        val cached = scopeParams[BODY_DATA_NAME]?.firstOrNull()
         if(cached == null && method in setOf("GET", "POST")) {
             val data = readBodyStream()
             if(data != null) {
-                scopeParams.put(BODY_DATA, mutableListOf(data))
+                scopeParams.put(BODY_DATA_NAME, mutableListOf(data))
             }else{
-                scopeParams.put(BODY_DATA, mutableListOf(/*empty*/))
+                scopeParams.put(BODY_DATA_NAME, mutableListOf(/*empty*/))
             }
             return data
         }else{
@@ -175,6 +178,13 @@ class Request(ctx: Context, request: HttpServletRequest){
      */
     fun putParam(name: String, value: String) {
         putOrNew(name, value, scopeParams)
+    }
+
+    /**
+     * 增加一个参数对到请求中
+     */
+    fun putParam(name: String, value: Any) {
+        putParam(name, value.toString())
     }
 
     /**

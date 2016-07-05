@@ -6,7 +6,7 @@ import com.github.yoojia.web.StatusCode
 import com.github.yoojia.web.core.DispatchChain
 import com.github.yoojia.web.supports.InternalPriority
 import com.github.yoojia.web.supports.ModuleHandler
-import com.github.yoojia.web.supports.RequestWrapper
+import com.github.yoojia.web.supports.Comparator
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
@@ -20,7 +20,7 @@ class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpContro
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val matches = findMatches(RequestWrapper.createFromClient(request.method, request.path, request.resources))
+        val matches = findMatches(request.comparator)
         // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
         if(matches.isNotEmpty()) {
             response.setStatusCode(StatusCode.ACCEPTED)

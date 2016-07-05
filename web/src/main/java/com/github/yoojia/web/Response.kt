@@ -16,7 +16,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
     @JvmField val createTime: Long
 
     init{
-        createTime = System.nanoTime()
+        createTime = System.currentTimeMillis()
         addHeader("X-Powered-By", Engine.VERSION)
     }
 
@@ -148,7 +148,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
     }
 
     companion object{
-        val TEMPLATE_NAME = "next-web.response.names:template"
-        val STATIC_NAME = "next-web.response.names:static"
+        val TEMPLATE_NAME = "<<next-web::response.names:template>"
+        val STATIC_NAME = "<next-web::response.names:static>"
     }
 }

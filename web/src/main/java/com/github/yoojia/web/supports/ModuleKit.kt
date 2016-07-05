@@ -57,7 +57,7 @@ internal fun checkArguments(method: Method) {
  * - 静态方法优先；
  * - 动态参数：固定参数类型{int:user_id}优先于不定参数类型{user_id}
  */
-fun getRequestPriority(request: RequestWrapper): Int {
+fun getRequestPriority(request: Comparator): Int {
     var priority = request.segments.size
     request.segments.forEach { segment ->
         if(segment.isWildcard) {

@@ -2,7 +2,7 @@ package com.github.yoojia.web.interceptor
 
 import com.github.yoojia.web.supports.ModuleHandler
 import com.github.yoojia.web.supports.RequestHandler
-import com.github.yoojia.web.supports.RequestWrapper
+import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.util.concat
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -18,7 +18,7 @@ abstract class InterceptorHandler(tag: String,
         private val Logger = LoggerFactory.getLogger(InterceptorHandler::class.java)
     }
 
-    private val ignores = ArrayList<RequestWrapper>()
+    private val ignores = ArrayList<Comparator>()
 
     override fun prepare(inputs: List<Class<*>>): List<Class<*>> {
         try{
@@ -33,16 +33,16 @@ abstract class InterceptorHandler(tag: String,
                     }
                     annotation.value.forEach { uri ->
                         if(uri.isNullOrEmpty()) throw IllegalArgumentException("URI must not be null or empty")
-                        val wrapper = RequestWrapper.createFromDefine(handler.request.method, concat(handler.root, uri))
-                        ignores.add(wrapper)
-                        Logger.info("$tag-Ignore-Define: $wrapper , based: ${handler.request}")
+                        val comparator = Comparator.createDefine(handler.comparator.method, concat(handler.root, uri))
+                        ignores.add(comparator)
+                        Logger.info("$tag-Ignore-Define: $comparator , based: ${handler.comparator}")
                     }
                 }
             }
         }
     }
 
-    override fun findMatches(request: RequestWrapper): List<RequestHandler> {
+    override fun findMatches(request: Comparator): List<RequestHandler> {
         ignores.forEach { define ->
             if(request.isMatchDefine(define)) {
                 return emptyList()

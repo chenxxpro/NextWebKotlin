@@ -62,16 +62,16 @@ abstract class ModuleHandler(val tag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatches(RequestWrapper.createFromClient(request.method, request.path, request.resources))
+        val found = findMatches(request.comparator)
         processFound(found, request, response, dispatch)
     }
 
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
         found.sortedBy { it.priority }.forEach { handler ->
             request._resetDynamicScope()
-            val dynamic = handler.request.parseDynamic(request.resources)
-            if(dynamic.isNotEmpty()) {
-                request._setDynamicScope(dynamic)
+            val dynamics = getDynamic(request)
+            if(dynamics.isNotEmpty()) {
+                request._setDynamicScope(dynamics)
             }
             Logger.trace("$tag-Processing-Handler: $handler")
             val moduleObject = objectProvider.get(handler.invoker.hostType)
@@ -93,10 +93,20 @@ abstract class ModuleHandler(val tag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected open fun findMatches(request: RequestWrapper): List<RequestHandler> {
-        return handlers.filter { define -> request.isMatchDefine(define.request) }
+    protected open fun findMatches(request: Comparator): List<RequestHandler> {
+        return handlers.filter { define -> request.isMatchDefine(define.comparator) }
     }
 
     protected abstract fun getRootUri(hostType: Class<*>): String
 
+    private fun getDynamic(request: Request): Map<String, String> {
+        val output = HashMap<String, String>()
+        for(i in request.comparator.segments.indices) {
+            val segment = request.comparator.segments[i]
+            if(segment.isDynamic) {
+                output.put(segment.segment, request.resources[i])
+            }
+        }
+        return if(output.isEmpty()) emptyMap() else output
+    }
 }

@@ -12,15 +12,15 @@ import java.lang.reflect.Method
 class RequestHandler(
         val root: String,
         val invoker: JavaMethodInvoker,
-        val request: RequestWrapper,
-        val priority: Int = getRequestPriority(request)) {
+        val comparator: Comparator,
+        val priority: Int = getRequestPriority(comparator)) {
 
     val javaMethod: Method by lazy {
         invoker.method
     }
 
     override fun toString(): String {
-        return "{invoker: $invoker, request: $request, priority: $priority}"
+        return "{invoker: $invoker, comparator: $comparator, priority: $priority}"
     }
 
     companion object {
@@ -36,7 +36,7 @@ class RequestHandler(
                 else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
             }
             return RequestHandler(root, JavaMethodInvoker(moduleType, method),
-                    RequestWrapper.createFromDefine(arg.first/*method*/, concat(root, arg.second/*path*/)))
+                    Comparator.createDefine(arg.first/*method*/, concat(root, arg.second/*path*/)))
         }
     }
 }

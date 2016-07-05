@@ -16,6 +16,6 @@ class AfterHandler(classes: List<Class<*>>) :
     }
 
     companion object {
-        @JvmField val DEFAULT_PRIORITY = InternalPriority.AFTER_INTERCEPTOR
+        @JvmField val DEFAULT_PRIORITY = InternalPriority.INTERCEPTOR_AFTER
     }
 }

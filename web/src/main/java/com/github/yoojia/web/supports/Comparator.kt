@@ -7,7 +7,7 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class RequestWrapper {
+class Comparator {
 
     val method: String
     val segments: List<UriSegment>
@@ -21,17 +21,17 @@ class RequestWrapper {
 
     companion object {
 
-        fun createFromClient(method: String, uri: String, segments: List<String>): RequestWrapper {
-            return RequestWrapper(method, uri, segments.map { createRequestUriSegment(it) })
+        fun createRequest(method: String, uri: String, segments: List<String>): Comparator {
+            return Comparator(method, uri, segments.map { createRequestUriSegment(it) })
         }
 
-        fun createFromDefine(method: String, uri: String): RequestWrapper {
-            return RequestWrapper(method, uri, splitToArray(uri).map { createDefineUriSegment(it) })
+        fun createDefine(method: String, uri: String): Comparator {
+            return Comparator(method, uri, splitToArray(uri).map { createDefineUriSegment(it) })
         }
 
     }
 
-    fun isMatchDefine(define: RequestWrapper): Boolean {
+    fun isMatchDefine(define: Comparator): Boolean {
         val request = this
         if("ALL".equals(define.method)) {
             return isUriSegmentMatch(requests = request.segments, defines = define.segments)
@@ -39,20 +39,6 @@ class RequestWrapper {
             return request.method.equals(define.method)
             && isUriSegmentMatch(requests = request.segments, defines = define.segments)
         }
-    }
-
-    /**
-     * 从指定URI请求资源中，解析出动态参数
-     */
-    fun parseDynamic(sources: List<String>): Map<String, String> {
-        val output = HashMap<String, String>()
-        for(i in segments.indices) {
-            val segment = segments[i]
-            if(segment.isDynamic) {
-                output.put(segment.segment, sources[i])
-            }
-        }
-        return if(output.isEmpty()) emptyMap() else output
     }
 
     override fun toString(): String {
