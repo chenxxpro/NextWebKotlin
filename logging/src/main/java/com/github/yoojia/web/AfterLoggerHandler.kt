@@ -20,7 +20,9 @@ class AfterLoggerHandler : LoggerModule() {
             val buff = StringBuilder()
             addLine("Response-At", FORMATTER.format(Date(response.createTime)), buff)
             addLine("Status-Code", response.servletResponse.status, buff)
-            addLine("Content-Type", response.servletResponse.contentType, buff)
+            response.servletResponse.contentType?.let { contentType->
+                addLine("Content-Type", contentType, buff)
+            }
             return buff.toString()
         }
 

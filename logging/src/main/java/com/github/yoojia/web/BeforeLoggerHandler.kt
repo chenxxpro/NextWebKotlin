@@ -51,7 +51,7 @@ class BeforeLoggerHandler : LoggerModule() {
     private val ignores = ArrayList<Comparator>()
 
     override fun onCreated(context: Context, config: Config) {
-        config.getTypedList<String>("ignores").forEach { uri ->
+        config.getTypedList<String>("uri-ignores").forEach { uri ->
             val path = if(uri.endsWith("/")) "$uri/*" else uri
             Logger.debug("BeforeLogger-URI-Ignore: $path")
             ignores.add(Comparator.createDefine("ALL", path))
