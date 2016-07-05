@@ -1,7 +1,6 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.supports.Comparator
-import com.github.yoojia.web.supports.parseDynamic
 import com.github.yoojia.web.util.splitToArray
 import org.junit.Assert
 import org.junit.Test
@@ -29,28 +28,6 @@ class WebURITest {
         Assert.assertEquals("/", resources[0])
         Assert.assertEquals("yoojia", resources[2])
         Assert.assertEquals("profile", resources[3])
-    }
-
-    @Test
-    fun testIsDynamic() {
-        val req = "/users/yoojia/profile"
-        val define = "/users/{username}/profile"
-        val params = parseDynamic(splitToArray(req), Comparator.createDefine("all", define).segments)
-        Assert.assertEquals(true, params.isNotEmpty())
-        Assert.assertEquals(true, params.contains("username"))
-        Assert.assertEquals("yoojia", params["username"])
-    }
-
-    @Test
-    fun testIsDynamic_1() {
-        val req = "/users/yoojia/profile/10086"
-        val define = "/users/{username}/profile/{id}"
-        val params = parseDynamic(splitToArray(req), Comparator.createDefine("all", define).segments)
-        Assert.assertEquals(true, params.isNotEmpty())
-        Assert.assertEquals(true, params.contains("username"))
-        Assert.assertEquals(true, params.contains("id"))
-        Assert.assertEquals("yoojia", params["username"])
-        Assert.assertEquals("10086", params["id"])
     }
 
     @Test
