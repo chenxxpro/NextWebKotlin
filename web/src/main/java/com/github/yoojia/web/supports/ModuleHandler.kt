@@ -69,8 +69,8 @@ abstract class ModuleHandler(val tag: String,
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
         found.sortedBy { it.priority }.forEach { handler ->
             request._resetDynamicScope()
-            val dynamics = getDynamic(request)
-            if(dynamics.isNotEmpty()) {
+            val dynamics = getDynamic(handler, request)
+            if (dynamics.isNotEmpty()) {
                 request._setDynamicScope(dynamics)
             }
             Logger.trace("$tag-Processing-Handler: $handler")
@@ -99,10 +99,10 @@ abstract class ModuleHandler(val tag: String,
 
     protected abstract fun getRootUri(hostType: Class<*>): String
 
-    private fun getDynamic(request: Request): Map<String, String> {
-        val output = HashMap<String, String>()
-        for(i in request.comparator.segments.indices) {
-            val segment = request.comparator.segments[i]
+    private fun getDynamic(handler: RequestHandler, request: Request): Map<String, String> {
+        val output = mutableMapOf<String, String>()
+        for(i in handler.comparator.segments.indices) {
+            val segment = handler.comparator.segments[i]
             if(segment.isDynamic) {
                 output.put(segment.segment, request.resources[i])
             }

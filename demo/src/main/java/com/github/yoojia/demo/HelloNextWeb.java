@@ -22,9 +22,9 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
         chain.interrupt();
     }
 
-    @GET("/{username}")
-    public void dynamic(Request request, Response response, RequestChain chain) {
-        response.sendHtml("<br/>Handle by /{username}, username= " + request.dynamicParam("username"));
+    @GET("/{user_id}")
+    public void undefined(Request request, Response response, RequestChain chain) {
+        response.sendHtml("<br/>Handle by /{user_id}, user_id= " + request.dynamicParam("user_id"));
         chain.interrupt();
     }
 
