@@ -43,7 +43,7 @@ class AfterLoggerHandler : LoggerModule() {
         val prepared = request.param(LOGGING_ENABLED_NAME, false)
         val text = request.param(LOGGING_TEXT_NAME, "")
         if(prepared && text.isNotEmpty()) {
-            val buff = StringBuilder()
+            val buff = StringBuilder(text)
             buff.append(prepareResponseLog(response))
             buff.append("<=== END ===>")
             Logger.debug(buff.toString())
