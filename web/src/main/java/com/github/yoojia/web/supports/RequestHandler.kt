@@ -25,18 +25,10 @@ class RequestHandler(
 
     companion object {
 
-        internal fun create(root: String, moduleType: Class<*>, method: Method, annotationType: Class<out Annotation>): RequestHandler {
-            val annotation = method.getAnnotation(annotationType)
-            val arg = when(annotation) {
-                is GET -> Pair("GET", annotation.value)
-                is POST -> Pair("POST", annotation.value)
-                is PUT -> Pair("PUT", annotation.value)
-                is DELETE -> Pair("DELETE", annotation.value)
-                is ALL -> Pair("ALL", annotation.value)
-                else -> throw IllegalArgumentException("Unexpected annotation <$annotation> in method: $method")
-            }
-            return RequestHandler(root, JavaMethodInvoker(moduleType, method),
-                    Comparator.createDefine(arg.first/*method*/, concat(root, arg.second/*path*/)))
+        internal fun create(root: String, moduleType: Class<*>, javaMethod: Method, httpMethod: String, path: String): RequestHandler {
+            return RequestHandler(root,
+                    JavaMethodInvoker(moduleType, javaMethod),
+                    Comparator.createDefine(httpMethod, concat(root, path)))
         }
     }
 }

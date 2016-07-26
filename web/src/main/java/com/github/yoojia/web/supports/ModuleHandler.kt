@@ -41,10 +41,10 @@ abstract class ModuleHandler(val tag: String,
     override fun prepare(/*Ignore*/inputs: List<Class<*>>): List<Class<*>> {
         classes.forEach { clazz ->
             val root = getRootUri(clazz)
-            findAnnotated(clazz, action = { javaMethod, annotationType ->
+            findAnnotated(clazz, action = { javaMethod, httpMethod, path ->
                 checkReturnType(javaMethod)
                 checkArguments(javaMethod)
-                val handler = RequestHandler.create(root, clazz, javaMethod, annotationType)
+                val handler = RequestHandler.create(root, clazz, javaMethod, httpMethod, path)
                 handlers.add(handler)
                 Logger.info("$tag-Module-Define: $handler")
             })
