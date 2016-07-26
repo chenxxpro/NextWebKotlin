@@ -11,6 +11,7 @@ import com.github.yoojia.web.util.*
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Paths
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -24,7 +25,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object Engine {
 
-    const val VERSION = "NextEngine/2.a.11 (Kotlin 1.0.2-1; Java 7/8)"
+    const val VERSION = "NextEngine/2.a.13 (Kotlin 1.0.2-1; Java 7/8)"
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Engine::class.java)
@@ -61,11 +62,10 @@ object Engine {
 
     fun process(req: ServletRequest, res: ServletResponse) {
         val context = contextRef.get()
-        val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
         response.setStatusCode(StatusCode.NOT_FOUND) // Default: 404
         try{
-            dispatcher.route(request, response)
+            dispatcher.route(Request(context, req as HttpServletRequest), response)
         }catch(err: Throwable) {
             Logger.error("Error when processing request", err)
             try{
@@ -82,22 +82,25 @@ object Engine {
     }
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>) {
-        val rootConfig = context.config;
+        val rootConfig = context.config
         val register = fun(tag: String, module: Module, priority: Int, config: String){
             val start = now()
-            val preUsed = module.prepare(classes);
-            classes.removeAll(preUsed)
+            val scrap = module.prepare(classes)
+            if (scrap.isNotEmpty()) {
+                classes.removeAll(scrap)
+            }
             Logger.debug("$tag-Prepare: ${escape(start)}ms")
             kernelManager.register(module, priority, rootConfig.getConfig(config))
         }
-        // Kernel
+        // Core module
         register("BeforeInterceptor", BeforeHandler(classes), BeforeHandler.DEFAULT_PRIORITY, "before-interceptor")
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
         register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
-        // Bind in
-        tryBuildInModules(context, classes)
-        // User
+
         val classLoader = getClassLoader()
+        // Extensions
+        tryExtensions(context, classes, classLoader)
+        // User.modules
         val modulesStart = now()
         val modules = rootConfig.getConfigList("modules")
         modules.forEach { config ->
@@ -110,7 +113,7 @@ object Engine {
         if(modules.isNotEmpty()) {
             Logger.debug("User-Modules-Prepare: ${escape(modulesStart)}ms")
         }
-
+        // User.plugins
         val pluginStart = now()
         val plugins = rootConfig.getConfigList("plugins")
         plugins.forEach { config ->
@@ -124,31 +127,36 @@ object Engine {
     }
 
     /**
-        - 资源： com.github.yoojia.web.Assets
-        - 模板： com.github.yoojia.web.VelocityTemplates
-    */
-    private fun tryBuildInModules(context: Context, classes: MutableList<Class<*>>) {
-        val classLoader = getClassLoader()
-        val httpPriority = HttpControllerHandler.DEFAULT_PRIORITY
+     *  - 日志： com.github.yoojia.web.LoggerHandler
+     *  - 资源： com.github.yoojia.web.Assets
+     *  - 模板： com.github.yoojia.web.VelocityTemplates
+     */
+    private fun tryExtensions(context: Context, out: MutableList<Class<*>>, classLoader: ClassLoader) {
         val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){
             if(classExists(className)){
                 val start = now()
                 val args = parseConfig(context.config.getConfig(configName))
                 val module = newClassInstance<Module>(loadClassByName(classLoader, className))
-                val used = module.prepare(classes)
-                classes.removeAll(used)
+                val scrap = module.prepare(out)
                 kernelManager.register(module, priorityAction.invoke(args.priority), args.args)
-                Logger.debug("$tagName-Classes: ${used.size}")
+                if(scrap.isNotEmpty()) {
+                    out.removeAll(scrap)
+                    Logger.debug("$tagName-Classes: ${scrap.size}")
+                }
                 Logger.debug("$tagName-Prepare: ${escape(start)}ms")
             }
         }
+
+        // Logger
+        ifExistsThenLoad("com.github.yoojia.web.BeforeLoggerHandler", "logging", "BeforeLogger", { InternalPriority.LOGGER_BEFORE })
+        ifExistsThenLoad("com.github.yoojia.web.AfterLoggerHandler", "logging", "AfterLogger", { InternalPriority.LOGGER_AFTER })
 
         // Assets
         ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
             val priority: Int
             if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.ASSETS
-                Logger.info("Assets.priority($define) must be < HTTP.priority($httpPriority), set to: $priority")
+                Logger.info("Assets.priority($define) must be < HTTP.priority(${HttpControllerHandler.DEFAULT_PRIORITY}), set to: $priority")
             }else{
                 priority = define
             }
@@ -159,8 +167,8 @@ object Engine {
         ifExistsThenLoad("com.github.yoojia.web.VelocityTemplates", "templates", "Templates", { define ->
             val priority: Int
             if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
-                priority = InternalPriority.VELOCITY
-                Logger.info("Templates.priority($define) must be > HTTP.priority($httpPriority), set to: $priority")
+                priority = InternalPriority.TEMPLATES
+                Logger.info("Templates.priority($define) must be > HTTP.priority(${HttpControllerHandler.DEFAULT_PRIORITY}), set to: $priority")
             }else{
                 priority = define
             }

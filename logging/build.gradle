@@ -4,23 +4,27 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
 }
 
 sourceCompatibility = 1.7
 
+apply plugin: 'kotlin'
+
 dependencies {
-    compile 'org.eclipse.jetty.aggregate:jetty-webapp:8.1.17.v20150415'
+    compile project(":web")
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 ext{
-    projVersion = "2.r.2"
-    projArtivactId = 'next-web-server'
+    projVersion = project_version
+    projArtivactId = 'next-web-logging'
     projName = 'NextWebKotlin'
     projDesc = 'NextWebKotlin: A Servlet 3+ based micro web framework written in Kotlin'
     projURL = "https://github.com/yoojia/NextWebKotlin"
     projVCS = "https://github.com/yoojia/NextWebKotlin.git"
 }
 
-//apply from: '../publish.gradle'
+apply from: '../publish.gradle'

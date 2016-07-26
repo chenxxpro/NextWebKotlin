@@ -3,5 +3,6 @@ include ':web'
 include ':server'
 include ':velocity'
 include ':assets'
+include ':logging'
 include ':demo'
 

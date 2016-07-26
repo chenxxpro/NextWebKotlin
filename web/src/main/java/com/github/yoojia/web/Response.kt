@@ -16,7 +16,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
     @JvmField val createTime: Long
 
     init{
-        createTime = System.nanoTime()
+        createTime = System.currentTimeMillis()
         addHeader("X-Powered-By", Engine.VERSION)
     }
 
@@ -111,21 +111,29 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
      * 设置渲染模板
      */
     fun template(name: String): Response {
-        args.put(TEMPLATE_NAME, name)
-        return this
+        return putArg(TEMPLATE_NAME, name)
     }
 
     /**
      * 设置静态资源文件名
      */
     fun static(name: String): Response {
-        args.put(STATIC_NAME, name)
+        return putArg(STATIC_NAME, name)
+    }
+
+    /**
+     * 添加一个参数
+     */
+    fun putArg(name: String, value: Any): Response {
+        args.put(name, value)
         return this
     }
 
-    fun putArgs(name: String, value: Any): Response {
-        args.put(name, value)
-        return this
+    /**
+     * 移除一个参数
+     */
+    fun removeArg(name: String) {
+        args.remove(name)
     }
 
     /**
@@ -148,7 +156,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
     }
 
     companion object{
-        val TEMPLATE_NAME = "next-web.response.names:template"
-        val STATIC_NAME = "next-web.response.names:static"
+        val TEMPLATE_NAME = "<next-web::response.names:template>"
+        val STATIC_NAME = "<next-web::response.names:static>"
     }
 }

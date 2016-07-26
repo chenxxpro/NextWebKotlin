@@ -18,35 +18,34 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
 
     @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
-        response.sendHtml("<br/>Handle by /hello/{username}, username= " + request.dynamicParam("username"));
+        response.sendHtml("<br/>Handle by GET/hello/{username}, username= " + request.dynamicParam("username"));
         chain.interrupt();
     }
 
-    @GET("/{username}")
-    public void dynamic(Request request, Response response, RequestChain chain) {
-        response.sendHtml("<br/>Handle by /{username}, username= " + request.dynamicParam("username"));
+    @GET("/{user_id}")
+    public void undefined(Request request, Response response, RequestChain chain) {
+        response.sendHtml("<br/>Handle by GET/{user_id}, user_id= " + request.dynamicParam("user_id"));
         chain.interrupt();
     }
 
     @GET("/{string:username}")
     public void dynamicTyped(Request request, Response response) {
-        response.sendHtml("<br/>Handle by /{string:username} , username= " + request.dynamicParam("username"));
+        response.sendHtml("<br/>Handle by GET/{string:username} , username= " + request.dynamicParam("username"));
     }
 
     @GET("/{int:user_id}")
     public void intDynamic(Request request, Response response) {
-        response.sendHtml("<br/>Handle by /{int:user_id} , user_id= " + request.dynamicParam("user_id"));
+        response.sendHtml("<br/>Handle by GET/{int:user_id} , user_id= " + request.dynamicParam("user_id"));
     }
 
-    @GET("/*")
-    @POST("/*")
-    public void wildcards(Request request, Response response) {
-        response.sendHtml("<br/>Handle by /* , username= " + request.param("username"));
+    @GETPOST("/*")
+    public void getpostWildcards(Request request, Response response) {
+        response.sendHtml("<br/>Handle by GET/* , username= " + request.param("username"));
     }
 
-    @GET("/yoojia")
+    @POST("/yoojia")
     public void statix(Request request, Response response) {
-        response.sendHtml("<br/>Handle by /yoojia, username= " + request.param("username"));
+        response.sendHtml("<br/>Handle by POST/yoojia, username= " + request.param("username"));
     }
 
     @PUT("/yoojia")

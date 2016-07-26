@@ -41,10 +41,10 @@ abstract class ModuleHandler(val tag: String,
     override fun prepare(/*Ignore*/inputs: List<Class<*>>): List<Class<*>> {
         classes.forEach { clazz ->
             val root = getRootUri(clazz)
-            findAnnotated(clazz, action = { javaMethod, annotationType ->
+            findAnnotated(clazz, action = { javaMethod, httpMethod, path ->
                 checkReturnType(javaMethod)
                 checkArguments(javaMethod)
-                val handler = RequestHandler.create(root, clazz, javaMethod, annotationType)
+                val handler = RequestHandler.create(root, clazz, javaMethod, httpMethod, path)
                 handlers.add(handler)
                 Logger.info("$tag-Module-Define: $handler")
             })
@@ -62,19 +62,18 @@ abstract class ModuleHandler(val tag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatches(RequestWrapper.createFromClient(request.method, request.path, request.resources))
+        val found = findMatches(request.comparator)
         processFound(found, request, response, dispatch)
     }
 
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
-        Logger.trace("$tag-Accepted: ${request.path}")
         found.sortedBy { it.priority }.forEach { handler ->
             request._resetDynamicScope()
-            val dynamic = handler.request.parseDynamic(request.resources)
-            if(dynamic.isNotEmpty()) {
-                request._setDynamicScope(dynamic)
+            val dynamics = getDynamic(handler, request)
+            if (dynamics.isNotEmpty()) {
+                request._setDynamicScope(dynamics)
             }
-            Logger.trace("$tag-Handler: $handler")
+            Logger.trace("$tag-Processing-Handler: $handler")
             val moduleObject = objectProvider.get(handler.invoker.hostType)
             val chain = RequestChain()
             // 插入一些特殊处理过程接口的调用
@@ -94,10 +93,20 @@ abstract class ModuleHandler(val tag: String,
         dispatch.next(request, response, dispatch)
     }
 
-    protected open fun findMatches(request: RequestWrapper): List<RequestHandler> {
-        return handlers.filter { define -> request.isMatchDefine(define.request) }
+    protected open fun findMatches(request: Comparator): List<RequestHandler> {
+        return handlers.filter { define -> request.isMatchDefine(define.comparator) }
     }
 
     protected abstract fun getRootUri(hostType: Class<*>): String
 
+    private fun getDynamic(handler: RequestHandler, request: Request): Map<String, String> {
+        val output = mutableMapOf<String, String>()
+        for(i in handler.comparator.segments.indices) {
+            val segment = handler.comparator.segments[i]
+            if(segment.isDynamic) {
+                output.put(segment.segment, request.resources[i])
+            }
+        }
+        return if(output.isEmpty()) emptyMap() else output
+    }
 }
