@@ -17,7 +17,7 @@ internal fun findAnnotated(hostType: Class<*>, action: (Method, String, String) 
                 is ALL -> action.invoke(method, "ALL", annotation.value)
                 is GETPOST -> {
                     if(method.isAnnotationPresent(GET::class.java) || method.isAnnotationPresent(POST::class.java)) {
-                        throw IllegalArgumentException("When @GETPOST annotated, @GET/@POST is not allow")
+                        throw IllegalArgumentException("When @GETPOST declared, @GET/@POST is not allow declare in $method")
                     }
                     val path = method.getAnnotation(GETPOST::class.java).value
                     action.invoke(method, "GET", path)
@@ -30,10 +30,10 @@ internal fun findAnnotated(hostType: Class<*>, action: (Method, String, String) 
         if(!method.isBridge && !method.isSynthetic) {
             ifAnnotated(method, GET::class)
             ifAnnotated(method, POST::class)
+            ifAnnotated(method, GETPOST::class)
             ifAnnotated(method, PUT::class)
             ifAnnotated(method, DELETE::class)
             ifAnnotated(method, ALL::class)
-            ifAnnotated(method, GETPOST::class)
         }
     }
 }
