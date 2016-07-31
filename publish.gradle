@@ -110,7 +110,7 @@ bintray {
             }
 
             mavenCentralSync {
-                sync = false
+                sync = true
                 user = getPropOrEnv('SONATYPE_USER')
                 password = getPropOrEnv('SONATYPE_PASS')
                 close = '1'
