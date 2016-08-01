@@ -90,13 +90,19 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
     }
 
+    @Deprecated(message = "Use paramOrNull(String) instead",replaceWith = ReplaceWith("paramOrNull", "String"))
+    fun param(name: String): String? {
+        return paramOrNull(name)
+    }
+
     /**
-     * 获取单个值的请求参数值。
-     * - 查找请求参数，如果请求中存在多个参数值，返回第一个参数；
-     * @return 字符值，如果请求中不存在此name的值则返回 null
+     * 获取指定参数名的值。
+     * - 请求中存在单个值，返回值本身；
+     * - 请求中存在多个值，返回第一个值；
+     * @return 参数值。如果请求中不存在此参数，返回 null
      */
-    fun param(key: String): String? {
-        scopeParams[key]?.let { values ->
+    fun paramOrNull(name: String): String? {
+        scopeParams[name]?.let { values ->
             return values.firstOrNull()
         }
         return null
@@ -151,9 +157,9 @@ class Request(ctx: Context, request: HttpServletRequest){
      * 返回指定name值的Cookie。
      * @return Cookie 对象，如果请求中不存在此Cookie则返回 null
      */
-    fun cookie(key: String): Cookie? {
+    fun cookie(name: String): Cookie? {
         servletRequest.cookies.forEach { cookie ->
-            if(key.equals(cookie.name)) {
+            if(name.equals(cookie.name)) {
                 return cookie
             }
         }
@@ -236,6 +242,86 @@ class Request(ctx: Context, request: HttpServletRequest){
 
     fun _resetDynamicScope(){
         dynamicParams.clear()
+    }
+
+    // extensions
+
+    fun stringParam(name: String, def: String): String {
+        val value = param(name)
+        if(value.isNullOrEmpty()) {
+            return def
+        }else{
+            return value!!
+        }
+    }
+
+    fun stringParam(name: String): String {
+        return stringParam(name, "")
+    }
+
+    fun intParam(name: String, def: Int): Int {
+        val value = param(name)
+        if(value.isNullOrEmpty()) {
+            return def
+        }else{
+            return value!!.toInt()
+        }
+    }
+
+    fun intParam(name: String): Int {
+        return intParam(name, 0)
+    }
+
+    fun longParam(name: String, def: Long): Long {
+        val value = param(name)
+        if(value.isNullOrEmpty()) {
+            return def
+        }else{
+            return value!!.toLong()
+        }
+    }
+
+    fun longParam(name: String): Long {
+        return longParam(name, 0L)
+    }
+
+    fun floatParam(name: String, def: Float): Float {
+        val value = param(name)
+        if(value.isNullOrEmpty()) {
+            return def
+        }else{
+            return value!!.toFloat()
+        }
+    }
+
+    fun floatParam(name: String): Float {
+        return floatParam(name, 0f)
+    }
+
+    fun doubleParam(name: String, def: Double): Double {
+        val value = param(name)
+        if(value.isNullOrEmpty()) {
+            return def
+        }else{
+            return value!!.toDouble()
+        }
+    }
+
+    fun doubleParam(name: String): Double {
+        return doubleParam(name, 0.0)
+    }
+
+    fun booleanParam(name: String, def: Boolean): Boolean {
+        val value = param(name)
+        if(value.isNullOrEmpty()) {
+            return def
+        }else{
+            return value!!.toBoolean()
+        }
+    }
+
+    fun booleanParam(name: String): Boolean {
+        return booleanParam(name, false)
     }
 
 }

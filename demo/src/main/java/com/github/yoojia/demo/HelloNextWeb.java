@@ -18,6 +18,7 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
 
     @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
+
         response.sendHtml("<br/>Handle by GET/hello/{username}, username= " + request.dynamicParam("username"));
         chain.interrupt();
     }

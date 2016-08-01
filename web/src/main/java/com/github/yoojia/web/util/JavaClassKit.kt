@@ -64,6 +64,15 @@ fun getClassLoader(): ClassLoader {
     return Thread.currentThread().contextClassLoader
 }
 
+fun classExists(name: String): Boolean {
+    try{
+        Class.forName(name)
+        return true
+    }catch(err: Exception) {
+        return false
+    }
+}
+
 private fun resolveClassName(path: String): String {
     val segments = splitToArray(path, File.separatorChar, false)
     val buffer = StringBuilder()

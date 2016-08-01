@@ -5,7 +5,6 @@ import java.lang.reflect.Method
 
 /**
  * 为模块类中@GET/POST/PUT/DELETE等方法创建的请求处理器。
- * 对应每个Java method生成一个RequestHandler；
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
