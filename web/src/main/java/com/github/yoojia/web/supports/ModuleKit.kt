@@ -11,10 +11,6 @@ internal fun findAnnotated(hostType: Class<*>, action: (Method, String, String) 
         if(method.isAnnotationPresent(type.java)) {
             val annotation = method.getAnnotation(type.java)
             when(annotation) {
-                is GET -> action.invoke(method, "GET", annotation.value)
-                is POST -> action.invoke(method, "POST", annotation.value)
-                is DELETE -> action.invoke(method, "DELETE", annotation.value)
-                is ALL -> action.invoke(method, "ALL", annotation.value)
                 is GETPOST -> {
                     if(method.isAnnotationPresent(GET::class.java) || method.isAnnotationPresent(POST::class.java)) {
                         throw IllegalArgumentException("When @GETPOST declared, @GET/@POST is not allow declare in $method")
@@ -23,14 +19,19 @@ internal fun findAnnotated(hostType: Class<*>, action: (Method, String, String) 
                     action.invoke(method, "GET", path)
                     action.invoke(method, "POST", path)
                 }
+                is GET -> action.invoke(method, "GET", annotation.value)
+                is POST -> action.invoke(method, "POST", annotation.value)
+                is PUT -> action.invoke(method, "PUT", annotation.value)
+                is DELETE -> action.invoke(method, "DELETE", annotation.value)
+                is ALL -> action.invoke(method, "ALL", annotation.value)
             }
         }
     }
     hostType.declaredMethods.forEach { method ->
         if(!method.isBridge && !method.isSynthetic) {
+            ifAnnotated(method, GETPOST::class)
             ifAnnotated(method, GET::class)
             ifAnnotated(method, POST::class)
-            ifAnnotated(method, GETPOST::class)
             ifAnnotated(method, PUT::class)
             ifAnnotated(method, DELETE::class)
             ifAnnotated(method, ALL::class)
@@ -40,7 +41,7 @@ internal fun findAnnotated(hostType: Class<*>, action: (Method, String, String) 
 
 internal fun checkReturnType(method: Method) {
     if(!Void.TYPE.equals(method.returnType)) {
-        throw IllegalArgumentException("Return type of @GET/@POST/@PUT/@DELETE methods must be <VOID> or <UNIT> !")
+        throw IllegalArgumentException("Return type of @GET/@POST/@PUT/@DELETE methods must be <Java::void> or <Kotlin::unit> !")
     }
 }
 
