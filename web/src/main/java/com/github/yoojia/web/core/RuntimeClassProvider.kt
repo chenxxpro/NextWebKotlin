@@ -10,11 +10,11 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-internal class ClassesLoader : ClassProvider {
+internal class RuntimeClassProvider : ClassProvider {
 
     companion object{
 
-        private val Logger = LoggerFactory.getLogger(ClassesLoader::class.java)
+        private val Logger = LoggerFactory.getLogger(RuntimeClassProvider::class.java)
 
         private val DEFAULT_SYSTEM_CLASSES = arrayOf(
                 "com.github.yoojia.web.",
@@ -37,9 +37,9 @@ internal class ClassesLoader : ClassProvider {
         }
         val classPath = Paths.get(Engine::class.java.getResource("/").toURI())
         Logger.debug("Class-Path: $classPath")
-        val runtime = findRuntimeNames(classPath, filter)
-        val jar = findJarClassNames(filter)
-        val classes = ArrayList<Class<*>>(loadClassByName(runtime.concat(jar)))
+        val classPathClasses = findRuntimeNames(classPath, filter)
+        val jarClasses = findJarClassNames(filter)
+        val classes = ArrayList<Class<*>>(loadClassesByNames(classPathClasses.concat(jarClasses)))
         Logger.debug("Class-Count: ${classes.size}")
         Logger.debug("Scan-Time: ${escape(start)}ms")
         return classes

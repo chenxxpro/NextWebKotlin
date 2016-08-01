@@ -23,26 +23,26 @@ internal class ConfigLoader : ConfigProvider {
      * - config-path 配置文件路径；
      * - config-state 配置文件处理状态；
      *
-     * @param path 配置文件路径
+     * @param filePath 配置文件路径
      * @return 非null Config对象。
      */
     @Suppress("UNCHECKED_CAST")
-    override fun get(path: Path): Config {
-        if(! Files.exists(path)) {
+    override fun get(filePath: Path): Config {
+        if(! Files.exists(filePath)) {
             val map = LinkedHashMap<String, Any>(2)
-            map.put(KEY_CONFIG_PATH, path.toString())
+            map.put(KEY_CONFIG_PATH, filePath.toString())
             map.put(KEY_CONFIG_STATE, "FILE-NOT-EXISTS")
             return Config(map)
         }else{
             val map: MutableMap<String, Any>
-            val stream = FileInputStream(path.toFile())
+            val stream = FileInputStream(filePath.toFile())
             try{
                 map = Yaml().load(stream) as MutableMap<String, Any>
             }finally{
                 stream.close()
             }
             map.put(KEY_CONFIG_STATE, "LOAD-SUCCESS")
-            map.put(KEY_CONFIG_PATH, path.toString())
+            map.put(KEY_CONFIG_PATH, filePath.toString())
             return Config(map)
         }
     }

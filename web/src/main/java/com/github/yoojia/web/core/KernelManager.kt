@@ -6,14 +6,10 @@ import java.util.*
  * @author Yoojia Chen (yoojia.chen@gmail.com)
  * @since 1.0
  */
-internal class KernelManager {
+class KernelManager {
 
     private val modules = ArrayList<Triple<Module, Int, Config>>()
     private val plugins = ArrayList<Triple<Plugin, Int, Config>>()
-
-    fun allModules(action: (Module) -> Unit) {
-        modules.forEach { action.invoke(it.first) }
-    }
 
     fun register(plugin: Plugin, priority: Int, config: Config) {
         plugins.add(Triple(plugin, priority, config))
@@ -23,12 +19,16 @@ internal class KernelManager {
         modules.add(Triple(module, priority, config))
     }
 
-    fun onCreated(ctx: Context) {
+    internal fun withModules(action: (Module) -> Unit) {
+        modules.forEach { action.invoke(it.first) }
+    }
+
+    internal fun onCreated(ctx: Context) {
         modules.sortedBy { it.second/*priority*/ }.forEach { it.first/*model*/.onCreated(ctx, it.third/*config*/) }
         plugins.sortedBy { it.second/*priority*/ }.forEach { it.first/*plugin*/.onCreated(ctx, it.third/*config*/) }
     }
 
-    fun onDestroy() {
+    internal fun onDestroy() {
         // Call onDestroy
         modules.forEach { it.first.onDestroy() }
         modules.clear()
@@ -36,11 +36,11 @@ internal class KernelManager {
         plugins.clear()
     }
 
-    fun moduleCount(): Int {
+    internal fun moduleCount(): Int {
         return modules.size
     }
 
-    fun pluginCount(): Int {
+    internal fun pluginCount(): Int {
         return plugins.size
     }
 }

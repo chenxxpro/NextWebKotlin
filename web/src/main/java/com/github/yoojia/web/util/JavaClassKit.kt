@@ -1,5 +1,6 @@
 package com.github.yoojia.web.util
 
+import com.github.yoojia.web.core.Engine
 import com.github.yoojia.web.supports.Filter
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -18,12 +19,12 @@ fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
     Files.walkFileTree(based, object : SimpleFileVisitor<Path>() {
         @Throws(IOException::class)
         override fun visitFile(path: Path, attr: BasicFileAttributes): FileVisitResult {
-            val name = based.relativize(path).toString()
-            if(name.endsWith(".class")) {
-                val clazz = resolveClassName(name)
-                Logger.trace("-> $clazz")
-                if(filter.accept(clazz)) { // return true to accept
-                    found.add(clazz);
+            val classFilePath = based.relativize(path).toString()
+            if(classFilePath.endsWith(".class")) {
+                val className = resolveClassName(classFilePath)
+                Logger.trace("-> $className")
+                if(filter.accept(className)) { // return true to accept
+                    found.add(className);
                 }
             }
             return FileVisitResult.CONTINUE
@@ -36,9 +37,9 @@ fun findJarClassNames(filter: Filter<String>): List<String> {
     return emptyList() // TODO 从Jar包中加载
 }
 
-fun loadClassByName(names: List<String>): List<Class<*>> {
+fun loadClassesByNames(names: List<String>): List<Class<*>> {
     val output = ArrayList<Class<*>>()
-    val classLoader = getClassLoader()
+    val classLoader = getEngineClassLoader()
     names.forEach { name ->
         output.add(loadClassByName(classLoader, name))
     }
@@ -60,12 +61,12 @@ fun <T> newClassInstance(clazz: Class<*>): T {
     return clazz.newInstance() as T
 }
 
-fun getClassLoader(): ClassLoader {
-    return Thread.currentThread().contextClassLoader
+fun getEngineClassLoader(): ClassLoader {
+    return Engine::class.java.classLoader
 }
 
-private fun resolveClassName(path: String): String {
-    val segments = splitToArray(path, File.separatorChar, false)
+private fun resolveClassName(classFilePath: String): String {
+    val segments = splitToArray(classFilePath, File.separatorChar, false)
     val buffer = StringBuilder()
     segments.forEach { seg ->
         if (seg.endsWith(".class")) {
