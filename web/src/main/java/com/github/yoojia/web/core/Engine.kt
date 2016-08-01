@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object Engine {
 
-    const val VERSION = "NextEngine/2.a.13 (Kotlin 1.0.2-1; Java 7/8)"
+    const val VERSION = "NextEngine/2.a.14 (Kotlin 1.0.3; Java 7/8)"
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Engine::class.java)
@@ -177,15 +177,6 @@ object Engine {
             }
             priority
         })
-    }
-
-    private fun classExists(name: String): Boolean {
-        try{
-            Class.forName(name)
-            return true
-        }catch(err: Exception) {
-            return false
-        }
     }
 
     /**

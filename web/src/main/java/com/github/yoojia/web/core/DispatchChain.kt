@@ -15,7 +15,7 @@ class DispatchChain {
         override fun initialValue(): Int? {
             return 0
         }
-    }
+    }// Supported to Java 7
 
     fun add(module: Module) {
         modules.add(module)

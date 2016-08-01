@@ -18,6 +18,16 @@ class Comparator {
         this.segments = segments
     }
 
+    fun isMatchDefine(define: Comparator): Boolean {
+        val request = this
+        if("ALL".equals(define.method)) {
+            return isUriSegmentMatch(requests = request.segments, defines = define.segments)
+        }else{
+            return request.method.equals(define.method)
+            && isUriSegmentMatch(requests = request.segments, defines = define.segments)
+        }
+    }
+
     companion object {
 
         fun createRequest(method: String, uri: String, segments: List<String>): Comparator {
@@ -28,15 +38,40 @@ class Comparator {
             return Comparator(method, uri, splitToArray(uri).map { createDefineUriSegment(it) })
         }
 
-    }
+        /**
+         * 客户端请求的UriSegments与定义的UriSegments是否匹配。
+         */
+        private fun isUriSegmentMatch(requests: List<UriSegment>, defines: List<UriSegment>): Boolean {
+            if(defines.last().isWildcard) {
+                val index = defines.size - 1
+                if(requests.size < index) {
+                    return false
+                }else{
+                    return match(requests.subList(0, index), defines.subList(0, index))
+                }
+            }else{
+                return requests.size == defines.size && match(requests, defines)
+            }
+        }
 
-    fun isMatchDefine(define: Comparator): Boolean {
-        val request = this
-        if("ALL".equals(define.method)) {
-            return isUriSegmentMatch(requests = request.segments, defines = define.segments)
-        }else{
-            return request.method.equals(define.method)
-            && isUriSegmentMatch(requests = request.segments, defines = define.segments)
+        /**
+         * 在UriSegment资源长度相同的情况下，判断它们是否匹配；
+         * - 定义为动态参数：比较它们的类型是否相同，忽略资源名；定义为字符串类型时，可以匹配任意请求资源类型；
+         * - 定义为静态字段：比较资源名是否相同（大小写完全相同）；
+         */
+        private fun match(requests: List<UriSegment>, defines: List<UriSegment>): Boolean{
+            for(i in requests.indices) {
+                val define = defines[i]
+                val request = requests[i]
+                val match: Boolean
+                if(define.isDynamic) {
+                    match = define.valueType.match(request.valueType)
+                }else{
+                    match = define.segment.equals(request.segment, ignoreCase = false)
+                }
+                if(!match) return false
+            }
+            return true
         }
     }
 

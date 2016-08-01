@@ -14,13 +14,13 @@ enum class UriValueType {
     INT("int:", "int:".length),
     LONG("long:", "long:".length);
 
-    private constructor(prefix: kotlin.String, offset: kotlin.Int){
+    val prefix: String
+    val offset: Int
+
+    private constructor(prefix: String, offset: Int){
         this.prefix = prefix
         this.offset = offset
     }
-
-    val prefix: kotlin.String
-    val offset: kotlin.Int;
 
     /**
      * 当前类型与指定类型是否匹配:
