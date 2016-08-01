@@ -4,7 +4,6 @@ import com.github.yoojia.web.core.Config
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.core.DispatchChain
 import com.github.yoojia.web.supports.InternalPriority
-import com.github.yoojia.web.util.param
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -40,8 +39,8 @@ class AfterLoggerHandler : LoggerModule() {
     }
 
     override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val prepared = request.param(LOGGING_ENABLED_NAME, false)
-        val text = request.param(LOGGING_TEXT_NAME, "")
+        val prepared = request.booleanParam(LOGGING_ENABLED_NAME)
+        val text = request.stringParam(LOGGING_TEXT_NAME)
         request.removeParam(LOGGING_ENABLED_NAME)
         request.removeParam(LOGGING_TEXT_NAME)
         if(prepared && text.isNotEmpty()) {

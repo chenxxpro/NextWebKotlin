@@ -12,11 +12,15 @@ class ModuleCachedProvider(guessSize: Int) {
     private val mCached = object: LinkedHashMap<Class<*>, Any>(guessSize, 0.75f, true){
 
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Class<*>, Any>?): Boolean {
-            val remove = this.size > guessSize
-            if(remove && eldest?.value is ModuleCachedListener) {
-                (eldest!!.value as ModuleCachedListener).onRemoved()
+            val isRemoved = this.size > guessSize
+            try{
+                return isRemoved
+            }finally {
+                val module = eldest!!.value
+                if(isRemoved && module is ModuleCachedListener) {
+                    module.onRemoved()
+                }
             }
-            return remove
         }
 
     }
