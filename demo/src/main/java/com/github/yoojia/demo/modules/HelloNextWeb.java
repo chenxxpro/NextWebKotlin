@@ -1,4 +1,4 @@
-package com.github.yoojia.demo;
+package com.github.yoojia.demo.modules;
 
 import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;

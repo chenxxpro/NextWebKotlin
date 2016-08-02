@@ -27,10 +27,31 @@ internal class RuntimeClassProvider : ClassProvider {
 
     override fun get(context: Context): List<Class<*>> {
         val start = now()
+        val runtimeConfig = context.config.getConfig("runtime-classes")
+        val excludePackages = runtimeConfig.getTypedList<String>("exclude-packages")
+        val excludeClasses = runtimeConfig.getTypedList<String>("exclude-classes")
+        val hasExcludePackage = excludePackages.isNotEmpty();
+        val hasExcludeClass = excludeClasses.isNotEmpty();
+        if(hasExcludePackage) excludePackages.forEach { pack->
+            Logger.debug("Exclude-Package: $pack")
+        }
+        if(hasExcludeClass) excludeClasses.forEach { className->
+            Logger.debug("Exclude-Class: $className")
+        }
         val filter = object : Filter<String> {
-            override fun accept(value: String): Boolean {
+            override fun accept(className: String): Boolean {
                 DEFAULT_SYSTEM_CLASSES.forEach {
-                    if(value.startsWith(it)) return false
+                    if(className.startsWith(it)) return false
+                }
+                if(hasExcludePackage) {
+                    excludePackages.forEach { excludePackage->
+                        if(className.startsWith(excludePackage)) return false
+                    }
+                }
+                if(hasExcludeClass) {
+                    excludeClasses.forEach { excludeName->
+                        if(className.equals(excludeName)) return false
+                    }
                 }
                 return true
             }

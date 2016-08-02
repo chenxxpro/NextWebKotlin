@@ -14,7 +14,7 @@ import javax.servlet.ServletConfig
 abstract class ProvidedBootstrapServlet : GeneralServlet(), ClassProvider, ConfigProvider {
 
     override fun init2(config: ServletConfig) {
-        Engine.init(config.servletContext!!, this, this)
+        Engine.start(config.servletContext!!, this, this)
     }
 
     override fun get(filePath: Path): Config {

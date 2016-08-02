@@ -11,7 +11,6 @@ import com.github.yoojia.web.util.*
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Paths
-import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -36,11 +35,11 @@ object Engine {
     val kernelManager = KernelManager()
 
     fun init(servletContext: ServletContext) {
-        init(servletContext, ConfigLoader(), RuntimeClassProvider())
+        start(servletContext, ConfigLoader(), RuntimeClassProvider())
     }
 
-    fun init(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
-        Logger.warn("===> NextEngine BOOTING, Version: $VERSION")
+    fun start(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
+        Logger.warn("===> NextEngine START BOOTING, Version: $VERSION")
         val _start = now()
         val directory = servletContext.getRealPath("/")
         val config = configProvider.get(Paths.get(directory, CONFIG_FILE))
@@ -98,7 +97,7 @@ object Engine {
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
         register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
 
-        val classLoader = getEngineClassLoader()
+        val classLoader = getCoreClassLoader()
         // Extensions
         tryExtensions(context, classes, classLoader)
         // User.modules

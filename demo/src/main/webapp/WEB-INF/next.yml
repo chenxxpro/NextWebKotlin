@@ -1,3 +1,15 @@
+# 配置运行时扫描类文件的排除选项。
+# 默认情况下，NWK引擎会扫描ClassPath目录下所有类文件，并尝试搜索添加了 @Controller / @BeforeInterceptor / @AfterInterceptor等标注的类，
+# 并对它们进一步扫描，形成Http/Intercetor的请求处理器。配置排除选项，可以优化应用启动时的扫描性能。
+runtime-classes:
+  # 排除指定类。
+  exclude-classes:
+    - com.github.yoojia.demo.WebAppLauncher
+  # 排除指定包
+  exclude-packages:
+    - com.github.yoojia.demo.supports
+
+
 intercept:
   priority: -9999
 
@@ -13,9 +25,9 @@ assets:
       - /css
       - /js
 
-
+# 配置应用插件
 plugins:
-  - class: "com.github.yoojia.demo.HelloPlugin"
+  - class: "com.github.yoojia.demo.supports.HelloPlugin"
     args:
       key: "my-value"
       secret: true

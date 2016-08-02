@@ -22,9 +22,9 @@ fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
             val classFilePath = based.relativize(path).toString()
             if(classFilePath.endsWith(".class")) {
                 val className = resolveClassName(classFilePath)
-                Logger.trace("-> $className")
                 if(filter.accept(className)) { // return true to accept
                     found.add(className);
+                    Logger.trace("-> $className")
                 }
             }
             return FileVisitResult.CONTINUE
@@ -39,7 +39,7 @@ fun findJarClassNames(filter: Filter<String>): List<String> {
 
 fun loadClassesByNames(names: List<String>): List<Class<*>> {
     val output = ArrayList<Class<*>>()
-    val classLoader = getEngineClassLoader()
+    val classLoader = getCoreClassLoader()
     names.forEach { name ->
         output.add(loadClassByName(classLoader, name))
     }
@@ -61,8 +61,17 @@ fun <T> newClassInstance(clazz: Class<*>): T {
     return clazz.newInstance() as T
 }
 
-fun getEngineClassLoader(): ClassLoader {
+fun getCoreClassLoader(): ClassLoader {
     return Engine::class.java.classLoader
+}
+
+fun classExists(className: String): Boolean {
+    try{
+        getCoreClassLoader().loadClass(className)
+        return true
+    }catch(err: Throwable) {
+        return false
+    }
 }
 
 private fun resolveClassName(classFilePath: String): String {
