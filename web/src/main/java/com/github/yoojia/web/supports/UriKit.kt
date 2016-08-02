@@ -26,23 +26,23 @@ fun createDefineUriSegment(segment: String): UriSegment {
         // unwrap: {user-id} -> user-id
         val unwrap = if(dynamic) segment.substring(1/*{*/, segment.lastIndex/*}*/) else segment
         when {
-            unwrap.startsWith(UriValueType.INT.prefix) -> {
+            unwrap.startsWith(UriValueType.INT.prefix, true) -> {
                 valueType = UriValueType.INT
                 _segment = unwrap.substring(UriValueType.INT.offset)
             }
-            unwrap.startsWith(UriValueType.FLOAT.prefix) -> {
+            unwrap.startsWith(UriValueType.FLOAT.prefix, true) -> {
                 valueType = UriValueType.FLOAT
                 _segment = unwrap.substring(UriValueType.FLOAT.offset)
             }
-            unwrap.startsWith(UriValueType.LONG.prefix) -> {
+            unwrap.startsWith(UriValueType.LONG.prefix, true) -> {
                 valueType = UriValueType.LONG
                 _segment = unwrap.substring(UriValueType.LONG.offset)
             }
-            unwrap.startsWith(UriValueType.DOUBLE.prefix) -> {
+            unwrap.startsWith(UriValueType.DOUBLE.prefix, true) -> {
                 valueType = UriValueType.DOUBLE
                 _segment = unwrap.substring(UriValueType.DOUBLE.offset)
             }
-            unwrap.startsWith(UriValueType.STRING.prefix) -> {
+            unwrap.startsWith(UriValueType.STRING.prefix, true) -> {
                 valueType = UriValueType.STRING
                 _segment = unwrap.substring(UriValueType.STRING.offset)
             }

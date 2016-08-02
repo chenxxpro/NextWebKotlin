@@ -1,4 +1,4 @@
-package com.github.yoojia.demo;
+package com.github.yoojia.demo.modules;
 
 import com.github.yoojia.web.Request;
 import com.github.yoojia.web.RequestChain;
@@ -41,23 +41,23 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
 
     @GETPOST("/*")
     public void getpostWildcards(Request request, Response response) {
-        response.sendHtml("<br/>Handle by GET/* , username= " + request.param("username"));
+        response.sendHtml("<br/>Handle by GET/* , username= " + request.paramOrNull("username"));
     }
 
     @POST("/yoojia")
     public void statix(Request request, Response response) {
-        response.sendHtml("<br/>Handle by POST/yoojia, username= " + request.param("username"));
+        response.sendHtml("<br/>Handle by POST/yoojia, username= " + request.paramOrNull("username"));
     }
 
     @PUT("/yoojia")
     public void put(Request request, Response response) {
-        response.sendHtml("<br/>Handle by PUT/yoojia, name= " + request.param("name") + ", body.data = " + request.bodyData());
+        response.sendHtml("<br/>Handle by PUT/yoojia, name= " + request.paramOrNull("name") + ", body.data = " + request.bodyData());
         response.sendHtml("<br/>Body.data = " + request.bodyData());
     }
 
     @DELETE("/yoojia")
     public void delete(Request request, Response response) {
-        response.sendHtml("<br/>Handle by DELETE/yoojia, name= " + request.param("name") + ", body.data = " + request.bodyData());
+        response.sendHtml("<br/>Handle by DELETE/yoojia, name= " + request.paramOrNull("name") + ", body.data = " + request.bodyData());
         response.sendHtml("<br/>Body.data = " + request.bodyData());
     }
 

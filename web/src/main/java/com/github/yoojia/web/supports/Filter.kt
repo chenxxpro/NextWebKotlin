@@ -6,6 +6,6 @@ package com.github.yoojia.web.supports
  */
 interface Filter<T> {
 
-    fun accept(value: T): Boolean
+    fun accept(className: T): Boolean
 
 }

@@ -11,7 +11,6 @@ import com.github.yoojia.web.util.*
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Paths
-import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.servlet.ServletContext
 import javax.servlet.ServletRequest
@@ -31,15 +30,16 @@ object Engine {
     private val Logger = LoggerFactory.getLogger(Engine::class.java)
 
     private val dispatcher = DispatchChain()
-    private val kernelManager = KernelManager()
     private val contextRef = AtomicReference<Context>()
 
-    fun boot(servletContext: ServletContext) {
-        boot(servletContext, ConfigLoader(), ClassesLoader())
+    val kernelManager = KernelManager()
+
+    fun init(servletContext: ServletContext) {
+        start(servletContext, ConfigLoader(), RuntimeClassProvider())
     }
 
-    fun boot(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
-        Logger.warn("===> NextEngine BOOTING, Version: $VERSION")
+    fun start(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
+        Logger.warn("===> NextEngine START BOOTING, Version: $VERSION")
         val _start = now()
         val directory = servletContext.getRealPath("/")
         val config = configProvider.get(Paths.get(directory, CONFIG_FILE))
@@ -51,7 +51,7 @@ object Engine {
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context  : ${ctx.contextPath}")
         initModules(ctx, classProvider.get(ctx).toMutableList())
-        kernelManager.allModules { module ->
+        kernelManager.withModules { module ->
             dispatcher.add(module)
         }
         Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
@@ -82,12 +82,12 @@ object Engine {
     }
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>) {
-        val rootConfig = context.config
+        val rootConfig = context.rootConfig
         val register = fun(tag: String, module: Module, priority: Int, config: String){
             val start = now()
-            val scrap = module.prepare(classes)
-            if (scrap.isNotEmpty()) {
-                classes.removeAll(scrap)
+            val scrapClasses = module.prepare(classes)
+            if (scrapClasses.isNotEmpty()) {
+                classes.removeAll(scrapClasses)
             }
             Logger.debug("$tag-Prepare: ${escape(start)}ms")
             kernelManager.register(module, priority, rootConfig.getConfig(config))
@@ -97,7 +97,7 @@ object Engine {
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
         register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
 
-        val classLoader = getClassLoader()
+        val classLoader = getCoreClassLoader()
         // Extensions
         tryExtensions(context, classes, classLoader)
         // User.modules
@@ -105,10 +105,11 @@ object Engine {
         val modules = rootConfig.getConfigList("modules")
         modules.forEach { config ->
             val args = parseConfig(config)
-            val module = newClassInstance<Module>(loadClassByName(classLoader, args.className))
-            val moduleUsed = module.prepare(classes)
-            classes.removeAll(moduleUsed)
-            kernelManager.register(module, args.priority, args.args)
+            val moduleClass = loadClassByName(classLoader, args.className)
+            val moduleInstance = newClassInstance<Module>(moduleClass)
+            val scrapClasses = moduleInstance.prepare(classes)
+            classes.removeAll(scrapClasses)
+            kernelManager.register(moduleInstance, args.priority, args.args)
         }
         if(modules.isNotEmpty()) {
             Logger.debug("User-Modules-Prepare: ${escape(modulesStart)}ms")
@@ -135,13 +136,14 @@ object Engine {
         val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){
             if(classExists(className)){
                 val start = now()
-                val args = parseConfig(context.config.getConfig(configName))
-                val module = newClassInstance<Module>(loadClassByName(classLoader, className))
-                val scrap = module.prepare(out)
-                kernelManager.register(module, priorityAction.invoke(args.priority), args.args)
-                if(scrap.isNotEmpty()) {
-                    out.removeAll(scrap)
-                    Logger.debug("$tagName-Classes: ${scrap.size}")
+                val args = parseConfig(context.rootConfig.getConfig(configName))
+                val moduleClass = loadClassByName(classLoader, className)
+                val moduleInstance = newClassInstance<Module>(moduleClass)
+                val scrapClasses = moduleInstance.prepare(out)
+                kernelManager.register(moduleInstance, priorityAction.invoke(args.priority), args.args)
+                if(scrapClasses.isNotEmpty()) {
+                    out.removeAll(scrapClasses)
+                    Logger.debug("$tagName-Classes: ${scrapClasses.size}")
                 }
                 Logger.debug("$tagName-Prepare: ${escape(start)}ms")
             }

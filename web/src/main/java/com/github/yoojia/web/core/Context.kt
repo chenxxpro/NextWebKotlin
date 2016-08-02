@@ -9,8 +9,15 @@ import javax.servlet.ServletContext
  * @since 2.0
  */
 class Context(@JvmField val webPath: String,
-              @JvmField val config: Config,
+              @JvmField val rootConfig: Config,
               @JvmField val servletContext: ServletContext) {
+
+    @Deprecated(message = "Use rootConfig instead")
+    val config: Config
+
+    init {
+        config = rootConfig
+    }
 
     val contextPath: String by lazy {
         val path = servletContext.contextPath
