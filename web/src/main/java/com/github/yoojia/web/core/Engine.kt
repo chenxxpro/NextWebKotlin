@@ -99,7 +99,7 @@ object Engine {
 
         val classLoader = getCoreClassLoader()
         // Extensions
-        tryExtensions(context, classes, classLoader)
+        tryExtensions(context, classes)
         // User.modules
         val modulesStart = now()
         val modules = rootConfig.getConfigList("modules")
@@ -132,12 +132,11 @@ object Engine {
      *  - 资源： com.github.yoojia.web.Assets
      *  - 模板： com.github.yoojia.web.VelocityTemplates
      */
-    private fun tryExtensions(context: Context, out: MutableList<Class<*>>, classLoader: ClassLoader) {
+    private fun tryExtensions(context: Context, out: MutableList<Class<*>>) {
         val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){
-            if(classExists(className)){
-                val start = now()
+            val start = now()
+            tryLoadClass(className)?.let { moduleClass->
                 val args = parseConfig(context.rootConfig.getConfig(configName))
-                val moduleClass = loadClassByName(classLoader, className)
                 val moduleInstance = newClassInstance<Module>(moduleClass)
                 val scrapClasses = moduleInstance.prepare(out)
                 kernelManager.register(moduleInstance, priorityAction.invoke(args.priority), args.args)

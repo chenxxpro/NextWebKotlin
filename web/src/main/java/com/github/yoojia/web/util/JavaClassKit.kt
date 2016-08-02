@@ -65,12 +65,11 @@ fun getCoreClassLoader(): ClassLoader {
     return Engine::class.java.classLoader
 }
 
-fun classExists(className: String): Boolean {
+fun tryLoadClass(className: String): Class<*>? {
     try{
-        getCoreClassLoader().loadClass(className)
-        return true
+        return getCoreClassLoader().loadClass(className)
     }catch(err: Throwable) {
-        return false
+        return null
     }
 }
 

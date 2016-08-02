@@ -28,11 +28,14 @@ abstract class InterceptorHandler(tag: String,
                 val method = handler.javaMethod
                 if(method.isAnnotationPresent(Ignore::class.java)) {
                     val annotation = method.getAnnotation(Ignore::class.java)
-                    if(annotation.value.isEmpty()) {
+                    val uris = annotation.value
+                    if(uris.isEmpty()) {
                         throw IllegalArgumentException("@Ignore must gives which URI to be ignore")
                     }
-                    annotation.value.forEach { uri ->
-                        if(uri.isNullOrEmpty()) throw IllegalArgumentException("URI must not be null or empty")
+                    uris.forEach { uri ->
+                        if(uri.isNullOrEmpty()) {
+                            throw IllegalArgumentException("URI must not be null or empty")
+                        }
                         val comparator = Comparator.createDefine(handler.comparator.method, concat(handler.root, uri))
                         ignores.add(comparator)
                         Logger.info("$tag-Ignore-Define: $comparator , based: ${handler.comparator}")
