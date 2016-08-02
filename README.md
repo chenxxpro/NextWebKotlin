@@ -1,6 +1,6 @@
 # Next-Web-Kotlin
 
-> A Servlet 3+ based super micro web framework written in Kotlin
+> A Servlet 3+ based lightweight & fast MicroWebFramework written in Kotlin
 
 [![BuildStatus](https://travis-ci.org/yoojia/NextWebKotlin.svg?branch=master)](https://travis-ci.org/yoojia/NextWebKotlin)
 
@@ -16,7 +16,7 @@
 
 - 微型Web服务；
 - 嵌入式设备Web服务；
-- API 模拟服务；
+- 单元测试模拟API服务；
 
 ## 项目状态
 

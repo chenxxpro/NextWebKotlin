@@ -8,5 +8,5 @@ import java.nio.file.Path
  */
 interface ConfigProvider {
 
-    fun get(path: Path): Config
+    fun get(filePath: Path): Config
 }
