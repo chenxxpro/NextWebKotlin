@@ -247,7 +247,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     // extensions
 
     fun stringParam(name: String, def: String): String {
-        val value = param(name)
+        val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
         }else{
@@ -260,7 +260,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     fun intParam(name: String, def: Int): Int {
-        val value = param(name)
+        val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
         }else{
@@ -273,7 +273,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     fun longParam(name: String, def: Long): Long {
-        val value = param(name)
+        val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
         }else{
@@ -286,7 +286,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     fun floatParam(name: String, def: Float): Float {
-        val value = param(name)
+        val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
         }else{
@@ -299,7 +299,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     fun doubleParam(name: String, def: Double): Double {
-        val value = param(name)
+        val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
         }else{
@@ -312,7 +312,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     fun booleanParam(name: String, def: Boolean): Boolean {
-        val value = param(name)
+        val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
         }else{

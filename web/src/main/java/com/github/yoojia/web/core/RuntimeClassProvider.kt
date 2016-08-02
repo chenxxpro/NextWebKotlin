@@ -27,7 +27,7 @@ internal class RuntimeClassProvider : ClassProvider {
 
     override fun get(context: Context): List<Class<*>> {
         val start = now()
-        val runtimeConfig = context.config.getConfig("runtime-classes")
+        val runtimeConfig = context.rootConfig.getConfig("runtime-classes")
         val excludePackages = runtimeConfig.getTypedList<String>("exclude-packages")
         val excludeClasses = runtimeConfig.getTypedList<String>("exclude-classes")
         val hasExcludePackage = excludePackages.isNotEmpty();

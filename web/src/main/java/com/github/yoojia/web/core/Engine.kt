@@ -82,7 +82,7 @@ object Engine {
     }
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>) {
-        val rootConfig = context.config
+        val rootConfig = context.rootConfig
         val register = fun(tag: String, module: Module, priority: Int, config: String){
             val start = now()
             val scrapClasses = module.prepare(classes)
@@ -136,7 +136,7 @@ object Engine {
         val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){
             if(classExists(className)){
                 val start = now()
-                val args = parseConfig(context.config.getConfig(configName))
+                val args = parseConfig(context.rootConfig.getConfig(configName))
                 val moduleClass = loadClassByName(classLoader, className)
                 val moduleInstance = newClassInstance<Module>(moduleClass)
                 val scrapClasses = moduleInstance.prepare(out)
