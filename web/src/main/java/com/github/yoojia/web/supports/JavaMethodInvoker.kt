@@ -14,10 +14,21 @@ class JavaMethodInvoker(val hostType: Class<*>, val method: Method) {
 
     @Throws(Exception::class)
     fun invoke(request: Request, response: Response, chain: RequestChain, hostObject: Any) {
-        val origin = method.isAccessible
-        method.isAccessible = true
-        method.invoke(hostObject, *varargs(request, response, chain))
-        method.isAccessible = origin
+        val originFlag = method.isAccessible
+        val accessChanged: Boolean
+        if(originFlag != true) {
+            accessChanged = true
+            method.isAccessible = true
+        }else{
+            accessChanged = false
+        }
+        try{
+            method.invoke(hostObject, *varargs(request, response, chain))
+        }finally{
+            if(accessChanged) {
+                method.isAccessible = originFlag
+            }
+        }
     }
 
     private fun varargs(request: Request, response: Response, chain: RequestChain): Array<Any> {

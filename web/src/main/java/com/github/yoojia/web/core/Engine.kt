@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object Engine {
 
-    const val VERSION = "NextEngine/2.a.14 (Kotlin 1.0.3; Java 7/8)"
+    const val VERSION = "NextEngine/2.a.15 (Kotlin 1.0.3; Java 7/8)"
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Engine::class.java)
@@ -40,12 +40,12 @@ object Engine {
 
     fun start(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
         Logger.warn("===> NextEngine START BOOTING, Version: $VERSION")
-        val _start = now()
+        val start = now()
         val directory = servletContext.getRealPath("/")
         val config = configProvider.get(Paths.get(directory, CONFIG_FILE))
         Engine.Logger.debug("Config-From : ${config.getString(ConfigLoader.KEY_CONFIG_PATH)}")
         Engine.Logger.debug("Config-State: ${config.getString(ConfigLoader.KEY_CONFIG_STATE)}")
-        Engine.Logger.debug("Config-Time : ${escape(_start)}ms")
+        Engine.Logger.debug("Config-Time : ${escape(start)}ms")
         val ctx = Context(directory, config, servletContext)
         contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
@@ -57,7 +57,7 @@ object Engine {
         Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
         Logger.debug("Loaded-Plugins: ${kernelManager.pluginCount()}")
         kernelManager.onCreated(ctx)
-        Logger.warn("<=== NextEngine BOOT SUCCESSFUL, Boot time: ${escape(_start)}ms")
+        Logger.warn("<=== NextEngine BOOT SUCCESSFUL, Boot time: ${escape(start)}ms")
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {
@@ -150,8 +150,8 @@ object Engine {
         }
 
         // Logger
-        ifExistsThenLoad("com.github.yoojia.web.BeforeLoggerHandler", "logging", "BeforeLogger", { InternalPriority.LOGGER_BEFORE })
-        ifExistsThenLoad("com.github.yoojia.web.AfterLoggerHandler", "logging", "AfterLogger", { InternalPriority.LOGGER_AFTER })
+        ifExistsThenLoad("com.github.yoojia.web.BeforeLoggerHandler", "logger", "BeforeLogger", { InternalPriority.LOGGER_BEFORE })
+        ifExistsThenLoad("com.github.yoojia.web.AfterLoggerHandler", "logger", "AfterLogger", { InternalPriority.LOGGER_AFTER })
 
         // Assets
         ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
@@ -179,11 +179,6 @@ object Engine {
     }
 
     /**
-     * 配置参数数据包装.不使用Triple的是为使得参数意义更新清晰.
-     */
-    private data class ConfigStruct(val className: String, val priority: Int, val args: Config)
-
-    /**
      * 解析配置条目
      */
     private fun parseConfig(config: Config): ConfigStruct {
@@ -191,5 +186,10 @@ object Engine {
                 config.getInt("priority"),
                 config.getConfig("args"))
     }
+
+    /**
+     * 配置参数数据包装.不使用Triple的是为使得参数意义更新清晰.
+     */
+    private data class ConfigStruct(val className: String, val priority: Int, val args: Config)
 
 }

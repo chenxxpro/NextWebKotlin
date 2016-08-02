@@ -42,12 +42,12 @@ abstract class InterceptorHandler(tag: String,
         }
     }
 
-    override fun findMatches(request: Comparator): List<RequestHandler> {
+    override fun findMatches(requestComparator: Comparator): List<RequestHandler> {
         ignores.forEach { define ->
-            if(request.isMatchDefine(define)) {
+            if(requestComparator.isMatchDefine(define)) {
                 return emptyList()
             }
         }
-        return super.findMatches(request)
+        return super.findMatches(requestComparator)
     }
 }
