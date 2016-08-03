@@ -4,5 +4,6 @@ include ':server'
 include ':velocity'
 include ':assets'
 include ':logging'
+include ':redis'
 include ':demo'
 

@@ -11,17 +11,18 @@ buildscript {
 
 sourceCompatibility = 1.7
 
-apply plugin: 'kotlin'
-
 dependencies {
     compile project(":web")
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile 'org.apache.velocity:velocity:1.7'
+    // Redis
+    compile "redis.clients:jedis:2.8.1"
 }
+
+apply plugin: 'kotlin'
 
 ext{
     projVersion = project_version
-    projArtivactId = 'next-web-velocity'
+    projArtivactId = 'next-web-redis'
     projName = 'NextWebKotlin'
     projDesc = 'NextWebKotlin: A Servlet 3+ based micro web framework written in Kotlin'
     projURL = "https://github.com/yoojia/NextWebKotlin"
@@ -29,3 +30,4 @@ ext{
 }
 
 apply from: '../publish.gradle'
+
