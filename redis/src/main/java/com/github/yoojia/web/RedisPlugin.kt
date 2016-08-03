@@ -1,4 +1,4 @@
-package com.github.yooia.web
+package com.github.yoojia.web
 
 import com.github.yoojia.web.core.Config
 import com.github.yoojia.web.core.Context
