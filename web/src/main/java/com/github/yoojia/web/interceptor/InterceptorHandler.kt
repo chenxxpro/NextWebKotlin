@@ -18,35 +18,32 @@ abstract class InterceptorHandler(tag: String,
         private val Logger = LoggerFactory.getLogger(InterceptorHandler::class.java)
     }
 
-    private val ignores = ArrayList<Comparator>()
+    private val definedIgnores = ArrayList<Comparator>()
 
     override fun prepare(inputs: List<Class<*>>): List<Class<*>> {
         try{
             return super.prepare(inputs)
         }finally{
-            handlers.forEach { handler->
-                val method = handler.javaMethod
-                if(method.isAnnotationPresent(Ignore::class.java)) {
-                    val annotation = method.getAnnotation(Ignore::class.java)
-                    val uris = annotation.value
-                    if(uris.isEmpty()) {
-                        throw IllegalArgumentException("@Ignore must gives which URI to be ignore")
+            handlers.filter{ it.javaMethod.isAnnotationPresent(Ignore::class.java) }.forEach { handler->
+                val annotation = handler.javaMethod.getAnnotation(Ignore::class.java)
+                val uris = annotation.value
+                if(uris.isEmpty()) {
+                    throw IllegalArgumentException("@Ignore must gives which URI to be ignore")
+                }
+                uris.forEach { uri ->
+                    if(uri.isNullOrEmpty()) {
+                        throw IllegalArgumentException("URI must not be null or empty")
                     }
-                    uris.forEach { uri ->
-                        if(uri.isNullOrEmpty()) {
-                            throw IllegalArgumentException("URI must not be null or empty")
-                        }
-                        val comparator = Comparator.createDefine(handler.comparator.method, concat(handler.root, uri))
-                        ignores.add(comparator)
-                        Logger.info("$tag-Ignore-Define: $comparator , based: ${handler.comparator}")
-                    }
+                    val comparator = Comparator.createDefine(handler.comparator.method, concat(handler.root, uri))
+                    definedIgnores.add(comparator)
+                    Logger.info("$tag-Ignore-Define: $comparator , based: ${handler.comparator}")
                 }
             }
         }
     }
 
     override fun findMatches(requestComparator: Comparator): List<RequestHandler> {
-        ignores.forEach { define ->
+        definedIgnores.forEach { define ->
             if(requestComparator.isMatchDefine(define)) {
                 return emptyList()
             }

@@ -51,9 +51,7 @@ object Engine {
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context  : ${ctx.contextPath}")
         initModules(ctx, classProvider.get(ctx).toMutableList())
-        kernelManager.withModules { module ->
-            dispatcher.add(module)
-        }
+        kernelManager.withModules { module -> dispatcher.add(module) }
         Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
         Logger.debug("Loaded-Plugins: ${kernelManager.pluginCount()}")
         kernelManager.onCreated(ctx)
@@ -64,14 +62,15 @@ object Engine {
         val context = contextRef.get()
         val response = Response(context, res as HttpServletResponse)
         response.setStatusCode(StatusCode.NOT_FOUND) // Default: 404
+        val request = Request(context, req as HttpServletRequest)
         try{
-            dispatcher.route(Request(context, req as HttpServletRequest), response)
+            dispatcher.route(request, response)
         }catch(err: Throwable) {
             Logger.error("Error when processing request", err)
             try{
                 response.sendError(err)
             }catch(stillError: Throwable) {
-                Logger.error("Error when send ERROR to client",stillError)
+                Logger.error("Error when send ERROR to client", stillError)
             }
         }
     }
@@ -102,27 +101,28 @@ object Engine {
         tryExtensions(context, classes)
         // User.modules
         val modulesStart = now()
-        val modules = rootConfig.getConfigList("modules")
-        modules.forEach { config ->
-            val args = parseConfig(config)
+        val modulesConfig = rootConfig.getConfigList("modules")
+        modulesConfig.forEach { config ->
+            val args = parseConfigArgs(config)
             val moduleClass = loadClassByName(classLoader, args.className)
             val moduleInstance = newClassInstance<Module>(moduleClass)
             val scrapClasses = moduleInstance.prepare(classes)
             classes.removeAll(scrapClasses)
             kernelManager.register(moduleInstance, args.priority, args.args)
         }
-        if(modules.isNotEmpty()) {
+        if(modulesConfig.isNotEmpty()) {
             Logger.debug("User-Modules-Prepare: ${escape(modulesStart)}ms")
         }
         // User.plugins
         val pluginStart = now()
-        val plugins = rootConfig.getConfigList("plugins")
-        plugins.forEach { config ->
-            val args = parseConfig(config)
-            val plugin = newClassInstance<Plugin>(loadClassByName(classLoader, args.className))
-            kernelManager.register(plugin, args.priority, args.args)
+        val pluginsConfig = rootConfig.getConfigList("plugins")
+        pluginsConfig.forEach { config ->
+            val args = parseConfigArgs(config)
+            val pluginClass = loadClassByName(classLoader, args.className)
+            val pluginInstance = newClassInstance<Plugin>(pluginClass)
+            kernelManager.register(pluginInstance, args.priority, args.args)
         }
-        if(plugins.isNotEmpty()) {
+        if(pluginsConfig.isNotEmpty()) {
             Logger.debug("User-Plugins-Prepare: ${escape(pluginStart)}ms")
         }
     }
@@ -136,7 +136,7 @@ object Engine {
         val ifExistsThenLoad = fun(className: String, configName: String, tagName: String, priorityAction: (Int)->Int){
             val start = now()
             tryLoadClass(className)?.let { moduleClass->
-                val args = parseConfig(context.rootConfig.getConfig(configName))
+                val args = parseConfigArgs(context.rootConfig.getConfig(configName))
                 val moduleInstance = newClassInstance<Module>(moduleClass)
                 val scrapClasses = moduleInstance.prepare(out)
                 kernelManager.register(moduleInstance, priorityAction.invoke(args.priority), args.args)
@@ -180,7 +180,7 @@ object Engine {
     /**
      * 解析配置条目
      */
-    private fun parseConfig(config: Config): ConfigStruct {
+    private fun parseConfigArgs(config: Config): ConfigStruct {
         return ConfigStruct(config.getString("class"),
                 config.getInt("priority"),
                 config.getConfig("args"))

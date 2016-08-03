@@ -23,8 +23,8 @@ fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
             if(classFilePath.endsWith(".class")) {
                 val className = resolveClassName(classFilePath)
                 if(filter.accept(className)) { // return true to accept
-                    found.add(className);
                     Logger.trace("-> $className")
+                    found.add(className)
                 }
             }
             return FileVisitResult.CONTINUE

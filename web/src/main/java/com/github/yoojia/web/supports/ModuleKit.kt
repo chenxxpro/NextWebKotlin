@@ -46,22 +46,22 @@ internal fun checkReturnType(method: Method) {
 }
 
 internal fun checkArguments(method: Method) {
-    val types = method.parameterTypes
-    if(types.size !in 1..3) {
-        throw IllegalArgumentException("@GET/@POST/@PUT/@DELETE methods must has 1 to 3 params, was ${types.size} in method $method")
+    val argumentTypes = method.parameterTypes
+    if(argumentTypes.size !in 1..3) {
+        throw IllegalArgumentException("@GET/@POST/@PUT/@DELETE methods must has 1 to 3 params, was ${argumentTypes.size} in method $method")
     }
     val marks = arrayOf(false, false, false)
-    val duplicate = fun (type: Class<*>, index: Int) {
+    val checkDuplicate = fun (type: Class<*>, index: Int) {
         if(marks[index]) {
             throw IllegalArgumentException("Duplicate arguments type <$type> in method $method")
         }
         marks[index] = true
     }
-    types.forEach { type ->
+    argumentTypes.forEach { type ->
         when {
-            type.equals(Request::class.java) -> duplicate(type, 0)
-            type.equals(Response::class.java) -> duplicate(type, 1)
-            type.equals(RequestChain::class.java) -> duplicate(type, 2)
+            type.equals(Request::class.java) -> checkDuplicate(type, 0)
+            type.equals(Response::class.java) -> checkDuplicate(type, 1)
+            type.equals(RequestChain::class.java) -> checkDuplicate(type, 2)
             else -> throw IllegalArgumentException("Unsupported argument type <$type> in method $method")
         }
     }
