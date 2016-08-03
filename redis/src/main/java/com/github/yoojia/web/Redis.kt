@@ -1,4 +1,4 @@
-package com.github.yooia.web
+package com.github.yoojia.web
 
 import redis.clients.jedis.Jedis
 
@@ -11,7 +11,7 @@ object Redis {
     /**
      * 获取一个Redis/Jedis资源
      */
-    fun getResource(): Jedis{
+    fun getResource(): Jedis {
         return RedisPlugin.CONNECTION.resource
     }
 
