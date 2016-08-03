@@ -14,9 +14,9 @@ sourceCompatibility = 1.7
 apply plugin: 'kotlin'
 
 dependencies {
+    compile project(":web")
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'org.apache.velocity:velocity:1.7'
-    compile project(":web")
 }
 
 ext{
