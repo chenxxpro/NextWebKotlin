@@ -48,6 +48,6 @@ val jedis = Redis.get()
 
 ```kotlin
 Resis.auto { jedis->
-    // do somethie with jedis instance
+    // do something with jedis instance
 }
 ```
