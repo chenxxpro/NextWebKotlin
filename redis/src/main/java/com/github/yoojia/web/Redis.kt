@@ -11,11 +11,11 @@ object Redis {
     /**
      * 获取一个Redis/Jedis资源
      */
-    fun getResource(): Jedis {
+    @JvmStatic fun getResource(): Jedis {
         return RedisPlugin.CONNECTION.resource
     }
 
-    fun <T> auto(action: (redis: Jedis)->T) : T {
+    @JvmStatic fun <T> auto(action: (redis: Jedis)->T) : T {
         val redis = RedisPlugin.CONNECTION.resource
         try {
             return action.invoke(redis)
