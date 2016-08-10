@@ -1,10 +1,10 @@
 package com.github.yoojia.web
 
+import com.github.yoojia.lang.DataMap
+import com.github.yoojia.lang.StreamKit
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.supports.Comparator
-import com.github.yoojia.web.util.AnyMap
 import com.github.yoojia.web.util.splitToArray
-import com.github.yoojia.web.util.streamCopy
 import java.io.InputStreamReader
 import java.io.StringWriter
 import java.net.URLDecoder
@@ -28,7 +28,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     val resources: List<String>
     val comparator: Comparator
 
-    private val dynamicParams = AnyMap()
+    private val dynamicParams = DataMap(HashMap<String, Any>())
     private val scopeParams: MutableMap<String, MutableList<String>> by lazy {
         val params: MutableMap<String, MutableList<String>> = HashMap()
         for((key, value) in request.parameterMap) {
@@ -114,8 +114,8 @@ class Request(ctx: Context, request: HttpServletRequest){
      * - 多个数值的参数以 List<String> 类型返回
      * @return 非空AnyMap对象
      */
-    fun params(): AnyMap {
-        val map = AnyMap()
+    fun params(): DataMap {
+        val map = DataMap(HashMap<String, Any>())
         for((k, v) in scopeParams) {
             if(v.size == 1) {
                 map.put(k, v.first())
@@ -140,8 +140,8 @@ class Request(ctx: Context, request: HttpServletRequest){
      * - 多个数值的参数以 List<String> 类型返回
      * @return 非空AnyMap对象
      */
-    fun headers(): AnyMap {
-        val map = AnyMap()
+    fun headers(): DataMap {
+        val map = DataMap(HashMap<String, Any>())
         for (name in servletRequest.headerNames) {
             val headers = servletRequest.getHeaders(name).toList()
             if(headers.size == 1) {
@@ -221,7 +221,7 @@ class Request(ctx: Context, request: HttpServletRequest){
     private fun readBodyStream(): String? {
         val output = StringWriter()
         val input = InputStreamReader(servletRequest.inputStream)
-        val count = streamCopy(from = input, to = output)
+        val count = StreamKit.copy(input, output)
         return if(count > 0) output.toString() else null
     }
 

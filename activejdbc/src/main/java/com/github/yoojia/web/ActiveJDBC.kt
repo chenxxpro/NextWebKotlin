@@ -1,5 +1,6 @@
 package com.github.yoojia.web
 
+import com.github.yoojia.lang.Promise
 import org.javalite.activejdbc.Base
 
 /**
@@ -8,7 +9,7 @@ import org.javalite.activejdbc.Base
  */
 object ActiveJDBC {
 
-    fun <T> once(action: ()->T) : T{
+    @JvmStatic fun <T> once(action: ()->T) : T{
         val hasBefore = Base.hasConnection()
         if(!hasBefore) {
             ActiveJDBCPlugin.justOpen()
@@ -22,7 +23,7 @@ object ActiveJDBC {
         }
     }
 
-    fun <T> trans(action: ()->T): T{
+    @JvmStatic fun <T> trans(action: ()->T): T{
         val hasBefore = Base.hasConnection()
         if(!hasBefore) {
             ActiveJDBCPlugin.openTransaction()
@@ -35,4 +36,9 @@ object ActiveJDBC {
             }
         }
     }
+
+    @JvmStatic fun <T> promise(action: ()->T): Promise<T> {
+        return Promise({ action.invoke() })
+    }
+
 }
