@@ -1,7 +1,5 @@
 package com.github.yoojia.web.util
 
-import java.io.Reader
-import java.io.Writer
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -19,24 +17,8 @@ fun <E> List<E>.concat(b: List<E>): List<E> {
     return out.toList()
 }
 
-fun streamCopy(from: Reader, to: Writer): Int {
-    val buffer = CharArray(1024 * 4)
-    var count = 0
-    var n = from.read(buffer)
-    while (n != -1) {
-        to.write(buffer, 0, n)
-        count += n
-        n = from.read(buffer)
-    }
-    return count
-}
-
 fun checkObjectType(value: Any, type: KClass<*>) {
     if(! type.javaObjectType.isAssignableFrom(value.javaClass)) {
         throw IllegalArgumentException("Unexpected type, expected: <${type.java}>, was: <${value.javaClass}>")
     }
-}
-
-fun String.notEquals(other: String): Boolean {
-    return !this.equals(other)
 }

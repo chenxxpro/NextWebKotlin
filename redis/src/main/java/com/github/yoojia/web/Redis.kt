@@ -16,6 +16,10 @@ object Redis {
     }
 
     @JvmStatic fun <T> auto(action: (redis: Jedis)->T) : T {
+        return once(action)
+    }
+
+    @JvmStatic fun <T> once(action: (redis: Jedis)->T) : T {
         val redis = RedisPlugin.CONNECTION.resource
         try {
             return action.invoke(redis)
@@ -23,4 +27,5 @@ object Redis {
             redis.close()
         }
     }
+
 }

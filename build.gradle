@@ -2,14 +2,13 @@ group 'com.github.yoojia'
 version '1.0'
 
 ext.kotlin_version = "1.0.3"
-ext.project_version = "2.a.17"
+ext.project_version = "2.a.17-1"
 
 subprojects {
 
     buildscript {
         repositories {
             jcenter()
-            mavenCentral()
         }
     }
 
@@ -18,6 +17,7 @@ subprojects {
     repositories {
         jcenter()
         mavenCentral()
+        maven{ url "https://dl.bintray.com/yoojia/maven" }
     }
 
 }

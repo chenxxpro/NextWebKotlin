@@ -1,8 +1,9 @@
 package com.github.yoojia.web
 
+import com.github.yoojia.lang.DataMap
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.core.Engine
-import com.github.yoojia.web.util.AnyMap
+import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 
@@ -12,7 +13,7 @@ import javax.servlet.http.HttpServletResponse
  */
 class Response(@JvmField val context: Context, @JvmField val servletResponse: HttpServletResponse) {
 
-    @JvmField val args = AnyMap()
+    @JvmField val args = DataMap(HashMap<String, Any>())
     @JvmField val createTime: Long
 
     init{
