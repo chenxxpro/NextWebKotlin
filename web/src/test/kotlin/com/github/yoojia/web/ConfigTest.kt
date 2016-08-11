@@ -25,13 +25,12 @@ class ConfigTest {
         map.put("key", map1)
         map.put("list", arrayListOf(map1, map2))
         val config = Config(map)
-        Assert.assertEquals("yoojia", config.getConfig("key").getString("name"))
-        Assert.assertEquals(true, config.getConfig("key").getBoolean("checked"))
-        Assert.assertEquals(123, config.getConfig("key").getInt("age"))
-        Assert.assertEquals(123.0f, config.getConfig("key").getFloat("age1"))
+        Assert.assertEquals("yoojia", config.getConfig("key").getStringValue("name"))
+        Assert.assertEquals(true, config.getConfig("key").getBooleanValue("checked"))
+        Assert.assertEquals(123, config.getConfig("key").getIntValue("age"))
+        Assert.assertEquals(123.0f, config.getConfig("key").getFloatValue("age1"))
         Assert.assertEquals(2, config.getConfigList("list").size)
-        Assert.assertEquals("chen", config.getConfigList("list")[1].getString("name"))
+        Assert.assertEquals("chen", config.getConfigList("list")[1].getStringValue("name"))
         
-        Assert.assertEquals("hoho", config.getChecked("haha", "hehe", String::class))
     }
 }

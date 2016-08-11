@@ -43,8 +43,8 @@ object Engine {
         val start = now()
         val directory = servletContext.getRealPath("/")
         val config = configProvider.get(Paths.get(directory, CONFIG_FILE))
-        Engine.Logger.debug("Config-From : ${config.getString(ConfigLoader.KEY_CONFIG_PATH)}")
-        Engine.Logger.debug("Config-State: ${config.getString(ConfigLoader.KEY_CONFIG_STATE)}")
+        Engine.Logger.debug("Config-From : ${config.getStringValue(ConfigLoader.KEY_CONFIG_PATH)}")
+        Engine.Logger.debug("Config-State: ${config.getStringValue(ConfigLoader.KEY_CONFIG_STATE)}")
         Engine.Logger.debug("Config-Time : ${escape(start)}ms")
         val ctx = Context(directory, config, servletContext)
         contextRef.set(ctx)
@@ -181,8 +181,8 @@ object Engine {
      * 解析配置条目
      */
     private fun parseConfigArgs(config: Config): ConfigStruct {
-        return ConfigStruct(config.getString("class"),
-                config.getInt("priority"),
+        return ConfigStruct(config.getStringValue("class"),
+                config.getIntValue("priority"),
                 config.getConfig("args"))
     }
 

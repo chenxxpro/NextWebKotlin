@@ -25,8 +25,8 @@ class RedisPlugin : Plugin {
     }
 
     override fun onCreated(context: Context, config: Config) {
-        val host = config.getString("host")
-        val password = config.getString("password")
+        val host = config.getStringValue("host")
+        val password = config.getStringValue("password")
         val port = config.getInt("port", 6379)
         val secret = config.getBoolean("secret", true)
         val log = StringBuilder()
