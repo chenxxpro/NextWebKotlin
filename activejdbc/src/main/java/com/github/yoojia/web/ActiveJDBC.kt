@@ -1,6 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.lang.Promise
 import org.javalite.activejdbc.Base
 
 /**
@@ -35,10 +34,6 @@ object ActiveJDBC {
                 ActiveJDBCPlugin.closeTransaction()
             }
         }
-    }
-
-    @JvmStatic fun <T> promise(action: ()->T): Promise<T> {
-        return Promise({ action.invoke() })
     }
 
 }

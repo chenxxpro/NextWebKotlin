@@ -20,7 +20,7 @@ object Redis {
     }
 
     @JvmStatic fun <T> once(action: (redis: Jedis)->T) : T {
-        val redis = RedisPlugin.CONNECTION.resource
+        val redis = getResource()
         try {
             return action.invoke(redis)
         }finally {

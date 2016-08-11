@@ -45,11 +45,11 @@ class ActiveJDBCPlugin : Plugin {
     }
 
     override fun onCreated(context: Context, config: Config) {
-        val driver = config.getString("driver")
-        val uri = config.getString("uri")
-        val username = config.getString("user")
-        val password = config.getString("pass")
-        val secret = config.getBoolean("secret")
+        val driver = config.getStringValue("driver")
+        val uri = config.getStringValue("uri")
+        val username = config.getStringValue("user")
+        val password = config.getStringValue("pass")
+        val secret = config.getBooleanValue("secret")
         val log = StringBuilder("uri=$uri")
         log.append(", user=${if(secret) "[secret]" else username}")
         log.append(", pass=${if(secret) "[secret]" else password}")
