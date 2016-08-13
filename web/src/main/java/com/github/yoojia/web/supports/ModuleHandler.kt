@@ -68,10 +68,10 @@ abstract class ModuleHandler(val tag: String,
 
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
         found.sortedBy { it.priority }.forEach { handler ->
-            request._resetDynamicScope()
+            request._removeDynamicScopeParams()
             val dynamics = getDynamicParams(handler, request)
             if (dynamics.isNotEmpty()) {
-                request._setDynamicScope(dynamics)
+                request._putDynamicScopeParams(dynamics)
             }
             Logger.trace("$tag-Processing-Handler: $handler")
             val moduleObject = objectProvider.get(handler.invoker.hostType)
