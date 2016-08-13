@@ -17,8 +17,11 @@ class DispatchChain {
         }
     }// Supported to Java 7
 
+    private var moduleSize = 0
+
     fun add(module: Module) {
         modules.add(module)
+        moduleSize = modules.size
     }
 
     @Throws(Exception::class)
@@ -33,7 +36,7 @@ class DispatchChain {
     @Throws(Exception::class)
     fun next(request: Request, response: Response, chain: DispatchChain) {
         val index = threadIndex.get()
-        if (index != modules.size) {
+        if (index != moduleSize) {
             threadIndex.set(index + 1)
             modules[index].process(request, response, chain)
         }

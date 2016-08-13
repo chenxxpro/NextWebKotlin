@@ -18,8 +18,8 @@ public class HelloPlugin implements Plugin {
     @Override
     public void onCreated(@NotNull Context context, @NotNull Config config) {
         logger.debug("Hello plugin: " + config);
-        logger.debug("Hello plugin: " + config.getBoolean("secret"));
-        logger.debug("Hello plugin: " + config.getBoolean("secret1"));
+        logger.debug("Hello plugin: " + config.getBooleanValue("secret"));
+        logger.debug("Hello plugin: " + config.getBooleanValue("secret1"));
     }
 
     @Override

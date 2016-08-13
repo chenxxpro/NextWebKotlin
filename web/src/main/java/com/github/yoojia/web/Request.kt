@@ -1,10 +1,10 @@
 package com.github.yoojia.web
 
+import com.github.yoojia.lang.DataMap
+import com.github.yoojia.lang.StreamKit
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.supports.Comparator
-import com.github.yoojia.web.util.AnyMap
 import com.github.yoojia.web.util.splitToArray
-import com.github.yoojia.web.util.streamCopy
 import java.io.InputStreamReader
 import java.io.StringWriter
 import java.net.URLDecoder
@@ -28,13 +28,13 @@ class Request(ctx: Context, request: HttpServletRequest){
     val resources: List<String>
     val comparator: Comparator
 
-    private val dynamicParams = AnyMap()
+    private val dynamicParams = DataMap(HashMap<String, Any>())
     private val scopeParams: MutableMap<String, MutableList<String>> by lazy {
         val params: MutableMap<String, MutableList<String>> = HashMap()
         for((key, value) in request.parameterMap) {
             params.put(key, value.toMutableList())
         }
-        if(request.method.toUpperCase() in setOf("PUT", "DELETE")) {
+        if(request.method.toUpperCase() in PUT_DELETE) {
             readBodyStream()?.let { data ->
                 params.put(BODY_DATA_NAME, mutableListOf(data))
                 if(CONTENT_TYPE_FORM.equals(request.contentType, ignoreCase = true)) {
@@ -50,6 +50,9 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     companion object {
+        private val PUT_DELETE = setOf("PUT", "DELETE")
+        private val GET_POST = setOf("GET", "POST")
+
         @JvmField val CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
         @JvmField val CONTENT_TYPE_MULTIPART = "multipart/form-data"
         @JvmField val BODY_DATA_NAME = "<next-web::body.data:raw-data:key>"
@@ -77,7 +80,7 @@ class Request(ctx: Context, request: HttpServletRequest){
      */
     fun bodyData(): String? {
         val cached = scopeParams[BODY_DATA_NAME]?.firstOrNull()
-        if(cached == null && method in setOf("GET", "POST")) {
+        if(cached == null && method in GET_POST) {
             val data = readBodyStream()
             if(data != null) {
                 scopeParams.put(BODY_DATA_NAME, mutableListOf(data))
@@ -114,8 +117,8 @@ class Request(ctx: Context, request: HttpServletRequest){
      * - 多个数值的参数以 List<String> 类型返回
      * @return 非空AnyMap对象
      */
-    fun params(): AnyMap {
-        val map = AnyMap()
+    fun params(): DataMap {
+        val map = DataMap(HashMap<String, Any>())
         for((k, v) in scopeParams) {
             if(v.size == 1) {
                 map.put(k, v.first())
@@ -140,8 +143,8 @@ class Request(ctx: Context, request: HttpServletRequest){
      * - 多个数值的参数以 List<String> 类型返回
      * @return 非空AnyMap对象
      */
-    fun headers(): AnyMap {
-        val map = AnyMap()
+    fun headers(): DataMap {
+        val map = DataMap(HashMap<String, Any>())
         for (name in servletRequest.headerNames) {
             val headers = servletRequest.getHeaders(name).toList()
             if(headers.size == 1) {
@@ -200,12 +203,9 @@ class Request(ctx: Context, request: HttpServletRequest){
         scopeParams.remove(name)
     }
 
-    /**
-     * 获取动态参数值，如果不存在则返回默认值。
-     * 注意：动态参数的有效范围是 @GET/POST/PUT/DELETE 标注的模块方法(Java Method)，离开模块方法范围后动态参数失效。
-     * @return 字符值，如果请求中不存在此name的值则返回默认值
-     */
-    fun dynamicParam(name: String, defaultValue: String? = null): String? {
+    // dynamic params
+
+    fun dynamicParam(name: String, defaultValue: String): String {
         val value = dynamicParams[name] as String?
         if(value != null) {
             return value
@@ -214,34 +214,28 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
     }
 
-    fun dynamicParam(name: String): String? {
-        return dynamicParam(name, null)
+    fun dynamicParam(name: String): String {
+        return dynamicParam(name, "")
     }
 
-    private fun readBodyStream(): String? {
-        val output = StringWriter()
-        val input = InputStreamReader(servletRequest.inputStream)
-        val count = streamCopy(from = input, to = output)
-        return if(count > 0) output.toString() else null
+    fun dynamicIntParam(name: String): Int {
+        return dynamicParam(name, "0").toInt()
     }
 
-    private fun putOrNew(name: String, value: String, map: MutableMap<String, MutableList<String>>) {
-        val values = map[name]
-        if(values != null) {
-            values.add(value)
-        }else{
-            map.put(name, mutableListOf(value))
-        }
+    fun dynamicLongParam(name: String): Long {
+        return dynamicParam(name, "0").toLong()
     }
 
-    /// framework methods
-
-    fun _setDynamicScope(params: Map<String, String>) {
-        dynamicParams.putAll(params)
+    fun dynamicFloatParam(name: String): Float {
+        return dynamicParam(name, "0").toFloat()
     }
 
-    fun _resetDynamicScope(){
-        dynamicParams.clear()
+    fun dynamicDoubleParam(name: String): Double {
+        return dynamicParam(name, "0").toDouble()
+    }
+
+    fun dynamicBooleanParam(name: String): Boolean {
+        return dynamicParam(name, "false").toBoolean()
     }
 
     // extensions
@@ -324,4 +318,31 @@ class Request(ctx: Context, request: HttpServletRequest){
         return booleanParam(name, false)
     }
 
+    /// framework methods
+
+    fun _putDynamicScopeParams(params: Map<String, String>) {
+        dynamicParams.putAll(params)
+    }
+
+    fun _removeDynamicScopeParams(){
+        dynamicParams.clear()
+    }
+
+    //// supports
+
+    private fun readBodyStream(): String? {
+        val output = StringWriter()
+        val input = InputStreamReader(servletRequest.inputStream)
+        val count = StreamKit.copy(input, output)
+        return if(count > 0) output.toString() else null
+    }
+
+    private fun putOrNew(name: String, value: String, map: MutableMap<String, MutableList<String>>) {
+        val values = map[name]
+        if(values != null) {
+            values.add(value)
+        }else{
+            map.put(name, mutableListOf(value))
+        }
+    }
 }

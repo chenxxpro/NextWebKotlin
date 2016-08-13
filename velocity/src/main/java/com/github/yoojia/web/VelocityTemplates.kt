@@ -47,7 +47,7 @@ class VelocityTemplates : Module {
         if(name != null && name is String && name.isNotEmpty()) {
             Logger.trace("Template-Module-Processing: ${request.path}, template: $name")
             if ( ! velocity.resourceExists(name)) {
-                throw RuntimeException("Template resource($name) not exists !");
+                throw RuntimeException("Template resource($name) not exists !")
             }
             val output = StringWriter()
             velocity.getTemplate(name)
