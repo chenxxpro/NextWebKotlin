@@ -1,8 +1,8 @@
 package com.github.yoojia.web.interceptor
 
-import com.github.yoojia.web.supports.ModuleHandler
-import com.github.yoojia.web.supports.RequestHandler
+import com.github.yoojia.web.AbstractModuleHandler
 import com.github.yoojia.web.supports.Comparator
+import com.github.yoojia.web.supports.RequestHandler
 import com.github.yoojia.web.util.concat
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -13,7 +13,7 @@ import java.util.*
  */
 abstract class InterceptorHandler(tag: String,
                                    annotation: Class<out Annotation>,
-                                   classes: List<Class<*>>) : ModuleHandler(tag, annotation, classes) {
+                                   classes: List<Class<*>>) : AbstractModuleHandler(tag, annotation, classes) {
     companion object {
         private val Logger = LoggerFactory.getLogger(InterceptorHandler::class.java)
     }
