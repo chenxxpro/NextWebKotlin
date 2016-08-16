@@ -130,6 +130,10 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
         return this
     }
 
+    fun putArgs(args: Map<String, Any>): Response {
+        this.args.putAll(args)
+        return this
+    }
     /**
      * 移除一个参数
      */

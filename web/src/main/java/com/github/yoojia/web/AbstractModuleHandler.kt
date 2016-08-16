@@ -1,12 +1,11 @@
-package com.github.yoojia.web.supports
+package com.github.yoojia.web
 
-import com.github.yoojia.web.Request
-import com.github.yoojia.web.RequestChain
-import com.github.yoojia.web.Response
 import com.github.yoojia.web.core.Config
 import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.core.DispatchChain
 import com.github.yoojia.web.core.Module
+import com.github.yoojia.web.supports.*
+import com.github.yoojia.web.supports.Comparator
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -15,12 +14,12 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-abstract class ModuleHandler(val tag: String,
-                             val annotation: Class<out Annotation>,
-                             inputs: List<Class<*>>) : Module {
+abstract class AbstractModuleHandler(val tag: String,
+                                     val annotation: Class<out Annotation>,
+                                     inputs: List<Class<*>>) : Module {
 
     companion object {
-        private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(AbstractModuleHandler::class.java)
     }
 
     protected  val handlers = ArrayList<RequestHandler>()
@@ -68,10 +67,11 @@ abstract class ModuleHandler(val tag: String,
 
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
         found.sortedBy { it.priority }.forEach { handler ->
-            request._removeDynamicScopeParams()
+            request.removeDynamicScopeParams()
             val dynamics = getDynamicParams(handler, request)
             if (dynamics.isNotEmpty()) {
-                request._putDynamicScopeParams(dynamics)
+                request.putDynamicScopeParams(dynamics)
+                response.putArgs(dynamics) // copy to response
             }
             Logger.trace("$tag-Processing-Handler: $handler")
             val moduleObject = objectProvider.get(handler.invoker.hostType)

@@ -320,11 +320,11 @@ class Request(ctx: Context, request: HttpServletRequest){
 
     /// framework methods
 
-    fun _putDynamicScopeParams(params: Map<String, String>) {
+    internal fun putDynamicScopeParams(params: Map<String, String>) {
         dynamicParams.putAll(params)
     }
 
-    fun _removeDynamicScopeParams(){
+    internal fun removeDynamicScopeParams(){
         dynamicParams.clear()
     }
 
