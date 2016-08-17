@@ -12,13 +12,30 @@ import java.util.*
  */
 class JavaMethodInvoker(val hostType: Class<*>,
                         val method: Method,
+                        private val strictAccessible: Boolean,
                         private val argumentTypes: Array<Class<*>> = method.parameterTypes) {
 
     @Throws(Exception::class)
     fun invoke(request: Request, response: Response, chain: RequestChain, hostObject: Any) {
-        val originFlag = method.isAccessible
+        if (strictAccessible) {
+            strictAccessibleInvoke(request, response, chain, hostObject)
+        }else{
+            weekAccessibleInvoke(request, response, chain, hostObject)
+        }
+    }
+
+    private fun weekAccessibleInvoke(request: Request, response: Response, chain: RequestChain, hostObject: Any){
+        if(!method.isAccessible) {
+            method.isAccessible = true
+        }
+        method.invoke(hostObject, *varargs(request, response, chain))
+    }
+
+    private fun strictAccessibleInvoke(request: Request, response: Response, chain: RequestChain, hostObject: Any) {
         val accessChanged: Boolean
-        if(originFlag != true) {
+        val originAccessible: Boolean
+        originAccessible = method.isAccessible
+        if(originAccessible != true) {
             accessChanged = true
             method.isAccessible = true
         }else{
@@ -28,7 +45,7 @@ class JavaMethodInvoker(val hostType: Class<*>,
             method.invoke(hostObject, *varargs(request, response, chain))
         }finally{
             if(accessChanged) {
-                method.isAccessible = originFlag
+                method.isAccessible = originAccessible
             }
         }
     }

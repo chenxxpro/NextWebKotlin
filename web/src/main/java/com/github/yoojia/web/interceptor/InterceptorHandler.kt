@@ -1,6 +1,9 @@
 package com.github.yoojia.web.interceptor
 
 import com.github.yoojia.web.AbstractModuleHandler
+import com.github.yoojia.web.Request
+import com.github.yoojia.web.Response
+import com.github.yoojia.web.core.DispatchChain
 import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.supports.RequestHandler
 import com.github.yoojia.web.util.concat
@@ -39,6 +42,14 @@ abstract class InterceptorHandler(tag: String,
                     Logger.info("$tag-Ignore-Define: $comparator , based: ${handler.comparator}")
                 }
             }
+        }
+    }
+
+    @Throws(Exception::class)
+    override fun process(request: Request, response: Response, dispatch: DispatchChain) {
+        if(handlers.isNotEmpty()) {
+            val found = findMatches(request.comparator)
+            processFound(found, request, response, dispatch)
         }
     }
 

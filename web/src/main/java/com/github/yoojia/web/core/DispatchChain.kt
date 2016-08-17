@@ -17,11 +17,10 @@ class DispatchChain {
         }
     }// Supported to Java 7
 
-    private var moduleSize = 0
+    private val moduleDeep: Int by lazy { modules.size }
 
     fun add(module: Module) {
         modules.add(module)
-        moduleSize = modules.size
     }
 
     @Throws(Exception::class)
@@ -35,10 +34,10 @@ class DispatchChain {
 
     @Throws(Exception::class)
     fun next(request: Request, response: Response, chain: DispatchChain) {
-        val index = threadIndex.get()
-        if (index != moduleSize) {
-            threadIndex.set(index + 1)
-            modules[index].process(request, response, chain)
+        val i = threadIndex.get()
+        if (i != moduleDeep) {
+            modules[i].process(request, response, chain)
+            threadIndex.set(i + 1)
         }
     }
 

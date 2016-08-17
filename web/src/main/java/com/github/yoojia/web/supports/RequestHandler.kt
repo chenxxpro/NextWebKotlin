@@ -14,9 +14,7 @@ class RequestHandler(
         val comparator: Comparator,
         val priority: Int = getRequestPriority(comparator)) {
 
-    val javaMethod: Method by lazy {
-        invoker.method
-    }
+    val javaMethod: Method by lazy { invoker.method }
 
     override fun toString(): String {
         return "{invoker: $invoker, comparator: $comparator, priority: $priority}"
@@ -26,7 +24,7 @@ class RequestHandler(
 
         internal fun create(root: String, moduleType: Class<*>, javaMethod: Method, httpMethod: String, path: String): RequestHandler {
             return RequestHandler(root,
-                    JavaMethodInvoker(moduleType, javaMethod),
+                    JavaMethodInvoker(moduleType, javaMethod, false/*Set Week Accessible by default*/),
                     Comparator.createDefine(httpMethod, concat(root, path)))
         }
     }
