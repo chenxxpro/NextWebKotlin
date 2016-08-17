@@ -23,8 +23,8 @@ class HttpControllerHandler(classes: List<Class<*>>) : AbstractModuleHandler("Ht
         // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
         if(matches.isNotEmpty()) {
             response.setStatusCode(StatusCode.ACCEPTED)
+            processFound(matches, request, response, dispatch)
         }
-        processFound(matches, request, response, dispatch)
     }
 
     companion object {

@@ -10,7 +10,8 @@ import java.util.concurrent.locks.ReentrantLock
  */
 class ModuleCachedProvider(guessSize: Int) {
 
-    private val mCached = object: LinkedHashMap<Class<*>, Any>(guessSize, 0.75f, true){
+    private val resourceLock = ReentrantLock()
+    private val cached = object: LinkedHashMap<Class<*>, Any>(guessSize, 0.75f, true){
 
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Class<*>, Any>?): Boolean {
             val isRemoved = this.size > guessSize
@@ -26,18 +27,16 @@ class ModuleCachedProvider(guessSize: Int) {
 
     }
 
-    private val resourceLock = ReentrantLock()
-
-    fun get(type: Class<*>): Any {
+    fun getCachedOrNew(type: Class<*>): Any {
         var isCached = false
-        val lock = resourceLock
         val module: Any
+        val lock = resourceLock
         lock.lock()
         try{
-            var cached = mCached[type]
+            var cached = cached[type]
             if(cached == null) {
                 cached = newClassInstance(type)
-                mCached.put(type, cached!!)
+                this.cached.put(type, cached!!)
                 isCached = true
             }
             module = cached

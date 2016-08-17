@@ -3,11 +3,17 @@
 # 并对它们进一步扫描，形成Http/Intercetor的请求处理器。配置排除选项，可以优化应用启动时的扫描性能。
 runtime-classes:
   # 排除指定类。
-  exclude-classes:
+  ignore-classes:
     - com.github.yoojia.demo.WebAppLauncher
-  # 排除指定包
-  exclude-packages:
+  # 排除指定前缀
+  ignore-starts:
     - com.github.yoojia.demo.supports
+#  ignore-ends:
+  # 接受指定前缀
+  accept-starts:
+    - com.github.yoojia.demo.modules
+#  accept-ends:
+#  accept-classes:
 
 
 intercept:

@@ -22,14 +22,15 @@ abstract class AbstractModuleHandler(val tag: String,
         private val Logger = LoggerFactory.getLogger(AbstractModuleHandler::class.java)
     }
 
+    /// 被多线程访问但保证只在主线初始化时做了修改
     protected  val handlers = ArrayList<RequestHandler>()
 
-    private val objectProvider: ModuleCachedProvider
+    private val moduleCachedObjects: ModuleCachedProvider
     private val classes: ArrayList<Class<*>>
 
     init{
         val found = inputs.filter { it.isAnnotationPresent(annotation) }
-        objectProvider = ModuleCachedProvider(found.size)
+        moduleCachedObjects = ModuleCachedProvider(found.size)
         classes = ArrayList(found)
     }
 
@@ -59,12 +60,6 @@ abstract class AbstractModuleHandler(val tag: String,
         handlers.clear()
     }
 
-    @Throws(Exception::class)
-    override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val found = findMatches(request.comparator)
-        processFound(found, request, response, dispatch)
-    }
-
     fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
         found.sortedBy { it.priority }.forEach { handler ->
             request.removeDynamicScopeParams()
@@ -74,7 +69,7 @@ abstract class AbstractModuleHandler(val tag: String,
                 response.putArgs(dynamics) // copy to response
             }
             Logger.trace("$tag-Processing-Handler: $handler")
-            val moduleObject = objectProvider.get(handler.invoker.hostType)
+            val moduleObject = moduleCachedObjects.getCachedOrNew(handler.invoker.hostType)
             val chain = RequestChain()
             // 插入一些特殊处理过程接口的调用
             if(moduleObject is ModuleRequestsListener) {
