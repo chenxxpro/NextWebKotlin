@@ -30,8 +30,8 @@ internal class RuntimeClassProvider : ClassProvider {
         val runtimeConfig = context.rootConfig.getConfig("runtime-classes")
         val excludePackages = runtimeConfig.getTypedList<String>("exclude-packages")
         val excludeClasses = runtimeConfig.getTypedList<String>("exclude-classes")
-        val hasExcludePackage = excludePackages.isNotEmpty();
-        val hasExcludeClass = excludeClasses.isNotEmpty();
+        val hasExcludePackage = excludePackages.isNotEmpty()
+        val hasExcludeClass = excludeClasses.isNotEmpty()
         if(hasExcludePackage) excludePackages.forEach { pack->
             Logger.debug("Exclude-Package: $pack")
         }

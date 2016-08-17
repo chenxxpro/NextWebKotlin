@@ -2,6 +2,7 @@ package com.github.yoojia.web.supports
 
 import com.github.yoojia.web.util.newClassInstance
 import java.util.*
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
@@ -25,19 +26,24 @@ class ModuleCachedProvider(guessSize: Int) {
 
     }
 
+    private val resourceLock = ReentrantLock()
+
     fun get(type: Class<*>): Any {
         var isCached = false
-        var obj: Any? = null
-        synchronized(mCached) {
+        val lock = resourceLock
+        val module: Any
+        lock.lock()
+        try{
             var cached = mCached[type]
             if(cached == null) {
                 cached = newClassInstance(type)
                 mCached.put(type, cached!!)
                 isCached = true
             }
-            obj = cached
+            module = cached
+        }finally {
+            lock.unlock()
         }
-        val module = obj!!
         try{
             return module
         }finally{

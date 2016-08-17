@@ -13,8 +13,8 @@ import java.util.*
 internal class ConfigLoader : ConfigProvider {
 
     companion object {
-        internal const val KEY_CONFIG_PATH = "config.path"
-        internal const val KEY_CONFIG_STATE = "config.state"
+        internal const val KEY_CONFIG_PATH = "nwk.core.config.path"
+        internal const val KEY_CONFIG_STATE = "nwk.core.config.state"
     }
 
     /**
