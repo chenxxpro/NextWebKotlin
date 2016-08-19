@@ -60,9 +60,8 @@ class Comparator {
          * - 定义为静态字段：比较资源名是否相同（大小写完全相同）；
          */
         private fun match(requests: List<UriSegment>, defines: List<UriSegment>): Boolean{
-            for(i in requests.indices) {
+            requests.forEachIndexed { i, request ->
                 val define = defines[i]
-                val request = requests[i]
                 val match: Boolean
                 if(define.isDynamic) {
                     match = define.valueType.match(request.valueType)
