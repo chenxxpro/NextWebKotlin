@@ -25,6 +25,7 @@ class HttpControllerHandler(classes: List<Class<*>>) : AbstractModuleHandler("Ht
             response.setStatusCode(StatusCode.ACCEPTED)
             processFound(matches, request, response, dispatch)
         }
+        super.process(request, response, dispatch)
     }
 
     companion object {
