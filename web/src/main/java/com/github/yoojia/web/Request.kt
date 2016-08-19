@@ -145,12 +145,16 @@ class Request(ctx: Context, request: HttpServletRequest){
      */
     fun headers(): DataMap {
         val map = DataMap(HashMap<String, Any>())
-        for (name in servletRequest.headerNames) {
-            val headers = servletRequest.getHeaders(name).toList()
-            if(headers.size == 1) {
-                map.put(name, headers.first())
-            }else{
-                map.put(name, headers.toList())
+        servletRequest.headerNames?.let { headerNames->
+            for (name in headerNames) {
+                servletRequest.getHeaders(name)?.let { headers->
+                    val list = headers.toList()
+                    if(list.size == 1) {
+                        map.put(name, list.first())
+                    }else{
+                        map.put(name, list)
+                    }
+                }
             }
         }
         return map
@@ -161,16 +165,19 @@ class Request(ctx: Context, request: HttpServletRequest){
      * @return Cookie 对象，如果请求中不存在此Cookie则返回 null
      */
     fun cookie(name: String): Cookie? {
-        servletRequest.cookies.forEach { cookie ->
-            if(name.equals(cookie.name)) {
-                return cookie
+        servletRequest.cookies?.let { cookies->
+            cookies.forEach { cookie ->
+                if(name.equals(cookie.name)) {
+                    return cookie
+                }
             }
         }
         return null
     }
 
     fun cookies(): List<Cookie> {
-        return servletRequest.cookies.toList()
+        val cookies = servletRequest.cookies
+        return if(cookies != null) cookies.toList() else emptyList()
     }
 
     /**
