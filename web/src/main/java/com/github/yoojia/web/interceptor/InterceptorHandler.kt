@@ -51,6 +51,7 @@ abstract class InterceptorHandler(tag: String,
             val found = findMatches(request.comparator)
             processFound(found, request, response, dispatch)
         }
+        super.process(request, response, dispatch)
     }
 
     override fun findMatches(requestComparator: Comparator): List<RequestHandler> {
