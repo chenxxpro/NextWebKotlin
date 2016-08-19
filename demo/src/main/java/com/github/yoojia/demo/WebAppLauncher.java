@@ -8,7 +8,7 @@ import com.github.yoojia.web.server.WebAppServer;
 public class WebAppLauncher {
 
     public static void main(String[] args) throws Exception {
-        WebAppServer server = new WebAppServer(8080);
+        WebAppServer server = new WebAppServer(8082);
         server.run("src/main/webapp");
     }
 }

@@ -22,8 +22,8 @@ abstract class AbstractModuleHandler(val tag: String,
         private val Logger = LoggerFactory.getLogger(AbstractModuleHandler::class.java)
     }
 
-    /// 被多线程访问但保证只在主线初始化时做了修改
-    protected  val handlers = ArrayList<RequestHandler>()
+    /// 被多线程访问但保证只在主线初始化时才有写操作，请求处理过程只读操作
+    protected val handlers = ArrayList<RequestHandler>()
 
     private val moduleCachedObjects: ModuleCachedProvider
     private val classes: ArrayList<Class<*>>

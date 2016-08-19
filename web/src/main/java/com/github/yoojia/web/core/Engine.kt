@@ -61,8 +61,11 @@ object Engine {
     fun process(req: ServletRequest, res: ServletResponse) {
         val context = contextRef.get()
         val response = Response(context, res as HttpServletResponse)
-        response.setStatusCode(StatusCode.NOT_FOUND) // Default: 404
         val request = Request(context, req as HttpServletRequest)
+        // default configs:
+        response.setStatusCode(StatusCode.NOT_FOUND) // Default: 404
+        response.putArg("app-base", request.contextPath)
+        response.putArg("req-base", request.path)
         try{
             dispatcher.route(request, response)
         }catch(err: Throwable) {

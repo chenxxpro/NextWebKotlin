@@ -36,8 +36,8 @@ class DispatchChain {
     fun next(request: Request, response: Response, chain: DispatchChain) {
         val i = threadIndex.get()
         if (i != moduleDeep) {
+            threadIndex.set(i + 1)//!! Set next index before process
             modules[i].process(request, response, chain)
-            threadIndex.set(i + 1)
         }
     }
 
