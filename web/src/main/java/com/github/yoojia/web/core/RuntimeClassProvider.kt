@@ -29,7 +29,7 @@ internal class RuntimeClassProvider : ClassProvider {
         val start = now()
         val runtimeConfig = context.rootConfig.getConfig("runtime-classes")
         // Accepts
-        val acceptStarts = runtimeConfig.getTypedList<String>("accept-ends")
+        val acceptStarts = runtimeConfig.getTypedList<String>("accept-starts")
         val hasAcceptStarts = acceptStarts.isNotEmpty()
         if(hasAcceptStarts) acceptStarts.forEach { startName->
             Logger.debug("Accept-Starts: $startName")

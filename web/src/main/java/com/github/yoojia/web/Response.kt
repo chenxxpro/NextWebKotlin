@@ -13,6 +13,12 @@ import javax.servlet.http.HttpServletResponse
  */
 class Response(@JvmField val context: Context, @JvmField val servletResponse: HttpServletResponse) {
 
+
+    companion object{
+        @JvmField val TEMPLATE_NAME = "nwk.response.names:template"
+        @JvmField val STATIC_NAME = "nwk.response.names:static"
+    }
+
     @JvmField val args = DataMap(HashMap<String, Any>())
     @JvmField val createTime: Long
 
@@ -160,8 +166,4 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
         }
     }
 
-    companion object{
-        val TEMPLATE_NAME = "<next-web::response.names:template>"
-        val STATIC_NAME = "<next-web::response.names:static>"
-    }
 }
