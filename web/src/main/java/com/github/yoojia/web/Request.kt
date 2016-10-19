@@ -24,9 +24,8 @@ class Request(ctx: Context, request: HttpServletRequest){
     @JvmField val path: String
     @JvmField val contextPath: String
     @JvmField val createTime: Long
-
-    val resources: List<String>
-    val comparator: Comparator
+    @JvmField val resources: List<String>
+    @JvmField val comparator: Comparator
 
     private val dynamicParams = DataMap(HashMap<String, Any>())
     private val scopeParams: MutableMap<String, MutableList<String>> by lazy {

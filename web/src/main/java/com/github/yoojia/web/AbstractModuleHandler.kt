@@ -23,7 +23,7 @@ abstract class AbstractModuleHandler(val tag: String,
     }
 
     /// 被多线程访问但保证只在主线初始化时才有写操作，请求处理过程只读操作
-    protected val handlers = ArrayList<RequestHandler>()
+    @JvmField protected val handlers = ArrayList<RequestHandler>()
 
     private val moduleCachedObjects: ModuleCachedProvider
     private val classes: ArrayList<Class<*>>

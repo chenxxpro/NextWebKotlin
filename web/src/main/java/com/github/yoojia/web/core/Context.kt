@@ -12,13 +12,6 @@ class Context(@JvmField val webPath: String,
               @JvmField val rootConfig: Config,
               @JvmField val servletContext: ServletContext) {
 
-    @Deprecated(message = "Use rootConfig instead")
-    val config: Config
-
-    init {
-        config = rootConfig
-    }
-
     val contextPath: String by lazy {
         val path = servletContext.contextPath
         if(path.isNullOrEmpty()) "/" else path

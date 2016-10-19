@@ -27,7 +27,7 @@ internal class ConfigLoader : ConfigProvider {
      * @return 非null Config对象。
      */
     @Suppress("UNCHECKED_CAST")
-    override fun get(filePath: Path): Config {
+    override fun getConfig(filePath: Path): Config {
         if(! Files.exists(filePath)) {
             val map = LinkedHashMap<String, Any>(2)
             map.put(KEY_CONFIG_PATH, filePath.toString())
