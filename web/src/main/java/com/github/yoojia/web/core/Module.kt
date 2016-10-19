@@ -12,9 +12,7 @@ interface Module : Plugin {
     /**
      * 初始化模块。
      */
-    fun prepare(inputs: List<Class<*>>): List<Class<*>>{
-        return emptyList()
-    }
+    fun prepare(inputs: List<Class<*>>): List<Class<*>> = emptyList()
 
     /**
      * 处理请求

@@ -8,9 +8,9 @@ import com.github.yoojia.web.util.splitToArray
  */
 class Comparator {
 
-    val method: String
-    val segments: List<UriSegment>
-    val path: String
+    @JvmField val method: String
+    @JvmField val segments: List<UriSegment>
+    @JvmField val path: String
 
     private constructor(method: String, path: String, segments: List<UriSegment>) {
         this.method = method.toUpperCase()

@@ -10,8 +10,8 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class JavaMethodInvoker(val hostType: Class<*>,
-                        val method: Method,
+class JavaMethodInvoker(@JvmField val hostType: Class<*>,
+                        @JvmField val method: Method,
                         private val strictAccessible: Boolean,
                         private val argumentTypes: Array<Class<*>> = method.parameterTypes) {
 

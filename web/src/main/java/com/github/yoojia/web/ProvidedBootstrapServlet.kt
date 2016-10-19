@@ -17,7 +17,7 @@ abstract class ProvidedBootstrapServlet : GeneralServlet(), ClassProvider, Confi
         Engine.start(config.servletContext!!, this, this)
     }
 
-    override fun get(filePath: Path): Config {
+    override fun getConfig(filePath: Path): Config {
         return Config.empty()
     }
 

@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object Engine {
 
-    const val VERSION = "NextEngine/2.a.20-2 (Kotlin 1.0.3; Java 7,8)"
+    const val VERSION = "NextEngine/2.a.20-6 (Kotlin 1.0.3; Java 7,8)"
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Engine::class.java)
@@ -32,7 +32,7 @@ object Engine {
     private val dispatcher = DispatchChain()
     private val contextRef = AtomicReference<Context>()
 
-    val kernelManager = KernelManager()
+    @JvmField val kernelManager = KernelManager()
 
     fun init(servletContext: ServletContext) {
         start(servletContext, ConfigLoader(), RuntimeClassProvider())
@@ -42,7 +42,7 @@ object Engine {
         Logger.warn("===> NextEngine START BOOTING, Version: $VERSION")
         val start = now()
         val directory = servletContext.getRealPath("/")
-        val config = configProvider.get(Paths.get(directory, CONFIG_FILE))
+        val config = configProvider.getConfig(Paths.get(directory, CONFIG_FILE))
         Logger.debug("Config-From : ${config.getStringValue(ConfigLoader.KEY_CONFIG_PATH)}")
         Logger.debug("Config-State: ${config.getStringValue(ConfigLoader.KEY_CONFIG_STATE)}")
         Logger.debug("Config-Time : ${escape(start)}ms")
@@ -50,7 +50,7 @@ object Engine {
         contextRef.set(ctx)
         Logger.debug("Web-Directory: ${ctx.webPath}")
         Logger.debug("Web-Context  : ${ctx.contextPath}")
-        initModules(ctx, classProvider.get(ctx).toMutableList(), kernelManager)
+        initModules(ctx, classProvider.getClasses(ctx).toMutableList(), kernelManager)
         kernelManager.withModules { module -> dispatcher.add(module) }
         Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
         Logger.debug("Loaded-Plugins: ${kernelManager.pluginCount()}")

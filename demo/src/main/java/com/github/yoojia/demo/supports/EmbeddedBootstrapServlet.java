@@ -19,7 +19,7 @@ public class EmbeddedBootstrapServlet extends ProvidedBootstrapServlet{
 
     @NotNull
     @Override
-    public List<Class<?>> get(@NotNull Context context) {
+    public List<Class<?>> getClasses(@NotNull Context context) {
         return from(HelloAfterInterceptor.class,
                 HelloBeforeInterceptor.class,
                 HelloNextWeb.class,

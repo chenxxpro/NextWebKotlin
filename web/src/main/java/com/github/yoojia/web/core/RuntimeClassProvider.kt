@@ -16,7 +16,7 @@ internal class RuntimeClassProvider : ClassProvider {
 
         private val Logger = LoggerFactory.getLogger(RuntimeClassProvider::class.java)
 
-        private val DEFAULT_SYSTEM_CLASSES = arrayOf(
+        private val IGNORE_PACKAGES = arrayOf(
                 "com.github.yoojia.web.",
                 "java.",
                 "javax.",
@@ -25,7 +25,7 @@ internal class RuntimeClassProvider : ClassProvider {
         )
     }
 
-    override fun get(context: Context): List<Class<*>> {
+    override fun getClasses(context: Context): List<Class<*>> {
         val start = now()
         val runtimeConfig = context.rootConfig.getConfig("runtime-classes")
         // Accepts
@@ -48,7 +48,6 @@ internal class RuntimeClassProvider : ClassProvider {
         }
 
         // Ignore
-
         val ignoreStarts = runtimeConfig.getTypedList<String>("ignore-starts")
         val hasIgnoreStarts = ignoreStarts.isNotEmpty()
         if(hasIgnoreStarts) ignoreStarts.forEach { startName->
@@ -69,7 +68,7 @@ internal class RuntimeClassProvider : ClassProvider {
 
         val filter = object : Filter<String> {
             override fun accept(className: String): Boolean {
-                DEFAULT_SYSTEM_CLASSES.forEach {
+                IGNORE_PACKAGES.forEach {
                     if(className.startsWith(it)) return false
                 }
                 // Accepts

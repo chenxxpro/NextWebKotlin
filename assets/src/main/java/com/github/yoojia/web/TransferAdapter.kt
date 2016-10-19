@@ -12,22 +12,22 @@ import java.util.*
  */
 internal class TransferAdapter {
 
-    private val mInputFilter: File
-    private val mLastModified: Long
+    private val inputFilter: File
+    private val lastModified: Long
 
     constructor(path: Path) {
-        mInputFilter = path.toFile()
-        mLastModified = mInputFilter.lastModified()
+        inputFilter = path.toFile()
+        lastModified = inputFilter.lastModified()
     }
 
     fun dispatch(request: Request, response: Response) {
-        val serverDate = Date(mLastModified).toString()
+        val serverDate = Date(lastModified).toString()
         val clientDate = request.header("If-Modified-Since")
         if(serverDate.equals(clientDate)) {
             response.setStatusCode(StatusCode.NOT_MODIFIED)
         }else{
             response.addHeader("Last-Modified", serverDate)
-            val file = FileInputStream(mInputFilter).channel
+            val file = FileInputStream(inputFilter).channel
             val out = Channels.newChannel(response.servletResponse.outputStream)
             file.transferTo(0, file.size(), out)
         }
