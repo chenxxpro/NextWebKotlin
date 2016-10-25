@@ -10,7 +10,7 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-internal class ConfigLoader : ConfigProvider {
+internal class YamlConfigLoader : ConfigProvider {
 
     companion object {
         internal const val KEY_CONFIG_PATH = "nwk.core.config.path"
