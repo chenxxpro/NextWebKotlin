@@ -28,7 +28,7 @@ class KernelManager {
         plugins.sortedBy { it.second/*priority*/ }.forEach { it.first/*plugin*/.onCreated(ctx, it.third/*config*/) }
     }
 
-    internal fun onDestroy() {
+    internal fun destroy() {
         // Call onDestroy
         modules.forEach { it.first.onDestroy() }
         modules.clear()

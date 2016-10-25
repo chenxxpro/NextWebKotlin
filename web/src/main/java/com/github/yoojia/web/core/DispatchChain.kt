@@ -41,8 +41,9 @@ class DispatchChain {
         }
     }
 
-    fun clear(){
+    fun stop(){
         modules.clear()
+        threadIndex.remove()
     }
 
 }

@@ -72,24 +72,24 @@ internal class RuntimeClassProvider : ClassProvider {
                     if(className.startsWith(it)) return false
                 }
                 // Accepts
-                if(hasAcceptStarts) acceptStarts.forEach { startName->
-                    if(className.startsWith(startName)) return true
+                if(hasAcceptStarts) acceptStarts.forEach { start->
+                    if(className.startsWith(start)) return true
                 }
-                if(hasAcceptClass) acceptClass.forEach { className->
-                    if(className.equals(className)) return true
+                if(hasAcceptClass) acceptClass.forEach { name->
+                    if(className.equals(name)) return true
                 }
-                if(hasAcceptEnds) acceptEnds.forEach { endName->
-                    if(className.endsWith(endName)) return true
+                if(hasAcceptEnds) acceptEnds.forEach { end->
+                    if(className.endsWith(end)) return true
                 }
                 // Ignore
-                if(hasIgnoreStarts) ignoreStarts.forEach { startName->
-                    if(className.startsWith(startName)) return false
+                if(hasIgnoreStarts) ignoreStarts.forEach { start->
+                    if(className.startsWith(start)) return false
                 }
-                if(hasIgnoreClass) ignoreClass.forEach { className->
-                    if(className.equals(className)) return false
+                if(hasIgnoreClass) ignoreClass.forEach { name->
+                    if(className.equals(name)) return false
                 }
-                if (hasIgnoreEnds) ignoreEnds.forEach { endName->
-                    if(className.endsWith(endName)) return false
+                if (hasIgnoreEnds) ignoreEnds.forEach { end->
+                    if(className.endsWith(end)) return false
                 }
                 return true
             }
