@@ -1,9 +1,9 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.DispatchChain
-import com.github.yoojia.web.core.Module
+import com.github.yoojia.web.Config
+import com.github.yoojia.web.Context
+import com.github.yoojia.web.Router
+import com.github.yoojia.web.Module
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.Velocity
 import org.apache.velocity.app.VelocityEngine
@@ -42,7 +42,7 @@ class VelocityTemplates : Module {
     }
 
     @Throws(Exception::class)
-    override fun process(request: Request, response: Response, dispatch: DispatchChain) {
+    override fun process(request: Request, response: Response, router: Router) {
         val name = response.args[Response.TEMPLATE_NAME]
         if(name != null && name is String && name.isNotEmpty()) {
             Logger.trace("Template-Module-Processing: ${request.path}, template: $name")
@@ -54,6 +54,6 @@ class VelocityTemplates : Module {
                     .merge(VelocityContext(response.args), output)
             response.sendHtml(output.toString())
         }
-        dispatch.next(request, response, dispatch)
+        router.next(request, response, router)
     }
 }

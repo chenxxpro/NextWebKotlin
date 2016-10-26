@@ -1,13 +1,13 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Module
+import com.github.yoojia.web.Module
 import java.text.SimpleDateFormat
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-abstract class LoggerModule : Module{
+abstract class LoggerModule : Module {
 
     companion object {
 

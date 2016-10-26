@@ -1,6 +1,6 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
+import com.github.yoojia.web.Config
 import org.junit.Assert
 import org.junit.Test
 import java.util.*

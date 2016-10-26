@@ -5,7 +5,7 @@ import com.github.yoojia.demo.modules.HelloBeforeInterceptor;
 import com.github.yoojia.demo.modules.HelloNextWeb;
 import com.github.yoojia.demo.modules.HelloTemplate;
 import com.github.yoojia.web.ProvidedBootstrapServlet;
-import com.github.yoojia.web.core.Context;
+import com.github.yoojia.web.Context;
 import com.github.yoojia.web.server.EmbeddedServer;
 import org.jetbrains.annotations.NotNull;
 

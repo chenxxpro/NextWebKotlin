@@ -18,7 +18,6 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
 
     @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
-
         response.sendHtml("<br/>Handle by GET/hello/{username}, username= " + request.dynamicParam("username"));
         chain.interrupt();
     }
@@ -72,12 +71,12 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
     }
 
     @Override
-    public void eachBefore(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void beforeRequests(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         System.out.println("---- Method invoke before: " + method);
     }
 
     @Override
-    public void eachAfter(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void afterRequests(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         System.out.println("---- Method invoke after: " + method);
     }
 }

@@ -1,8 +1,8 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.DispatchChain
+import com.github.yoojia.web.Config
+import com.github.yoojia.web.Context
+import com.github.yoojia.web.Router
 import com.github.yoojia.web.supports.InternalPriority
 import com.github.yoojia.web.supports.Comparator
 import org.slf4j.LoggerFactory
@@ -62,7 +62,7 @@ class BeforeLoggerHandler : LoggerModule() {
 
     }
 
-    override fun process(request: Request, response: Response, dispatch: DispatchChain) {
+    override fun process(request: Request, response: Response, router: Router) {
         var enabled = true
         ignores.forEach { define ->
             if(request.comparator.isMatchDefine(define)) {
@@ -74,6 +74,6 @@ class BeforeLoggerHandler : LoggerModule() {
             request.putParam(LOGGING_TEXT_NAME, prepareRequestLog(request))
             request.putParam(LOGGING_ENABLED_NAME, true)
         }
-        super.process(request, response, dispatch)
+        super.process(request, response, router)
     }
 }

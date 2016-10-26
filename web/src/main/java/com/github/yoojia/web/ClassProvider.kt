@@ -1,4 +1,4 @@
-package com.github.yoojia.web.core
+package com.github.yoojia.web
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)

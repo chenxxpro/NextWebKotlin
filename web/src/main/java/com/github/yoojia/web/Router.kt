@@ -1,14 +1,12 @@
-package com.github.yoojia.web.core
+package com.github.yoojia.web
 
-import com.github.yoojia.web.Request
-import com.github.yoojia.web.Response
 import java.util.*
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-class DispatchChain {
+class Router {
 
     private val modules = ArrayList<Module>()
     private val threadIndex = object : ThreadLocal<Int>() {
@@ -33,7 +31,7 @@ class DispatchChain {
     }
 
     @Throws(Exception::class)
-    fun next(request: Request, response: Response, chain: DispatchChain) {
+    fun next(request: Request, response: Response, chain: Router) {
         val index = threadIndex.get()
         if (index != moduleSize) {
             threadIndex.set(index + 1)//!! Set next index before process
@@ -41,7 +39,7 @@ class DispatchChain {
         }
     }
 
-    fun stop(){
+    fun shutdown(){
         modules.clear()
         threadIndex.remove()
     }
