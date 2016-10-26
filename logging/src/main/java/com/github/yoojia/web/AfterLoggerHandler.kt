@@ -15,9 +15,11 @@ class AfterLoggerHandler : LoggerModule() {
 
     companion object {
 
-        private fun prepareResponseLog(response: Response): String {
+        private fun prepareResponseLog(request: Request, response: Response): String {
             val buff = StringBuilder()
-            addLine("Response-At", FORMATTER.format(Date(response.createTime)), buff)
+            val end = System.currentTimeMillis()
+            addLine("Response-At", FORMATTER.format(Date(end)), buff)
+            addLine("Response-Time", "${end - request.createTime} ms", buff)
             addLine("Status-Code", response.servletResponse.status, buff)
             response.servletResponse.contentType?.let { contentType->
                 addLine("Content-Type", contentType, buff)
@@ -45,7 +47,7 @@ class AfterLoggerHandler : LoggerModule() {
         request.removeParam(LOGGING_TEXT_NAME)
         if(prepared && text.isNotEmpty()) {
             val buff = StringBuilder(text)
-            buff.append(prepareResponseLog(response))
+            buff.append(prepareResponseLog(request, response))
             buff.append("<=== END ===>")
             Logger.debug(buff.toString())
         }

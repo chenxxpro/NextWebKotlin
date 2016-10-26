@@ -53,10 +53,10 @@ class JavaMethodInvoker(@JvmField val hostType: Class<*>,
     private fun varargs(request: Request, response: Response, chain: RequestChain): Array<Any> {
         val output = ArrayList<Any>()
         argumentTypes.forEach { type ->
-            when {
-                type.equals(Request::class.java) -> output.add(request)
-                type.equals(Response::class.java) -> output.add(response)
-                type.equals(RequestChain::class.java) -> output.add(chain)
+            when(type) {
+                Request::class.java -> output.add(request)
+                Response::class.java -> output.add(response)
+                RequestChain::class.java -> output.add(chain)
             }
         }
         return output.toArray()

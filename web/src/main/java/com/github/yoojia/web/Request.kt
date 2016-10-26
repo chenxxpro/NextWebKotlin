@@ -63,7 +63,7 @@ class Request(ctx: Context, request: HttpServletRequest){
         servletRequest = request
         contextPath = request.contextPath
         val uri = request.requestURI
-        path = if ("/".equals(contextPath)) uri else uri.substring(contextPath.length)
+        path = if ("/" == contextPath) uri else uri.substring(contextPath.length)
         method = request.method.toUpperCase()
         resources = splitToArray(path)
         comparator = Comparator.createRequest(method, path, resources)
@@ -90,11 +90,6 @@ class Request(ctx: Context, request: HttpServletRequest){
         }else{
             return cached
         }
-    }
-
-    @Deprecated(message = "Use paramOrNull(String) instead",replaceWith = ReplaceWith("paramOrNull", "String"))
-    fun param(name: String): String? {
-        return paramOrNull(name)
     }
 
     /**
