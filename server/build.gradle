@@ -23,4 +23,4 @@ ext{
     projVCS = "https://github.com/yoojia/NextWebKotlin.git"
 }
 
-apply from: '../publish.gradle'
+//apply from: '../publish.gradle'
