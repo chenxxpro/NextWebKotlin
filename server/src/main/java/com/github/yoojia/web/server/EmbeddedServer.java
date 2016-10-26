@@ -12,7 +12,7 @@ public class EmbeddedServer extends JettyServer {
     private boolean mSetBootstrap = false;
 
     public EmbeddedServer(int port) {
-        super("localhost", port);
+        super("0.0.0.0", port);
     }
 
     public void setBootstrapServlet(Class<? extends Servlet> servletClass){
