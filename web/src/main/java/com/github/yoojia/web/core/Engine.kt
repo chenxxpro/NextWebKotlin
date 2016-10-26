@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object Engine {
 
-    const val VERSION = "NextEngine/2.a.20-6 (Kotlin 1.0.3; Java 7,8)"
+    const val VERSION = "NextEngine/2.a.20-7 (Kotlin 1.0.4; Java 7/8;)"
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Engine::class.java)
@@ -35,7 +35,7 @@ object Engine {
     @JvmField val kernelManager = KernelManager()
 
     fun init(servletContext: ServletContext) {
-        start(servletContext, ConfigLoader(), RuntimeClassProvider())
+        start(servletContext, YamlConfigLoader(), RuntimeClassProvider())
     }
 
     fun start(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
@@ -43,8 +43,8 @@ object Engine {
         val start = now()
         val directory = servletContext.getRealPath("/")
         val config = configProvider.getConfig(Paths.get(directory, CONFIG_FILE))
-        Logger.debug("Config-From : ${config.getStringValue(ConfigLoader.KEY_CONFIG_PATH)}")
-        Logger.debug("Config-State: ${config.getStringValue(ConfigLoader.KEY_CONFIG_STATE)}")
+        Logger.debug("Config-From : ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_PATH)}")
+        Logger.debug("Config-State: ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_STATE)}")
         Logger.debug("Config-Time : ${escape(start)}ms")
         val ctx = Context(directory, config, servletContext)
         contextRef.set(ctx)
@@ -72,15 +72,15 @@ object Engine {
             Logger.error("Error when processing request", err)
             try{
                 response.sendError(err)
-            }catch(stillError: Throwable) {
-                Logger.error("Error when send ERROR to client", stillError)
+            }catch(still: Throwable) {
+                Logger.error("Error when send ERROR to client", still)
             }
         }
     }
 
     fun shutdown() {
-        dispatcher.clear()
-        kernelManager.onDestroy()
+        dispatcher.stop()
+        kernelManager.destroy()
     }
 
     private fun initModules(context: Context, classes: MutableList<Class<*>>, manager: KernelManager) {

@@ -21,7 +21,7 @@ public class JettyServer {
     }
 
     public JettyServer(int port) {
-        this("localhost", port);
+        this("0.0.0.0", port);
     }
 
     public InetSocketAddress getAddress() {

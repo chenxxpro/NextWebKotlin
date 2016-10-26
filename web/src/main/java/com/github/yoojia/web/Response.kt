@@ -13,17 +13,14 @@ import javax.servlet.http.HttpServletResponse
  */
 class Response(@JvmField val context: Context, @JvmField val servletResponse: HttpServletResponse) {
 
-
     companion object{
         @JvmField val TEMPLATE_NAME = "nwk.response.names:template"
         @JvmField val STATIC_NAME = "nwk.response.names:static"
     }
 
     @JvmField val args = DataMap(HashMap<String, Any>())
-    @JvmField val createTime: Long
 
     init{
-        createTime = System.currentTimeMillis()
         addHeader("X-Powered-By", Engine.VERSION)
     }
 
@@ -140,6 +137,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
         this.args.putAll(args)
         return this
     }
+
     /**
      * 移除一个参数
      */
