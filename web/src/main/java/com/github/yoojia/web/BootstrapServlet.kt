@@ -1,6 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Engine
 import javax.servlet.ServletConfig
 
 /**
@@ -10,6 +9,6 @@ import javax.servlet.ServletConfig
 class BootstrapServlet : GeneralServlet() {
 
     override fun init2(config: ServletConfig) {
-        Engine.init(config.servletContext!!)
+        AppEngine.setup(config.servletContext!!)
     }
 }

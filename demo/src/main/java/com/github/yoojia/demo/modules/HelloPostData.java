@@ -33,12 +33,12 @@ public class HelloPostData implements ModuleRequestsListener {
     }
 
     @Override
-    public void eachBefore(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void beforeRequests(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         response.sendText(request.bodyData());
     }
 
     @Override
-    public void eachAfter(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void afterRequests(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
 
     }
 }

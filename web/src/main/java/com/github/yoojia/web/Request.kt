@@ -2,7 +2,6 @@ package com.github.yoojia.web
 
 import com.github.yoojia.lang.DataMap
 import com.github.yoojia.lang.StreamKit
-import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.util.splitToArray
 import java.io.InputStreamReader

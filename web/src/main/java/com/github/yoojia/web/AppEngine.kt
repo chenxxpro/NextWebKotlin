@@ -1,8 +1,5 @@
-package com.github.yoojia.web.core
+package com.github.yoojia.web
 
-import com.github.yoojia.web.Request
-import com.github.yoojia.web.Response
-import com.github.yoojia.web.StatusCode
 import com.github.yoojia.web.http.HttpControllerHandler
 import com.github.yoojia.web.interceptor.AfterHandler
 import com.github.yoojia.web.interceptor.BeforeHandler
@@ -22,52 +19,52 @@ import javax.servlet.http.HttpServletResponse
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-object Engine {
+object AppEngine {
 
-    const val VERSION = "NextEngine/2.a.20-7 (Kotlin 1.0.4; Java 7/8;)"
+    const val VERSION = "NextEngine/2.a.20-9 (Kotlin 1.0.4; Java 7/8;)"
+
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
-    private val Logger = LoggerFactory.getLogger(Engine::class.java)
+    private val Logger = LoggerFactory.getLogger(AppEngine::class.java)
 
-    private val dispatcher = DispatchChain()
-    private val contextRef = AtomicReference<Context>()
+    private val router = Router()
+    private val appContext = AtomicReference<Context>()
 
-    @JvmField val kernelManager = KernelManager()
+    private val kernels = KernelManager()
 
-    fun init(servletContext: ServletContext) {
-        start(servletContext, YamlConfigLoader(), RuntimeClassProvider())
+    fun setup(servletContext: ServletContext) {
+        startup(servletContext, YamlConfigLoader(), RuntimeClassProvider())
     }
 
-    fun start(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
+    fun startup(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
         Logger.warn("===> NextEngine START BOOTING, Version: $VERSION")
         val start = now()
-        val directory = servletContext.getRealPath("/")
-        val config = configProvider.getConfig(Paths.get(directory, CONFIG_FILE))
+        val path = servletContext.getRealPath("/")
+        val config = configProvider.getConfig(Paths.get(path, CONFIG_FILE))
+        val ctx = Context(path, config, servletContext)
+        appContext.set(ctx)
+        initKernel(classProvider)
         Logger.debug("Config-From : ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_PATH)}")
         Logger.debug("Config-State: ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_STATE)}")
         Logger.debug("Config-Time : ${escape(start)}ms")
-        val ctx = Context(directory, config, servletContext)
-        contextRef.set(ctx)
-        Logger.debug("Web-Directory: ${ctx.webPath}")
-        Logger.debug("Web-Context  : ${ctx.contextPath}")
-        initModules(ctx, classProvider.getClasses(ctx).toMutableList(), kernelManager)
-        kernelManager.withModules { module -> dispatcher.add(module) }
-        Logger.debug("Loaded-Modules: ${kernelManager.moduleCount()}")
-        Logger.debug("Loaded-Plugins: ${kernelManager.pluginCount()}")
-        kernelManager.onCreated(ctx)
+        Logger.debug("App-Path: ${ctx.webPath}")
+        Logger.debug("App-Context  : ${ctx.contextPath}")
+        Logger.debug("Modules-Loaded: ${kernels.moduleCount()}")
+        Logger.debug("Plugins-Loaded: ${kernels.pluginCount()}")
         Logger.warn("<=== NextEngine BOOT SUCCESSFUL, Boot time: ${escape(start)}ms")
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {
-        val context = contextRef.get()
-        val response = Response(context, res as HttpServletResponse)
+        val context = appContext.get()
+        // 接收到每个客户端请求时，创建 Request 和 Response 临时对象，生命周期只限于请求过程。
         val request = Request(context, req as HttpServletRequest)
+        val response = Response(context, res as HttpServletResponse)
         // default configs:
         response.setStatusCode(StatusCode.NOT_FOUND) // Default: 404
-        response.putArg("app-base", request.contextPath)
-        response.putArg("req-base", request.path)
+        response.putArg("app-context", request.contextPath)
+        response.putArg("request-path", request.path)
         try{
-            dispatcher.route(request, response)
+            router.route(request, response)
         }catch(err: Throwable) {
             Logger.error("Error when processing request", err)
             try{
@@ -79,11 +76,18 @@ object Engine {
     }
 
     fun shutdown() {
-        dispatcher.stop()
-        kernelManager.destroy()
+        router.shutdown()
+        kernels.destroy()
     }
 
-    private fun initModules(context: Context, classes: MutableList<Class<*>>, manager: KernelManager) {
+    private fun initKernel(classProvider: ClassProvider){
+        val ctx = appContext.get()
+        instances(ctx, classProvider.getClasses(ctx).toMutableList(), kernels)
+        kernels.modules { module -> router.add(module) }
+        kernels.created(ctx)
+    }
+
+    private fun instances(context: Context, classes: MutableList<Class<*>>, manager: KernelManager) {
         val rootConfig = context.rootConfig
         val register = fun(tag: String, module: Module, priority: Int, config: String){
             val start = now()
@@ -105,8 +109,8 @@ object Engine {
         // User.modules
         val modulesStart = now()
         val modulesConfig = rootConfig.getConfigList("modules")
-        modulesConfig.forEach { config ->
-            val args = parseConfigArgs(config)
+        modulesConfig.forEach { conf ->
+            val args = parseConfigArgs(conf)
             val moduleClass = loadClassByName(classLoader, args.className)
             val moduleInstance = newClassInstance<Module>(moduleClass)
             val scrapClasses = moduleInstance.prepare(classes)
@@ -119,8 +123,8 @@ object Engine {
         // User.plugins
         val pluginStart = now()
         val pluginsConfig = rootConfig.getConfigList("plugins")
-        pluginsConfig.forEach { config ->
-            val args = parseConfigArgs(config)
+        pluginsConfig.forEach { conf ->
+            val args = parseConfigArgs(conf)
             val pluginClass = loadClassByName(classLoader, args.className)
             val pluginInstance = newClassInstance<Plugin>(pluginClass)
             manager.register(pluginInstance, args.priority, args.args)

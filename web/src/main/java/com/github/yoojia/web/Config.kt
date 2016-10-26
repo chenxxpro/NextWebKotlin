@@ -1,4 +1,4 @@
-package com.github.yoojia.web.core
+package com.github.yoojia.web
 
 import com.github.yoojia.lang.DataMap
 import java.util.*
@@ -26,7 +26,7 @@ class Config(realMap: MutableMap<String, Any>?) : DataMap(realMap) {
     fun getConfig(key: String): Config {
         val value = get(key)
         if(value == null) {
-            return Config(DataMap.EMPTY)
+            return Config(EMPTY)
         }else{
             val map = value as MutableMap<String, Any>
             return Config(map)

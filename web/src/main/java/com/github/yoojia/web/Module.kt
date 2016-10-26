@@ -1,7 +1,4 @@
-package com.github.yoojia.web.core
-
-import com.github.yoojia.web.Request
-import com.github.yoojia.web.Response
+package com.github.yoojia.web
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)
@@ -17,8 +14,8 @@ interface Module : Plugin {
     /**
      * 处理请求
      */
-    fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        dispatch.next(request, response, dispatch)
+    fun process(request: Request, response: Response, router: Router) {
+        router.next(request, response, router)
     }
 
 }

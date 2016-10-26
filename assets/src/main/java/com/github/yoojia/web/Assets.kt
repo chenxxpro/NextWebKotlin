@@ -1,9 +1,9 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.DispatchChain
-import com.github.yoojia.web.core.Module
+import com.github.yoojia.web.Config
+import com.github.yoojia.web.Context
+import com.github.yoojia.web.Router
+import com.github.yoojia.web.Module
 import com.github.yoojia.web.supports.Comparator
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
@@ -15,7 +15,7 @@ import java.util.*
  */
 class Assets : Module {
 
-    private val mAssetsDefine = ArrayList<Comparator>()
+    private val define = ArrayList<Comparator>()
 
     companion object {
         private val Logger = LoggerFactory.getLogger(Assets::class.java)
@@ -25,11 +25,11 @@ class Assets : Module {
         config.getTypedList<String>("uri-mapping").forEach { uri->
             val path = if(uri.endsWith("/")) "$uri/*" else uri
             Logger.debug("Assets-URI-Define: $path")
-            mAssetsDefine.add(Comparator.createDefine("ALL", path))
+            define.add(Comparator.createDefine("ALL", path))
         }
     }
 
-    override fun process(request: Request, response: Response, dispatch: DispatchChain) {
+    override fun process(request: Request, response: Response, router: Router) {
         if(match(request)){
             val local = request.context.resolvePath(request.path)
             if(Files.exists(local)) {
@@ -43,12 +43,12 @@ class Assets : Module {
                 response.setStatusCode(StatusCode.NOT_FOUND)
             }
         }else{
-            dispatch.next(request, response, dispatch)
+            router.next(request, response, router)
         }
     }
 
     private fun match(request: Request): Boolean {
-        mAssetsDefine.forEach { define->
+        define.forEach { define->
             if(request.comparator.isMatchDefine(define)) {
                 return true
             }
@@ -57,6 +57,6 @@ class Assets : Module {
     }
 
     override fun onDestroy() {
-        mAssetsDefine.clear()
+        define.clear()
     }
 }

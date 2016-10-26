@@ -1,6 +1,6 @@
 package com.github.yoojia.web.util
 
-import com.github.yoojia.web.core.Engine
+import com.github.yoojia.web.AppEngine
 import com.github.yoojia.web.supports.Filter
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -62,7 +62,7 @@ fun <T> newClassInstance(clazz: Class<*>): T {
 }
 
 fun getCoreClassLoader(): ClassLoader {
-    return Engine::class.java.classLoader
+    return AppEngine::class.java.classLoader
 }
 
 fun tryLoadClass(className: String): Class<*>? {

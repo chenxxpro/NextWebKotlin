@@ -1,9 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.ClassProvider
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.ConfigProvider
-import com.github.yoojia.web.core.Engine
 import java.nio.file.Path
 import javax.servlet.ServletConfig
 
@@ -14,7 +10,7 @@ import javax.servlet.ServletConfig
 abstract class ProvidedBootstrapServlet : GeneralServlet(), ClassProvider, ConfigProvider {
 
     override fun init2(config: ServletConfig) {
-        Engine.start(config.servletContext!!, this, this)
+        AppEngine.startup(config.servletContext!!, this, this)
     }
 
     override fun getConfig(filePath: Path): Config {

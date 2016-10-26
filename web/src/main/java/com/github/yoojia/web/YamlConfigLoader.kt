@@ -1,4 +1,4 @@
-package com.github.yoojia.web.core
+package com.github.yoojia.web
 
 import org.yaml.snakeyaml.Yaml
 import java.io.FileInputStream

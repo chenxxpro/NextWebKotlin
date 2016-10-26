@@ -1,8 +1,6 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.lang.DataMap
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.Engine
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
@@ -21,7 +19,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
     @JvmField val args = DataMap(HashMap<String, Any>())
 
     init{
-        addHeader("X-Powered-By", Engine.VERSION)
+        addHeader("X-Powered-By", AppEngine.VERSION)
     }
 
     /**

@@ -1,9 +1,9 @@
 package com.github.yoojia.web.interceptor
 
-import com.github.yoojia.web.AbstractModuleHandler
+import com.github.yoojia.web.ModuleHandler
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.Response
-import com.github.yoojia.web.core.DispatchChain
+import com.github.yoojia.web.Router
 import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.supports.RequestHandler
 import com.github.yoojia.web.util.concat
@@ -16,7 +16,7 @@ import java.util.*
  */
 abstract class InterceptorHandler(tag: String,
                                    annotation: Class<out Annotation>,
-                                   classes: List<Class<*>>) : AbstractModuleHandler(tag, annotation, classes) {
+                                   classes: List<Class<*>>) : ModuleHandler(tag, annotation, classes) {
     companion object {
         private val Logger = LoggerFactory.getLogger(InterceptorHandler::class.java)
     }
@@ -46,12 +46,12 @@ abstract class InterceptorHandler(tag: String,
     }
 
     @Throws(Exception::class)
-    override fun process(request: Request, response: Response, dispatch: DispatchChain) {
+    override fun process(request: Request, response: Response, router: Router) {
         if(handlers.isNotEmpty()) {
             val found = findMatches(request.comparator)
-            processFound(found, request, response, dispatch)
+            processFound(found, request, response, router)
         }
-        super.process(request, response, dispatch)
+        super.process(request, response, router)
     }
 
     override fun findMatches(requestComparator: Comparator): List<RequestHandler> {
