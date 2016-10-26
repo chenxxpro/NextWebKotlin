@@ -7,5 +7,4 @@ include ':logging'
 include ':redis'
 include ':activejdbc'
 include ':demo'
-include 'web2'
 
