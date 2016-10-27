@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse
  */
 object AppEngine {
 
-    const val VERSION = "NextEngine/2.a.20-9 (Kotlin 1.0.4; Java 7/8;)"
+    const val VERSION = "NextEngine/2.21-ALPHA (Kotlin 1.0.4; Java 7/8;)"
 
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
