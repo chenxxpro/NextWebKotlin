@@ -1,6 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Engine
 import javax.servlet.Servlet
 import javax.servlet.ServletConfig
 import javax.servlet.ServletRequest
@@ -26,14 +25,14 @@ abstract class GeneralServlet : Servlet {
     }
 
     override fun getServletInfo(): String? {
-        return "${this.javaClass.simpleName}#${Engine.VERSION}"
+        return "${this.javaClass.simpleName}#${AppEngine.VERSION}"
     }
 
     override fun destroy() {
-        Engine.shutdown()
+        AppEngine.shutdown()
     }
 
     override fun service(request: ServletRequest?, response: ServletResponse?) {
-        Engine.process(request!!, response!!)
+        AppEngine.process(request!!, response!!)
     }
 }

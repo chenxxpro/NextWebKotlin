@@ -1,8 +1,8 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.DispatchChain
+import com.github.yoojia.web.Config
+import com.github.yoojia.web.Context
+import com.github.yoojia.web.Router
 import com.github.yoojia.web.supports.InternalPriority
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -40,9 +40,9 @@ class AfterLoggerHandler : LoggerModule() {
         // nop
     }
 
-    override fun process(request: Request, response: Response, dispatch: DispatchChain) {
-        val prepared = request.booleanParam(LOGGING_ENABLED_NAME)
-        val text = request.stringParam(LOGGING_TEXT_NAME)
+    override fun process(request: Request, response: Response, router: Router) {
+        val prepared = request.paramAsBoolean(LOGGING_ENABLED_NAME)
+        val text = request.paramAsString(LOGGING_TEXT_NAME)
         request.removeParam(LOGGING_ENABLED_NAME)
         request.removeParam(LOGGING_TEXT_NAME)
         if(prepared && text.isNotEmpty()) {
@@ -51,6 +51,6 @@ class AfterLoggerHandler : LoggerModule() {
             buff.append("<=== END ===>")
             Logger.debug(buff.toString())
         }
-        super.process(request, response, dispatch)
+        super.process(request, response, router)
     }
 }

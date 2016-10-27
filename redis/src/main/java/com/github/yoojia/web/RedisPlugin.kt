@@ -1,8 +1,8 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.Plugin
+import com.github.yoojia.web.Config
+import com.github.yoojia.web.Context
+import com.github.yoojia.web.Plugin
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig

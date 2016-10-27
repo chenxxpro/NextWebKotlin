@@ -1,9 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.core.Config
-import com.github.yoojia.web.core.Context
-import com.github.yoojia.web.core.DispatchChain
-import com.github.yoojia.web.core.Module
 import com.github.yoojia.web.supports.*
 import com.github.yoojia.web.supports.Comparator
 import org.slf4j.LoggerFactory
@@ -14,19 +10,20 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-abstract class AbstractModuleHandler(val tag: String,
-                                     val annotation: Class<out Annotation>,
-                                     inputs: List<Class<*>>) : Module {
+abstract class ModuleHandler(val tag: String,
+                             val annotation: Class<out Annotation>,
+                             inputs: List<Class<*>>) : Module {
 
     companion object {
-        private val Logger = LoggerFactory.getLogger(AbstractModuleHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
     }
 
     /// 被多线程访问但保证只在主线初始化时才有写操作，请求处理过程只读操作
-    @JvmField protected val handlers = ArrayList<RequestHandler>()
-
+    private val cached = ArrayList<RequestHandler>()
     private val moduleCachedObjects: ModuleCachedProvider
     private val classes: ArrayList<Class<*>>
+
+    protected val handlers: List<RequestHandler> by lazy { cached }
 
     init{
         val found = inputs.filter { it.isAnnotationPresent(annotation) }
@@ -45,7 +42,7 @@ abstract class AbstractModuleHandler(val tag: String,
                 checkReturnType(javaMethod)
                 checkArguments(javaMethod)
                 val handler = RequestHandler.create(root, clazz, javaMethod, httpMethod, path)
-                handlers.add(handler)
+                cached.add(handler)
                 Logger.info("$tag-Module-Define: $handler")
             })
         }
@@ -57,15 +54,15 @@ abstract class AbstractModuleHandler(val tag: String,
     }
 
     override fun onDestroy() {
-        handlers.clear()
+        cached.clear()
     }
 
-    fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: DispatchChain) {
-        found.sortedBy { it.priority }.forEach { handler ->
-            request.removeDynamicScopeParams()
-            val dynamics = getDynamicParams(handler, request)
+    fun processHandlers(handlers: List<RequestHandler>, request: Request, response: Response, router: Router) {
+        handlers.sortedBy { it.priority }.forEach { handler ->
+            request.removeDynamics()
+            val dynamics = getDynamics(handler, request)
             if (dynamics.isNotEmpty()) {
-                request.putDynamicScopeParams(dynamics)
+                request.putDynamics(dynamics)
                 response.putArgs(dynamics) // copy to response
             }
             Logger.trace("$tag-Processing-Handler: $handler")
@@ -73,11 +70,11 @@ abstract class AbstractModuleHandler(val tag: String,
             val chain = RequestChain()
             // 插入一些特殊处理过程接口的调用
             if(moduleObject is ModuleRequestsListener) {
-                moduleObject.eachBefore(handler.javaMethod, request, response)
+                moduleObject.beforeRequests(handler.javaMethod, request, response)
                 try{
                     handler.invoker.invoke(request, response, chain, moduleObject)
                 }finally{
-                    moduleObject.eachAfter(handler.javaMethod, request, response)
+                    moduleObject.afterRequests(handler.javaMethod, request, response)
                 }
             }else{
                 handler.invoker.invoke(request, response, chain, moduleObject)
@@ -85,16 +82,16 @@ abstract class AbstractModuleHandler(val tag: String,
             if(chain.isInterrupted()) return@forEach
             if(chain.isStopDispatching()) return
         }
-        dispatch.next(request, response, dispatch)
+        router.next(request, response, router)
     }
 
     protected open fun findMatches(requestComparator: Comparator): List<RequestHandler> {
-        return handlers.filter { define -> requestComparator.isMatchDefine(define.comparator) }
+        return cached.filter { define -> requestComparator.isMatchDefine(define.comparator) }
     }
 
     protected abstract fun getRootUri(hostType: Class<*>): String
 
-    private fun getDynamicParams(handler: RequestHandler, request: Request): Map<String, String> {
+    private fun getDynamics(handler: RequestHandler, request: Request): Map<String, String> {
         val output = mutableMapOf<String, String>()
         for(i in handler.comparator.segments.indices) {
             val segment = handler.comparator.segments[i]

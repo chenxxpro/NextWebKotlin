@@ -14,7 +14,7 @@ public class HelloTemplate {
 
     @GET("/{username}")
     public void dynamic(Request request, Response response) {
-        String username = request.dynamicParam("username");
+        String username = request.dynamic("username");
         request.putParam("username", username);
         response.template("hello.html");
     }

@@ -18,25 +18,24 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
 
     @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
-
-        response.sendHtml("<br/>Handle by GET/hello/{username}, username= " + request.dynamicParam("username"));
+        response.sendHtml("<br/>Handle by GET/hello/{username}, username= " + request.dynamic("username"));
         chain.interrupt();
     }
 
     @GET("/{user_id}")
     public void undefined(Request request, Response response, RequestChain chain) {
-        response.sendHtml("<br/>Handle by GET/{user_id}, user_id= " + request.dynamicParam("user_id"));
+        response.sendHtml("<br/>Handle by GET/{user_id}, user_id= " + request.dynamic("user_id"));
         chain.interrupt();
     }
 
     @GET("/{string:username}")
     public void dynamicTyped(Request request, Response response) {
-        response.sendHtml("<br/>Handle by GET/{string:username} , username= " + request.dynamicParam("username"));
+        response.sendHtml("<br/>Handle by GET/{string:username} , username= " + request.dynamic("username"));
     }
 
     @GET("/{int:user_id}")
     public void intDynamic(Request request, Response response) {
-        response.sendHtml("<br/>Handle by GET/{int:user_id} , user_id= " + request.dynamicParam("user_id"));
+        response.sendHtml("<br/>Handle by GET/{int:user_id} , user_id= " + request.dynamic("user_id"));
     }
 
     @GETPOST("/*")
@@ -72,12 +71,12 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
     }
 
     @Override
-    public void eachBefore(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void beforeRequests(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         System.out.println("---- Method invoke before: " + method);
     }
 
     @Override
-    public void eachAfter(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
+    public void afterRequests(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
         System.out.println("---- Method invoke after: " + method);
     }
 }

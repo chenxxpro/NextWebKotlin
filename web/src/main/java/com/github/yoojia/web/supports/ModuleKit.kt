@@ -40,7 +40,7 @@ internal fun findAnnotated(hostType: Class<*>, action: (Method, String, String) 
 }
 
 internal fun checkReturnType(method: Method) {
-    if(!Void.TYPE.equals(method.returnType)) {
+    if(Void.TYPE != method.returnType) {
         throw IllegalArgumentException("Return type of @GET/@POST/@PUT/@DELETE methods must be <Java::void> or <Kotlin::unit> !")
     }
 }
@@ -58,10 +58,10 @@ internal fun checkArguments(method: Method) {
         marks[index] = true
     }
     argumentTypes.forEach { type ->
-        when {
-            type.equals(Request::class.java) -> checkDuplicateArgs(type, 0)
-            type.equals(Response::class.java) -> checkDuplicateArgs(type, 1)
-            type.equals(RequestChain::class.java) -> checkDuplicateArgs(type, 2)
+        when(type) {
+            Request::class.java -> checkDuplicateArgs(type, 0)
+            Response::class.java -> checkDuplicateArgs(type, 1)
+            RequestChain::class.java -> checkDuplicateArgs(type, 2)
             else -> throw IllegalArgumentException("Unsupported argument type <$type> in method $method")
         }
     }

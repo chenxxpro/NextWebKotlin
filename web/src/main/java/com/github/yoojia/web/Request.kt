@@ -2,7 +2,6 @@ package com.github.yoojia.web
 
 import com.github.yoojia.lang.DataMap
 import com.github.yoojia.lang.StreamKit
-import com.github.yoojia.web.core.Context
 import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.util.splitToArray
 import java.io.InputStreamReader
@@ -27,8 +26,12 @@ class Request(ctx: Context, request: HttpServletRequest){
     @JvmField val resources: List<String>
     @JvmField val comparator: Comparator
 
+    // （对用户只读）动态参数的意义是：用户定义的模块处理方法(method)的动态参数，
+    // 通过动态参数来限定它（当前处理方法）的生命周期只存在于当前处理方法，隔离于其它处理方法。
     private val dynamicParams = DataMap(HashMap<String, Any>())
-    private val scopeParams: MutableMap<String, MutableList<String>> by lazy {
+
+    // 整个请求生命周期内的请求参数：由客户端提交，以及用户实现的程序内部设置。
+    private val requestParams: MutableMap<String, MutableList<String>> by lazy {
         val params: MutableMap<String, MutableList<String>> = HashMap()
         for((key, value) in request.parameterMap) {
             params.put(key, value.toMutableList())
@@ -71,56 +74,25 @@ class Request(ctx: Context, request: HttpServletRequest){
 
     /**
      * 读取BodyData (InputStream) 的文本数据。
-     * 允许重复读取。第一次读取BodyData后，Request会将数据缓存到 scopeParams.BODY_DATA_NAME 中。
+     * 允许重复读取。第一次读取BodyData后，Request会将数据缓存到 requestParams.BODY_DATA_NAME 中。
      * HTTP 的各个方法的数据读取逻辑：
      * - GET/POST 在调用bodyData()时检查；
      * - PUT/DELETE 在调用任意params相关接口时才检查和加载（LazyLoad）
      * @return 文本数据。如果不存在数据则返回 null
      */
     fun bodyData(): String? {
-        val cached = scopeParams[BODY_DATA_NAME]?.firstOrNull()
+        val cached = requestParams[BODY_DATA_NAME]?.firstOrNull()
         if(cached == null && method in GET_POST) {
             val data = readBodyStream()
             if(data != null) {
-                scopeParams.put(BODY_DATA_NAME, mutableListOf(data))
+                requestParams.put(BODY_DATA_NAME, mutableListOf(data))
             }else{
-                scopeParams.put(BODY_DATA_NAME, mutableListOf(/*empty*/))
+                requestParams.put(BODY_DATA_NAME, mutableListOf(/*empty*/))
             }
             return data
         }else{
             return cached
         }
-    }
-
-    /**
-     * 获取指定参数名的值。
-     * - 请求中存在单个值，返回值本身；
-     * - 请求中存在多个值，返回第一个值；
-     * @return 参数值。如果请求中不存在此参数，返回 null
-     */
-    fun paramOrNull(name: String): String? {
-        scopeParams[name]?.let { values ->
-            return values.firstOrNull()
-        }
-        return null
-    }
-
-    /**
-     * 获取所有参数。
-     * - 单个数值的参数以 String 类型返回
-     * - 多个数值的参数以 List<String> 类型返回
-     * @return 非空AnyMap对象
-     */
-    fun params(): DataMap {
-        val map = DataMap(HashMap<String, Any>())
-        for((k, v) in scopeParams) {
-            if(v.size == 1) {
-                map.put(k, v.first())
-            }else{
-                map.put(k, v.toList())
-            }
-        }
-        return map
     }
 
     /**
@@ -175,9 +147,41 @@ class Request(ctx: Context, request: HttpServletRequest){
     }
 
     /**
+     * 获取指定参数名的值。
+     * - 请求中存在单个值，返回值本身；
+     * - 请求中存在多个值，返回第一个值；
+     * @return 参数值。如果请求中不存在此参数，返回 null
+     */
+    fun paramOrNull(name: String): String? {
+        requestParams[name]?.let { values ->
+            return values.firstOrNull()
+        }
+        return null
+    }
+
+    /**
+     * 获取所有参数。
+     * - 单个数值的参数以 String 类型返回
+     * - 多个数值的参数以 List<String> 类型返回
+     * @return 非空AnyMap对象
+     */
+    fun params(): DataMap {
+        val map = DataMap(HashMap<String, Any>())
+        for((k, v) in requestParams) {
+            if(v.size == 1) {
+                map.put(k, v.first())
+            }else{
+                map.put(k, v.toList())
+            }
+        }
+        return map
+    }
+
+
+    /**
      * 增加多个参数对到请求中
      */
-    fun putParam(params: Map<String, String>) {
+    fun putParams(params: Map<String, String>) {
         for((k, v) in params) {
             putParam(k, v)
         }
@@ -187,7 +191,7 @@ class Request(ctx: Context, request: HttpServletRequest){
      * 增加一个参数对到请求中
      */
     fun putParam(name: String, value: String) {
-        putOrNew(name, value, scopeParams)
+        putOrNew(name, value, requestParams)
     }
 
     /**
@@ -201,47 +205,10 @@ class Request(ctx: Context, request: HttpServletRequest){
      * 移除一个参数
      */
     fun removeParam(name: String) {
-        scopeParams.remove(name)
+        requestParams.remove(name)
     }
 
-    // dynamic params
-
-    fun dynamicParam(name: String, defaultValue: String): String {
-        val value = dynamicParams[name] as String?
-        if(value != null) {
-            return value
-        }else{
-            return defaultValue
-        }
-    }
-
-    fun dynamicParam(name: String): String {
-        return dynamicParam(name, "")
-    }
-
-    fun dynamicIntParam(name: String): Int {
-        return dynamicParam(name, "0").toInt()
-    }
-
-    fun dynamicLongParam(name: String): Long {
-        return dynamicParam(name, "0").toLong()
-    }
-
-    fun dynamicFloatParam(name: String): Float {
-        return dynamicParam(name, "0").toFloat()
-    }
-
-    fun dynamicDoubleParam(name: String): Double {
-        return dynamicParam(name, "0").toDouble()
-    }
-
-    fun dynamicBooleanParam(name: String): Boolean {
-        return dynamicParam(name, "false").toBoolean()
-    }
-
-    // extensions
-
-    fun stringParam(name: String, def: String): String {
+    fun paramAsString(name: String, def: String): String {
         val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
@@ -250,11 +217,11 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
     }
 
-    fun stringParam(name: String): String {
-        return stringParam(name, "")
+    fun paramAsString(name: String): String {
+        return paramAsString(name, "")
     }
 
-    fun intParam(name: String, def: Int): Int {
+    fun paramAsInt(name: String, def: Int): Int {
         val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
@@ -263,11 +230,11 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
     }
 
-    fun intParam(name: String): Int {
-        return intParam(name, 0)
+    fun paramAsInt(name: String): Int {
+        return paramAsInt(name, 0)
     }
 
-    fun longParam(name: String, def: Long): Long {
+    fun paramAsLong(name: String, def: Long): Long {
         val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
@@ -276,11 +243,11 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
     }
 
-    fun longParam(name: String): Long {
-        return longParam(name, 0L)
+    fun paramAsLong(name: String): Long {
+        return paramAsLong(name, 0L)
     }
 
-    fun floatParam(name: String, def: Float): Float {
+    fun paramAsFloat(name: String, def: Float): Float {
         val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
@@ -289,11 +256,11 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
     }
 
-    fun floatParam(name: String): Float {
-        return floatParam(name, 0f)
+    fun paramAsFloat(name: String): Float {
+        return paramAsFloat(name, 0f)
     }
 
-    fun doubleParam(name: String, def: Double): Double {
+    fun paramAsDouble(name: String, def: Double): Double {
         val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
@@ -302,11 +269,11 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
     }
 
-    fun doubleParam(name: String): Double {
-        return doubleParam(name, 0.0)
+    fun paramAsDouble(name: String): Double {
+        return paramAsDouble(name, 0.0)
     }
 
-    fun booleanParam(name: String, def: Boolean): Boolean {
+    fun paramAsBoolean(name: String, def: Boolean): Boolean {
         val value = paramOrNull(name)
         if(value.isNullOrEmpty()) {
             return def
@@ -315,21 +282,54 @@ class Request(ctx: Context, request: HttpServletRequest){
         }
     }
 
-    fun booleanParam(name: String): Boolean {
-        return booleanParam(name, false)
+    fun paramAsBoolean(name: String): Boolean {
+        return paramAsBoolean(name, false)
+    }
+
+    // dynamic params
+
+    fun dynamic(name: String, defaultValue: String): String {
+        val value = dynamicParams[name] as String?
+        if(value != null) {
+            return value
+        }else{
+            return defaultValue
+        }
+    }
+
+    fun dynamic(name: String): String {
+        return dynamic(name, "")
+    }
+
+    fun dynamicAsInt(name: String): Int {
+        return dynamic(name, "0").toInt()
+    }
+
+    fun dynamicAsLong(name: String): Long {
+        return dynamic(name, "0").toLong()
+    }
+
+    fun dynamicAsFloat(name: String): Float {
+        return dynamic(name, "0").toFloat()
+    }
+
+    fun dynamicAsDouble(name: String): Double {
+        return dynamic(name, "0").toDouble()
+    }
+
+    fun dynamicAsBoolean(name: String): Boolean {
+        return dynamic(name, "false").toBoolean()
     }
 
     /// framework methods
 
-    internal fun putDynamicScopeParams(params: Map<String, String>) {
+    internal fun putDynamics(params: Map<String, String>) {
         dynamicParams.putAll(params)
     }
 
-    internal fun removeDynamicScopeParams(){
+    internal fun removeDynamics(){
         dynamicParams.clear()
     }
-
-    //// supports
 
     private fun readBodyStream(): String? {
         val output = StringWriter()

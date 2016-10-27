@@ -18,7 +18,7 @@ fun createDefineUriSegment(segment: String): UriSegment {
         throw IllegalArgumentException("Invalid uri segment: $segment")
     }
     val dynamic = segment.length >= 3/*{a}*/&& starts.and(ends) == 1
-    val wildcard = !dynamic && "*".equals(segment)
+    val wildcard = !dynamic && "*" == segment
     val _segment: String
     val valueType: UriValueType
     var fixedType: Boolean = true
