@@ -1,9 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.Config
-import com.github.yoojia.web.Context
-import com.github.yoojia.web.Router
-import com.github.yoojia.web.Module
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.Velocity
 import org.apache.velocity.app.VelocityEngine

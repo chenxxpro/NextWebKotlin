@@ -1,6 +1,6 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.http.HttpControllerHandler
+import com.github.yoojia.web.http.HttpHandler
 import com.github.yoojia.web.interceptor.AfterHandler
 import com.github.yoojia.web.interceptor.BeforeHandler
 import com.github.yoojia.web.supports.InternalPriority
@@ -19,13 +19,13 @@ import javax.servlet.http.HttpServletResponse
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-object AppEngine {
+object Application {
 
     const val VERSION = "NextEngine/2.21-ALPHA (Kotlin 1.0.4; Java 7/8;)"
 
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
-    private val Logger = LoggerFactory.getLogger(AppEngine::class.java)
+    private val Logger = LoggerFactory.getLogger(Application::class.java)
 
     private val router = Router()
     private val appContext = AtomicReference<Context>()
@@ -101,7 +101,7 @@ object AppEngine {
         // Core modules
         register("BeforeInterceptor", BeforeHandler(classes), BeforeHandler.DEFAULT_PRIORITY, "before-interceptor")
         register("AfterInterceptor", AfterHandler(classes), AfterHandler.DEFAULT_PRIORITY, "after-interceptor")
-        register("Http", HttpControllerHandler(classes), HttpControllerHandler.DEFAULT_PRIORITY, "http")
+        register("Http", HttpHandler(classes), HttpHandler.DEFAULT_PRIORITY, "http")
 
         val classLoader = getCoreClassLoader()
         // Extensions
@@ -162,9 +162,9 @@ object AppEngine {
         // Assets
         ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->
             val priority: Int
-            if(define >= HttpControllerHandler.DEFAULT_PRIORITY) {
+            if(define >= HttpHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.ASSETS
-                Logger.info("Assets.priority($define) must be < HTTP.priority(${HttpControllerHandler.DEFAULT_PRIORITY}), set to: $priority")
+                Logger.info("Assets.priority($define) must be < HTTP.priority(${HttpHandler.DEFAULT_PRIORITY}), set to: $priority")
             }else{
                 priority = define
             }
@@ -174,9 +174,9 @@ object AppEngine {
         // Templates
         ifExistsThenLoad("com.github.yoojia.web.VelocityTemplates", "templates", "Templates", { define ->
             val priority: Int
-            if(define <= HttpControllerHandler.DEFAULT_PRIORITY) {
+            if(define <= HttpHandler.DEFAULT_PRIORITY) {
                 priority = InternalPriority.TEMPLATES
-                Logger.info("Templates.priority($define) must be > HTTP.priority(${HttpControllerHandler.DEFAULT_PRIORITY}), set to: $priority")
+                Logger.info("Templates.priority($define) must be > HTTP.priority(${HttpHandler.DEFAULT_PRIORITY}), set to: $priority")
             }else{
                 priority = define
             }

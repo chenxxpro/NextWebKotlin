@@ -63,7 +63,7 @@ fun createDefineUriSegment(segment: String): UriSegment {
  * 从客户端Request中获取的URI,创建其UriSegment。
  */
 fun createRequestUriSegment(segment: String): UriSegment {
-    return UriSegment(isDynamic = false,
+    return UriSegment(dynamic = false,
             isWildcard = false,
             valueType = UriValueType.parse(segment),
             isFixedType = true, /*请求参数的数值类型要求为固定类型，不能为ValueType.Any*/

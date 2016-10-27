@@ -4,8 +4,8 @@ import com.github.yoojia.demo.modules.HelloAfterInterceptor;
 import com.github.yoojia.demo.modules.HelloBeforeInterceptor;
 import com.github.yoojia.demo.modules.HelloNextWeb;
 import com.github.yoojia.demo.modules.HelloTemplate;
-import com.github.yoojia.web.ProvidedBootstrapServlet;
 import com.github.yoojia.web.Context;
+import com.github.yoojia.web.ProvidedServlet;
 import com.github.yoojia.web.server.EmbeddedServer;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-public class EmbeddedBootstrapServlet extends ProvidedBootstrapServlet{
+public class EmbeddedBootstrapServlet extends ProvidedServlet {
 
     @NotNull
     @Override

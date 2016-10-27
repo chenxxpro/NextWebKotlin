@@ -1,6 +1,6 @@
 package com.github.yoojia.web.interceptor
 
-import com.github.yoojia.web.ModuleHandler
+import com.github.yoojia.web.ModuleImpl
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.Response
 import com.github.yoojia.web.Router
@@ -16,7 +16,7 @@ import java.util.*
  */
 abstract class InterceptorHandler(tag: String,
                                    annotation: Class<out Annotation>,
-                                   classes: List<Class<*>>) : ModuleHandler(tag, annotation, classes) {
+                                   classes: List<Class<*>>) : ModuleImpl(tag, annotation, classes) {
     companion object {
         private val Logger = LoggerFactory.getLogger(InterceptorHandler::class.java)
     }

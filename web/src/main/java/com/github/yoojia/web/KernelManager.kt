@@ -47,6 +47,6 @@ internal class KernelManager {
     /**
      * 配置参数数据包装.不使用Triple的是为使得参数意义更新清晰.
      */
-    private data class KernelItem<T: EngineLifecycle>(val payload: T, val priority: Int, val conf: Config)
+    private data class KernelItem<out T: Lifecycle>(val payload: T, val priority: Int, val conf: Config)
 
 }

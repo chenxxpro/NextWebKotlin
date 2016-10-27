@@ -63,7 +63,7 @@ class Comparator {
             requests.forEachIndexed { i, request ->
                 val define = defines[i]
                 val match: Boolean
-                if(define.isDynamic) {
+                if(define.dynamic) {
                     match = define.valueType.match(request.valueType)
                 }else{
                     match = define.segment.equals(request.segment, ignoreCase = false)

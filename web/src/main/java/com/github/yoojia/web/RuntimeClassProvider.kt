@@ -94,7 +94,7 @@ internal class RuntimeClassProvider : ClassProvider {
                 return true
             }
         }
-        val classPath = Paths.get(AppEngine::class.java.getResource("/").toURI())
+        val classPath = Paths.get(Application::class.java.getResource("/").toURI())
         Logger.debug("Class-Path: $classPath")
         val classPathClasses = findRuntimeNames(classPath, filter)
         val jarClasses = findJarClassNames(filter)

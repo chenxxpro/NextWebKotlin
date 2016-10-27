@@ -10,10 +10,10 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class JavaMethodInvoker(@JvmField val hostType: Class<*>,
-                        @JvmField val method: Method,
-                        private val strictAccessible: Boolean,
-                        private val argumentTypes: Array<Class<*>> = method.parameterTypes) {
+class JavaInvoker(@JvmField val hostType: Class<*>,
+                  @JvmField val method: Method,
+                  private val strictAccessible: Boolean,
+                  private val argumentTypes: Array<Class<*>> = method.parameterTypes) {
 
     @Throws(Exception::class)
     fun invoke(request: Request, response: Response, chain: RequestChain, hostObject: Any) {
