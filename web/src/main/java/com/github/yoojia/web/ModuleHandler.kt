@@ -57,12 +57,12 @@ abstract class ModuleHandler(val tag: String,
         cached.clear()
     }
 
-    fun processFound(found: List<RequestHandler>, request: Request, response: Response, dispatch: Router) {
-        found.sortedBy { it.priority }.forEach { handler ->
-            request.removeDynamicScopeParams()
-            val dynamics = getDynamicParams(handler, request)
+    fun processHandlers(handlers: List<RequestHandler>, request: Request, response: Response, router: Router) {
+        handlers.sortedBy { it.priority }.forEach { handler ->
+            request.removeDynamics()
+            val dynamics = getDynamics(handler, request)
             if (dynamics.isNotEmpty()) {
-                request.putDynamicScopeParams(dynamics)
+                request.putDynamics(dynamics)
                 response.putArgs(dynamics) // copy to response
             }
             Logger.trace("$tag-Processing-Handler: $handler")
@@ -82,7 +82,7 @@ abstract class ModuleHandler(val tag: String,
             if(chain.isInterrupted()) return@forEach
             if(chain.isStopDispatching()) return
         }
-        dispatch.next(request, response, dispatch)
+        router.next(request, response, router)
     }
 
     protected open fun findMatches(requestComparator: Comparator): List<RequestHandler> {
@@ -91,7 +91,7 @@ abstract class ModuleHandler(val tag: String,
 
     protected abstract fun getRootUri(hostType: Class<*>): String
 
-    private fun getDynamicParams(handler: RequestHandler, request: Request): Map<String, String> {
+    private fun getDynamics(handler: RequestHandler, request: Request): Map<String, String> {
         val output = mutableMapOf<String, String>()
         for(i in handler.comparator.segments.indices) {
             val segment = handler.comparator.segments[i]

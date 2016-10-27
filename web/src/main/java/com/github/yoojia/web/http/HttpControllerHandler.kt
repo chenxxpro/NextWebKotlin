@@ -19,7 +19,7 @@ class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpContro
         // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
         if(matches.isNotEmpty()) {
             response.setStatusCode(StatusCode.ACCEPTED)
-            processFound(matches, request, response, router)
+            processHandlers(matches, request, response, router)
         }
         super.process(request, response, router)
     }

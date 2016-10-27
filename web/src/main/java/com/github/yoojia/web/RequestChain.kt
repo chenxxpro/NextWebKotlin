@@ -24,11 +24,11 @@ class RequestChain() {
         stopDispatching = true
     }
 
-    fun isStopDispatching(): Boolean {
+    internal fun isStopDispatching(): Boolean {
         return stopDispatching
     }
 
-    fun isInterrupted(): Boolean {
+    internal fun isInterrupted(): Boolean {
         return interrupt
     }
 }

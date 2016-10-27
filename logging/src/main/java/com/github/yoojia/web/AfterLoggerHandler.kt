@@ -41,8 +41,8 @@ class AfterLoggerHandler : LoggerModule() {
     }
 
     override fun process(request: Request, response: Response, router: Router) {
-        val prepared = request.booleanParam(LOGGING_ENABLED_NAME)
-        val text = request.stringParam(LOGGING_TEXT_NAME)
+        val prepared = request.paramAsBoolean(LOGGING_ENABLED_NAME)
+        val text = request.paramAsString(LOGGING_TEXT_NAME)
         request.removeParam(LOGGING_ENABLED_NAME)
         request.removeParam(LOGGING_TEXT_NAME)
         if(prepared && text.isNotEmpty()) {

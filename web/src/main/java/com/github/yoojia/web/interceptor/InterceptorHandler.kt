@@ -49,7 +49,7 @@ abstract class InterceptorHandler(tag: String,
     override fun process(request: Request, response: Response, router: Router) {
         if(handlers.isNotEmpty()) {
             val found = findMatches(request.comparator)
-            processFound(found, request, response, router)
+            processHandlers(found, request, response, router)
         }
         super.process(request, response, router)
     }
