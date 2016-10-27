@@ -28,10 +28,10 @@ enum class UriValueType {
      * - 类型相同时,匹配;
      */
     fun match(other: UriValueType): Boolean {
-        if(UNDEFINED.equals(this) || UNDEFINED.equals(other)) {
+        if(UNDEFINED == this || UNDEFINED == other) {
             return true
         }else{
-            return this.equals(other)
+            return this == other
         }
     }
 
@@ -44,21 +44,21 @@ enum class UriValueType {
             resource.forEachIndexed { index, char ->
                 if(Character.isDigit(char)) {
                     digits += 1
-                }else if('E'.equals(char, ignoreCase = true)) {
+                }else if('e'== char || 'E'== char) {
                     if(0 == index || index == lastIndex) return STRING //: e123, 123E
                     marks += 1
                     markIndex = index
-                }else if('-'.equals(char)) {
+                }else if('-' == char) {
                     if(index == lastIndex) return STRING //: 123-
                     if(index != 0 && index == (markIndex + 1)) {
                         marks += 1 // 1.4E-23
                     }else{
                         signs += 1
                     }
-                }else if('+'.equals(char)) {
+                }else if('+' == char) {
                     if(index == lastIndex) return STRING //: 123+
                     signs += 1
-                }else if('.'.equals(char)) {
+                }else if('.' == char) {
                     if(0 == index || index == lastIndex) return STRING //: .123 , 123.
                     dots += 1
                 }

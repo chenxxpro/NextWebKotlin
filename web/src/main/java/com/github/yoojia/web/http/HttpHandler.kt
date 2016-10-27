@@ -7,7 +7,7 @@ import com.github.yoojia.web.supports.InternalPriority
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class HttpControllerHandler(classes: List<Class<*>>) : ModuleHandler("HttpController", Controller::class.java, classes) {
+class HttpHandler(classes: List<Class<*>>) : ModuleImpl("HttpController", Controller::class.java, classes) {
 
     override fun getRootUri(hostType: Class<*>): String {
         return hostType.getAnnotation(Controller::class.java).value

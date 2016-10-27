@@ -10,7 +10,7 @@ import java.lang.reflect.Method
  */
 class RequestHandler(
         val root: String,
-        val invoker: JavaMethodInvoker,
+        val invoker: JavaInvoker,
         val comparator: Comparator,
         val priority: Int = getRequestPriority(comparator)) {
 
@@ -24,7 +24,7 @@ class RequestHandler(
 
         internal fun create(root: String, moduleType: Class<*>, javaMethod: Method, httpMethod: String, path: String): RequestHandler {
             return RequestHandler(root,
-                    JavaMethodInvoker(moduleType, javaMethod, false/*Set Week Accessible by default*/),
+                    JavaInvoker(moduleType, javaMethod, false/*Set Week Accessible by default*/),
                     Comparator.createDefine(httpMethod, concat(root, path)))
         }
     }

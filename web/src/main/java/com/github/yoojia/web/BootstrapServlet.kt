@@ -9,6 +9,6 @@ import javax.servlet.ServletConfig
 class BootstrapServlet : GeneralServlet() {
 
     override fun init2(config: ServletConfig) {
-        AppEngine.setup(config.servletContext!!)
+        Application.setup(config.servletContext!!)
     }
 }

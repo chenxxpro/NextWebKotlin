@@ -25,14 +25,14 @@ abstract class GeneralServlet : Servlet {
     }
 
     override fun getServletInfo(): String? {
-        return "${this.javaClass.simpleName}#${AppEngine.VERSION}"
+        return "${this.javaClass.simpleName}#${Application.VERSION}"
     }
 
     override fun destroy() {
-        AppEngine.shutdown()
+        Application.shutdown()
     }
 
     override fun service(request: ServletRequest?, response: ServletResponse?) {
-        AppEngine.process(request!!, response!!)
+        Application.process(request!!, response!!)
     }
 }

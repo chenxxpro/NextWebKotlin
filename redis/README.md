@@ -26,7 +26,7 @@ plugins:
         secret: true
         host: "127.0.0.1"
         port: 6379
-        password: "YOUR-PASS"
+        password: "YOUR-PASSWORD"
         max-total: 8
         max-idle: 8
         min-idle: 2

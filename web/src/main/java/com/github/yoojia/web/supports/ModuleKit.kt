@@ -79,7 +79,7 @@ fun getRequestPriority(request: Comparator): Int {
         if(segment.isWildcard) {
             priority += -1
         }else{
-            priority += if(segment.isDynamic) {
+            priority += if(segment.dynamic) {
                 if(segment.isFixedType) {1} else {2}
             } else {0}
         }

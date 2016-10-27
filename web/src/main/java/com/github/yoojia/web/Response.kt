@@ -19,7 +19,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
     @JvmField val args = DataMap(HashMap<String, Any>())
 
     init{
-        addHeader("X-Powered-By", AppEngine.VERSION)
+        addHeader("X-Powered-By", Application.VERSION)
     }
 
     /**

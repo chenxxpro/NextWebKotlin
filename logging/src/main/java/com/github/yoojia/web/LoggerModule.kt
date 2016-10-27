@@ -1,6 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.Module
 import java.text.SimpleDateFormat
 
 /**

@@ -10,12 +10,12 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-abstract class ModuleHandler(val tag: String,
-                             val annotation: Class<out Annotation>,
-                             inputs: List<Class<*>>) : Module {
+abstract class ModuleImpl(val tag: String,
+                          val annotation: Class<out Annotation>,
+                          inputs: List<Class<*>>) : Module {
 
     companion object {
-        private val Logger = LoggerFactory.getLogger(ModuleHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(ModuleImpl::class.java)
     }
 
     /// 被多线程访问但保证只在主线初始化时才有写操作，请求处理过程只读操作
@@ -95,7 +95,7 @@ abstract class ModuleHandler(val tag: String,
         val output = mutableMapOf<String, String>()
         for(i in handler.comparator.segments.indices) {
             val segment = handler.comparator.segments[i]
-            if(segment.isDynamic) {
+            if(segment.dynamic) {
                 output.put(segment.segment, request.resources[i])
             }
         }

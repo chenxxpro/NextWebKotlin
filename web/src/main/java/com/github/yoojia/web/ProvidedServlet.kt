@@ -7,10 +7,10 @@ import javax.servlet.ServletConfig
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.a.5
  */
-abstract class ProvidedBootstrapServlet : GeneralServlet(), ClassProvider, ConfigProvider {
+abstract class ProvidedServlet : GeneralServlet(), ClassProvider, ConfigProvider {
 
     override fun init2(config: ServletConfig) {
-        AppEngine.startup(config.servletContext!!, this, this)
+        Application.startup(config.servletContext!!, this, this)
     }
 
     override fun getConfig(filePath: Path): Config {

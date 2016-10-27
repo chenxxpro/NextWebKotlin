@@ -1,8 +1,5 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.Config
-import com.github.yoojia.web.Context
-import com.github.yoojia.web.Plugin
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
@@ -31,7 +28,7 @@ class RedisPlugin : Plugin {
         val secret = config.getBoolean("secret", true)
         val log = StringBuilder()
         log.append(", host=${if(secret) "[secret]" else host}")
-        log.append(", pass=${if(secret) "[secret]" else password}")
+        log.append(", password=${if(secret) "[secret]" else password}")
         Logger.debug("Init REDIS plugin: $log")
         val jConfig = JedisPoolConfig()
         jConfig.maxTotal = config.getInt("max-total", JedisPoolConfig.DEFAULT_MAX_TOTAL)

@@ -1,10 +1,7 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.web.Config
-import com.github.yoojia.web.Context
-import com.github.yoojia.web.Router
-import com.github.yoojia.web.supports.InternalPriority
 import com.github.yoojia.web.supports.Comparator
+import com.github.yoojia.web.supports.InternalPriority
 import org.slf4j.LoggerFactory
 import java.util.*
 

@@ -4,7 +4,7 @@ package com.github.yoojia.web
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.2
  */
-interface EngineLifecycle {
+interface Lifecycle {
 
     /**
      * 当引擎初始化完成后并启动时调用此方法。
