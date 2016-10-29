@@ -61,9 +61,9 @@ object Application {
         val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
         // default configs:
-        response.setStatusCode(StatusCode.NOT_FOUND) // Default: 404
-        response.putArg("app-context", request.contextPath)
-        response.putArg("request-path", request.path)
+        response.status(StatusCode.NOT_FOUND) // Default: 404
+        response.param("app-context", request.contextPath)
+        response.param("request-path", request.path)
         try{
             router.route(request, response)
         }catch(errors: Throwable) {
@@ -71,7 +71,7 @@ object Application {
                 Logger.debug("Error when processing request", errors)
             }
             try{
-                response.sendError(errors)
+                response.error(errors)
             }catch(still: Throwable) {
                 if (Logger.isDebugEnabled) {
                     Logger.error("Error when send ERROR to client", still)
@@ -192,8 +192,8 @@ object Application {
     /**
      * 解析配置条目
      */
-    private fun parseConfigArgs(config: Config): ConfigStruct {
-        return ConfigStruct(config.getStringValue("class"),
+    private fun parseConfigArgs(config: Config): ConfigEntry {
+        return ConfigEntry(config.getStringValue("class"),
                 config.getIntValue("priority"),
                 config.getConfig("args"))
     }
@@ -201,6 +201,6 @@ object Application {
     /**
      * 配置参数数据包装.不使用Triple的是为使得参数意义更新清晰.
      */
-    private data class ConfigStruct(val className: String, val priority: Int, val args: Config)
+    private data class ConfigEntry(val className: String, val priority: Int, val args: Config)
 
 }

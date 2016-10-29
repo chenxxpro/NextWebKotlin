@@ -69,7 +69,7 @@ abstract class ModuleImpl(val tag: String,
             val dynamics = dynamics(handler, request)
             if (dynamics.isNotEmpty()) {
                 request.putDynamics(dynamics)
-                response.putArgs(dynamics) // copy to response
+                response.params(dynamics) // copy to response
             }
             if (Logger.isTraceEnabled) {
                 Logger.trace("$tag-Processing: $handler")

@@ -20,7 +20,7 @@ class HttpHandler(classes: List<Class<*>>) : ModuleImpl("HttpController", Contro
             super.process(request, response, router)
         }else{
             // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
-            response.setStatusCode(StatusCode.ACCEPTED)
+            response.status(StatusCode.ACCEPTED)
             val forward = invokeHandlers(handlers, request, response)
             if (forward) {
                 super.process(request, response, router)

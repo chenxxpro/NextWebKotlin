@@ -39,7 +39,7 @@ class VelocityTemplates : Module {
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, router: Router) {
-        val name = response.args[Response.TEMPLATE_NAME]
+        val name = response.params[Response.TEMPLATE_NAME]
         if(name != null && name is String && name.isNotEmpty()) {
             Logger.trace("Template-Module-Processing: ${request.path}, template: $name")
             if ( ! velocity.resourceExists(name)) {
@@ -47,8 +47,8 @@ class VelocityTemplates : Module {
             }
             val output = StringWriter()
             velocity.getTemplate(name)
-                    .merge(VelocityContext(response.args), output)
-            response.sendHtml(output.toString())
+                    .merge(VelocityContext(response.params), output)
+            response.html(output.toString())
         }
         router.next(request, response, router)
     }
