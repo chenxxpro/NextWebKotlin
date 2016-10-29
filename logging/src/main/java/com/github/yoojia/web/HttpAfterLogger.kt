@@ -8,7 +8,7 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.a.13
  */
-class AfterLoggerHandler : LoggerModule() {
+class HttpAfterLogger : HttpLogger() {
 
     companion object {
 
@@ -24,7 +24,7 @@ class AfterLoggerHandler : LoggerModule() {
             return buff.toString()
         }
 
-        private val Logger = LoggerFactory.getLogger(AfterLoggerHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(HttpAfterLogger::class.java)
 
         @JvmStatic val DEFAULT_PRIORITY = InternalPriority.LOGGER_AFTER
     }
@@ -48,6 +48,6 @@ class AfterLoggerHandler : LoggerModule() {
             buff.append("<=== END ===>")
             Logger.debug(buff.toString())
         }
-        super.process(request, response, router)
+        router.next(request, response, router)
     }
 }

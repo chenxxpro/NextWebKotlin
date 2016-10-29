@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 1.0
  */
-abstract class LoggerModule : Module {
+abstract class HttpLogger : Module {
 
     companion object {
 

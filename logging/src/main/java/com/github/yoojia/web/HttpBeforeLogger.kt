@@ -9,11 +9,11 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.a.13
  */
-class BeforeLoggerHandler : LoggerModule() {
+class HttpBeforeLogger : HttpLogger() {
 
     companion object {
 
-        private val Logger = LoggerFactory.getLogger(BeforeLoggerHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(HttpBeforeLogger::class.java)
 
         private fun prepareRequestLog(request: Request): String {
             val buff = StringBuilder("\r\n <=== START ===>").append("\r\n")
@@ -71,6 +71,6 @@ class BeforeLoggerHandler : LoggerModule() {
             request.putParam(LOGGING_TEXT_NAME, prepareRequestLog(request))
             request.putParam(LOGGING_ENABLED_NAME, true)
         }
-        super.process(request, response, router)
+        router.next(request, response, router)
     }
 }

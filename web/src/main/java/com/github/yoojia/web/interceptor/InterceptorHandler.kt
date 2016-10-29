@@ -48,13 +48,13 @@ abstract class InterceptorHandler(tag: String,
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, router: Router) {
         if(handlers.isEmpty()) {
-            super.process(request, response, router)
+            router.next(request, response, router)
         }else{
             val handlers = findMatches(request.comparator)
             val forward = invokeHandlers(handlers, request, response)
             if (forward) {
-                super.process(request, response, router)
-            }/*else{ 用户主动中断模块传递链 }*/
+                router.next(request, response, router)
+            }/*else{ 用户主动中断模块链的传递 }*/
         }
     }
 

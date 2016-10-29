@@ -17,14 +17,14 @@ class HttpHandler(classes: List<Class<*>>) : ModuleImpl("HttpController", Contro
     override fun process(request: Request, response: Response, router: Router) {
         val handlers = findMatches(request.comparator)
         if(handlers.isEmpty()) {
-            super.process(request, response, router)
+            router.next(request, response, router)
         }else{
             // 在HTTP模块存在处理器的时候，将HTTP状态码修改为 202 Accepted
             response.status(StatusCode.ACCEPTED)
             val forward = invokeHandlers(handlers, request, response)
             if (forward) {
-                super.process(request, response, router)
-            }/*else{ 用户主动中断模块传递链 }*/
+                router.next(request, response, router)
+            }/*else{ 用户主动中断模块链的传递 }*/
         }
     }
 

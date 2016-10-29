@@ -57,7 +57,7 @@ object Application {
 
     fun process(req: ServletRequest, res: ServletResponse) {
         val context = appContext.get()
-        // 接收到每个客户端请求时，创建 Request 和 Response 临时对象，生命周期只限于请求过程。
+        // 接收到每个客户端请求时，q独立创建 Request 和 Response 临时对象，生命周期只限于请求过程。
         val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
         // default configs:
@@ -140,7 +140,7 @@ object Application {
     }
 
     /**
-     *  - 日志： com.github.yoojia.web.LoggerHandler
+     *  - 日志： com.github.yoojia.web.HttpLogger
      *  - 资源： com.github.yoojia.web.Assets
      *  - 模板： com.github.yoojia.web.VelocityTemplates
      */
@@ -161,8 +161,8 @@ object Application {
         }
 
         // Logger
-        ifExistsThenLoad("com.github.yoojia.web.BeforeLoggerHandler", "logger", "BeforeLogger", { InternalPriority.LOGGER_BEFORE })
-        ifExistsThenLoad("com.github.yoojia.web.AfterLoggerHandler", "logger", "AfterLogger", { InternalPriority.LOGGER_AFTER })
+        ifExistsThenLoad("com.github.yoojia.web.HttpBeforeLogger", "logger", "HttpBeforeLogger", { InternalPriority.LOGGER_BEFORE })
+        ifExistsThenLoad("com.github.yoojia.web.HttpAfterLogger", "logger", "HttpAfterLogger", { InternalPriority.LOGGER_AFTER })
 
         // Assets
         ifExistsThenLoad("com.github.yoojia.web.Assets", "assets", "Assets", { define ->

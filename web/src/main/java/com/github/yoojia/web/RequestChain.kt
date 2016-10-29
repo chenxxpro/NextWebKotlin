@@ -9,9 +9,6 @@ class RequestChain() {
 
     internal var isInterrupted: Boolean = false
 
-    /**
-     * 中断模块内处理接口之间的后续处理
-     */
     fun interrupt() {
         isInterrupted = true
     }

@@ -75,6 +75,7 @@ abstract class ModuleImpl(val tag: String,
                 Logger.trace("$tag-Processing: $handler")
             }
             val moduleObject = instances.getOrNew(handler.invoker.classType)
+            // 为每个请求处理器创建一个独立的 RequestChain 临时对象，生命周期只限于当前请求处理器。
             val chain = RequestChain()
             // 插入一些特殊处理过程接口的调用
             if(moduleObject is ModuleRequestsListener) {
