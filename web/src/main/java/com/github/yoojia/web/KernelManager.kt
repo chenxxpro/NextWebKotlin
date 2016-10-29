@@ -8,31 +8,31 @@ import java.util.*
  */
 internal class KernelManager {
 
-    private val modules = ArrayList<KernelItem<Module>>()
-    private val plugins = ArrayList<KernelItem<Plugin>>()
+    private val modules = ArrayList<Invoker<Module>>()
+    private val plugins = ArrayList<Invoker<Plugin>>()
 
     fun register(plugin: Plugin, priority: Int, config: Config) {
-        plugins.add(KernelItem(plugin, priority, config))
+        plugins.add(Invoker(plugin, priority, config))
     }
 
     fun register(module: Module, priority: Int, config: Config) {
-        modules.add(KernelItem(module, priority, config))
+        modules.add(Invoker(module, priority, config))
     }
 
     internal fun modules(action: (Module) -> Unit) {
-        modules.forEach { action.invoke(it.payload) }
+        modules.forEach { action.invoke(it.invoker) }
     }
 
     internal fun created(ctx: Context) {
-        modules.sortedBy { it.priority }.forEach { it.payload.onCreated(ctx, it.conf) }
-        plugins.sortedBy { it.priority }.forEach { it.payload.onCreated(ctx, it.conf) }
+        modules.sortedBy { it.priority }.forEach { it.invoker.onCreated(ctx, it.config) }
+        plugins.sortedBy { it.priority }.forEach { it.invoker.onCreated(ctx, it.config) }
     }
 
     internal fun destroy() {
         // Call onDestroy
-        modules.forEach { it.payload.onDestroy() }
+        modules.forEach { it.invoker.onDestroy() }
         modules.clear()
-        plugins.forEach { it.payload.onDestroy() }
+        plugins.forEach { it.invoker.onDestroy() }
         plugins.clear()
     }
 
@@ -47,6 +47,6 @@ internal class KernelManager {
     /**
      * 配置参数数据包装.不使用Triple的是为使得参数意义更新清晰.
      */
-    private data class KernelItem<out T: Lifecycle>(val payload: T, val priority: Int, val conf: Config)
+    private data class Invoker<out T: Lifecycle>(val invoker: T, val priority: Int, val config: Config)
 
 }

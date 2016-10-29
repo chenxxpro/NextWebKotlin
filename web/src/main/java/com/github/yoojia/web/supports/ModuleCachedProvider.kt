@@ -27,7 +27,7 @@ class ModuleCachedProvider(guessSize: Int) {
 
     }
 
-    fun getCachedOrNew(type: Class<*>): Any {
+    fun getOrNew(type: Class<*>): Any {
         var isCached = false
         val module: Any
         val lock = resourceLock

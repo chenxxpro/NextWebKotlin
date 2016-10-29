@@ -65,12 +65,16 @@ object Application {
         response.putArg("request-path", request.path)
         try{
             router.route(request, response)
-        }catch(err: Throwable) {
-            Logger.error("Error when processing request", err)
+        }catch(errors: Throwable) {
+            if (Logger.isDebugEnabled) {
+                Logger.debug("Error when processing request", errors)
+            }
             try{
-                response.sendError(err)
+                response.sendError(errors)
             }catch(still: Throwable) {
-                Logger.error("Error when send ERROR to client", still)
+                if (Logger.isDebugEnabled) {
+                    Logger.error("Error when send ERROR to client", still)
+                }
             }
         }
     }

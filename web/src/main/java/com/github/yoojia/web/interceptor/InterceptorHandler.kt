@@ -1,6 +1,6 @@
 package com.github.yoojia.web.interceptor
 
-import com.github.yoojia.web.ModuleImpl
+import com.github.yoojia.web.CoreModuleImpl
 import com.github.yoojia.web.Request
 import com.github.yoojia.web.Response
 import com.github.yoojia.web.Router
@@ -16,7 +16,7 @@ import java.util.*
  */
 abstract class InterceptorHandler(tag: String,
                                    annotation: Class<out Annotation>,
-                                   classes: List<Class<*>>) : ModuleImpl(tag, annotation, classes) {
+                                   classes: List<Class<*>>) : CoreModuleImpl(tag, annotation, classes) {
     companion object {
         private val Logger = LoggerFactory.getLogger(InterceptorHandler::class.java)
     }
@@ -47,11 +47,15 @@ abstract class InterceptorHandler(tag: String,
 
     @Throws(Exception::class)
     override fun process(request: Request, response: Response, router: Router) {
-        if(handlers.isNotEmpty()) {
-            val found = findMatches(request.comparator)
-            processHandlers(found, request, response, router)
+        if(handlers.isEmpty()) {
+            super.process(request, response, router)
+        }else{
+            val handlers = findMatches(request.comparator)
+            val forward = invokeHandlers(handlers, request, response)
+            if (forward) {
+                super.process(request, response, router)
+            }/*else{ 用户主动中断模块传递链 }*/
         }
-        super.process(request, response, router)
     }
 
     override fun findMatches(requestComparator: Comparator): List<RequestHandler> {

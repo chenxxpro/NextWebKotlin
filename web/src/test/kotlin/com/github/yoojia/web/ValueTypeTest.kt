@@ -53,8 +53,8 @@ class ValueTypeTest {
         Assert.assertEquals(UriValueType.LONG, UriValueType.parse(Long.MIN_VALUE.toString()))
         Assert.assertEquals(UriValueType.LONG, UriValueType.parse(Long.MAX_VALUE.toString()))
 
-        Assert.assertEquals(UriValueType.STRING, UriValueType.parse("${Long.MIN_VALUE.toString()}9"))
-        Assert.assertEquals(UriValueType.STRING, UriValueType.parse("${Long.MAX_VALUE.toString()}9"))
+        Assert.assertEquals(UriValueType.STRING, UriValueType.parse("${Long.MIN_VALUE}9"))
+        Assert.assertEquals(UriValueType.STRING, UriValueType.parse("${Long.MAX_VALUE}9"))
 
     }
 
