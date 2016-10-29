@@ -21,7 +21,8 @@ import javax.servlet.http.HttpServletResponse
  */
 object Application {
 
-    const val VERSION = "NextEngine/2.21-ALPHA (Kotlin 1.0.4; Java 7/8;)"
+    const val PRODUCT_NAME = "NextWebKotlin"
+    const val VERSION = "$PRODUCT_NAME/2.24-ALPHA (Kotlin 1.0.4; Java 7/8;)"
 
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
@@ -37,7 +38,7 @@ object Application {
     }
 
     fun startup(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
-        Logger.warn("===> NextEngine START BOOTING, Version: $VERSION")
+        Logger.warn("$PRODUCT_NAME starting, version: $VERSION")
         val start = now()
         val path = servletContext.getRealPath("/")
         val config = configProvider.getConfig(Paths.get(path, CONFIG_FILE))
@@ -51,7 +52,7 @@ object Application {
         Logger.debug("App-Context  : ${ctx.contextPath}")
         Logger.debug("Modules-Loaded: ${kernels.moduleCount()}")
         Logger.debug("Plugins-Loaded: ${kernels.pluginCount()}")
-        Logger.warn("<=== NextEngine BOOT SUCCESSFUL, Boot time: ${escape(start)}ms")
+        Logger.warn("$PRODUCT_NAME startup successful, boot-time: ${escape(start)}ms")
     }
 
     fun process(req: ServletRequest, res: ServletResponse) {

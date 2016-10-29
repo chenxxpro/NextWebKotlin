@@ -23,7 +23,9 @@ fun findRuntimeNames(based: Path, filter: Filter<String>): List<String> {
             if(classFilePath.endsWith(".class")) {
                 val className = resolveClassName(classFilePath)
                 if(filter.accept(className)) { // return true to accept
-                    Logger.trace("-> $className")
+                    if (Logger.isTraceEnabled) {
+                        Logger.trace("Found class: $className")
+                    }
                     found.add(className)
                 }
             }

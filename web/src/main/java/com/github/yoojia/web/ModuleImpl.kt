@@ -10,12 +10,12 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-abstract class CoreModuleImpl(val tag: String,
-                              val annotation: Class<out Annotation>,
-                              inputs: List<Class<*>>) : Module {
+abstract class ModuleImpl(val tag: String,
+                          val annotation: Class<out Annotation>,
+                          inputs: List<Class<*>>) : Module {
 
     companion object {
-        private val Logger = LoggerFactory.getLogger(CoreModuleImpl::class.java)
+        private val Logger = LoggerFactory.getLogger(ModuleImpl::class.java)
     }
 
     /// 被多线程访问但保证只在主线初始化时才有写操作，请求处理过程只读操作
@@ -44,7 +44,7 @@ abstract class CoreModuleImpl(val tag: String,
                 val handler = RequestHandler.create(root, clazz, javaMethod, httpMethod, path)
                 cached.add(handler)
                 if (Logger.isInfoEnabled) {
-                    Logger.info("$tag-Module-Define: $handler")
+                    Logger.info("$tag-Define: $handler")
                 }
             })
         }

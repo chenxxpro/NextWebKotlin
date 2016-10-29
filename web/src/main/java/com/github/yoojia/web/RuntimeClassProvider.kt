@@ -76,7 +76,7 @@ internal class RuntimeClassProvider : ClassProvider {
                     if(className.startsWith(start)) return true
                 }
                 if(hasAcceptClass) acceptClass.forEach { name->
-                    if(className.equals(name)) return true
+                    if(className == name) return true
                 }
                 if(hasAcceptEnds) acceptEnds.forEach { end->
                     if(className.endsWith(end)) return true
@@ -86,7 +86,7 @@ internal class RuntimeClassProvider : ClassProvider {
                     if(className.startsWith(start)) return false
                 }
                 if(hasIgnoreClass) ignoreClass.forEach { name->
-                    if(className.equals(name)) return false
+                    if(className == name) return false
                 }
                 if (hasIgnoreEnds) ignoreEnds.forEach { end->
                     if(className.endsWith(end)) return false
