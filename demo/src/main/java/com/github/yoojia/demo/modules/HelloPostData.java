@@ -34,7 +34,7 @@ public class HelloPostData implements ModuleRequestsListener {
 
     @Override
     public void beforeRequests(@NotNull Method method, @NotNull Request request, @NotNull Response response) {
-        response.sendText(request.body());
+        response.text(request.body());
     }
 
     @Override

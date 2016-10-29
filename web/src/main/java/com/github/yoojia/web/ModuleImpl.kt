@@ -63,7 +63,7 @@ abstract class ModuleImpl(val tag: String,
      * 执行指定RequestHandler列表，返回是否继续运行模块链的标记。
      * @return True为继续传递，False则中断
      */
-    protected fun invokeHandlers(handlers: List<RequestHandler>, request: Request, response: Response): Boolean {
+    protected fun invokeHandlers(handlers: List<RequestHandler>, request: Request, response: Response, chain: RequestChain) {
         handlers.sortedBy { it.priority }.forEach { handler ->
             request.removeDynamics()
             val dynamics = dynamics(handler, request)
@@ -75,8 +75,7 @@ abstract class ModuleImpl(val tag: String,
                 Logger.trace("$tag-Processing: $handler")
             }
             val moduleObject = instances.getOrNew(handler.invoker.classType)
-            // 为每个请求处理器创建一个独立的 RequestChain 临时对象，生命周期只限于当前请求处理器。
-            val chain = RequestChain()
+            chain.reset() // 在每个请求处理器执行前重置 RequestChain , 中断状态只限于当前请求处理器
             // 插入一些特殊处理过程接口的调用
             if(moduleObject is ModuleRequestsListener) {
                 moduleObject.beforeRequests(handler.javaMethod, request, response)
@@ -89,10 +88,9 @@ abstract class ModuleImpl(val tag: String,
                 handler.invoker.invoke(request, response, chain, moduleObject)
             }
             if (chain.isInterrupted) {
-                return false
+                return
             }
         }
-        return true
     }
 
     protected open fun findMatches(requestComparator: Comparator): List<RequestHandler> {

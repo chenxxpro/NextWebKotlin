@@ -9,6 +9,10 @@ class RequestChain() {
 
     internal var isInterrupted: Boolean = false
 
+    internal fun reset() {
+        isInterrupted = false
+    }
+
     fun interrupt() {
         isInterrupted = true
     }

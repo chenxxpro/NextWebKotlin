@@ -15,13 +15,6 @@ runtime-classes:
 #  accept-ends:
 #  accept-classes:
 
-
-intercept:
-  priority: -9999
-
-http:
-  priority: 0
-
 assets:
   priority: -200
   args:
@@ -30,6 +23,8 @@ assets:
       - /imgs
       - /css
       - /js
+
+#modules:
 
 # 配置应用插件
 plugins:

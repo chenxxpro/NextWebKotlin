@@ -25,7 +25,7 @@ class Assets : Module {
         }
     }
 
-    override fun process(request: Request, response: Response, router: Router) {
+    override fun process(request: Request, response: Response, chain: RequestChain, router: Router) {
         if(match(request)){
             val local = request.context.resolvePath(request.path)
             if(Files.exists(local)) {
@@ -39,7 +39,7 @@ class Assets : Module {
                 response.status(StatusCode.NOT_FOUND)
             }
         }else{
-            router.next(request, response, router)
+            router.next(request, response, chain, router)
         }
     }
 

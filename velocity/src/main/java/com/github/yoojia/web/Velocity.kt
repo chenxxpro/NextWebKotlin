@@ -11,12 +11,12 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class VelocityTemplates : Module {
+class Velocity : Module {
 
     private val velocity = VelocityEngine()
 
     companion object {
-        private val Logger = LoggerFactory.getLogger(VelocityTemplates::class.java)
+        private val Logger = LoggerFactory.getLogger(com.github.yoojia.web.Velocity::class.java)
     }
 
     override fun onCreated(context: Context, config: Config) {
@@ -38,7 +38,7 @@ class VelocityTemplates : Module {
     }
 
     @Throws(Exception::class)
-    override fun process(request: Request, response: Response, router: Router) {
+    override fun process(request: Request, response: Response, chain: RequestChain, router: Router) {
         val name = response.params[Response.TEMPLATE_NAME]
         if(name != null && name is String && name.isNotEmpty()) {
             Logger.trace("Template-Module-Processing: ${request.path}, template: $name")
@@ -50,6 +50,6 @@ class VelocityTemplates : Module {
                     .merge(VelocityContext(response.params), output)
             response.html(output.toString())
         }
-        router.next(request, response, router)
+        router.next(request, response, chain, router)
     }
 }

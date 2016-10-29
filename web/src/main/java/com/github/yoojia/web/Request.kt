@@ -76,12 +76,11 @@ class Request(ctx: Context, request: HttpServletRequest){
         val uri = request.requestURI
         path = if ("/" == contextPath) uri else uri.substring(contextPath.length)
         method = request.method.toUpperCase()
-        host = servletRequest.getHeader("host")
-        ip = servletRequest.remoteAddr
+        host = servletRequest.getHeader("host")?:""
+        ip = servletRequest.remoteAddr?:""
         port = servletRequest.remotePort
-        userAgent = servletRequest.getHeader("User-Agent")
-        contentType = servletRequest.contentType
-
+        userAgent = servletRequest.getHeader("User-Agent")?:""
+        contentType = servletRequest.contentType ?: ""
         resources = splitToArray(path)
         comparator = Comparator.createRequest(method, path, resources)
     }

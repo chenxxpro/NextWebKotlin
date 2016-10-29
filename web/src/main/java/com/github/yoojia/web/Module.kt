@@ -14,6 +14,6 @@ interface Module : Plugin {
     /**
      * 处理请求
      */
-    fun process(request: Request, response: Response, router: Router)
+    fun process(request: Request, response: Response, chain: RequestChain, router: Router)
 
 }

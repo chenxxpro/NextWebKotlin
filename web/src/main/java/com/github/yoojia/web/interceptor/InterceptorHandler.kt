@@ -1,9 +1,6 @@
 package com.github.yoojia.web.interceptor
 
-import com.github.yoojia.web.ModuleImpl
-import com.github.yoojia.web.Request
-import com.github.yoojia.web.Response
-import com.github.yoojia.web.Router
+import com.github.yoojia.web.*
 import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.supports.RequestHandler
 import com.github.yoojia.web.util.concat
@@ -46,14 +43,14 @@ abstract class InterceptorHandler(tag: String,
     }
 
     @Throws(Exception::class)
-    override fun process(request: Request, response: Response, router: Router) {
+    override fun process(request: Request, response: Response, chain: RequestChain, router: Router) {
         if(handlers.isEmpty()) {
-            router.next(request, response, router)
+            router.next(request, response, chain, router)
         }else{
             val handlers = findMatches(request.comparator)
-            val forward = invokeHandlers(handlers, request, response)
-            if (forward) {
-                router.next(request, response, router)
+            invokeHandlers(handlers, request, response, chain)
+            if (! chain.isInterrupted) {
+                router.next(request, response, chain, router)
             }/*else{ 用户主动中断模块链的传递 }*/
         }
     }

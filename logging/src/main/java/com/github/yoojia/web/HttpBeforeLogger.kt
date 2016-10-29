@@ -41,7 +41,7 @@ class HttpBeforeLogger : HttpLogger() {
             return buff.toString()
         }
 
-        @JvmStatic val DEFAULT_PRIORITY = InternalPriority.LOGGER_BEFORE
+        @JvmStatic val DEFAULT_PRIORITY = InternalPriority.LOGGING_BEFORE
 
     }
 
@@ -59,7 +59,7 @@ class HttpBeforeLogger : HttpLogger() {
 
     }
 
-    override fun process(request: Request, response: Response, router: Router) {
+    override fun process(request: Request, response: Response, chain: RequestChain, router: Router) {
         var enabled = true
         ignores.forEach { define ->
             if(request.comparator.isMatchDefine(define)) {
@@ -71,6 +71,6 @@ class HttpBeforeLogger : HttpLogger() {
             request.putParam(LOGGING_TEXT_NAME, prepareRequestLog(request))
             request.putParam(LOGGING_ENABLED_NAME, true)
         }
-        router.next(request, response, router)
+        router.next(request, response, chain, router)
     }
 }
