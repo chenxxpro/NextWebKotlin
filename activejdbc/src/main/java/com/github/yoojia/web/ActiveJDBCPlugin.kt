@@ -50,7 +50,7 @@ class ActiveJDBCPlugin : Plugin {
         val log = StringBuilder("uri=$uri")
         log.append(", user=${if(secret) "[secret]" else username}")
         log.append(", password=${if(secret) "[secret]" else password}")
-        Logger.debug("- Init database plugin: $log")
+        Logger.debug("Init database plugin: $log")
         val checkNotSet = fun(field: String): Boolean {
             return field.isNullOrEmpty() || field.startsWith("NOT-SET-")
         }
