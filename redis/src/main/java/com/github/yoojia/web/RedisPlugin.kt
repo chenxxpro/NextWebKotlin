@@ -27,15 +27,19 @@ class RedisPlugin : Plugin {
         val port = config.getInt("port", 6379)
         val secret = config.getBoolean("secret", true)
         val log = StringBuilder()
-        log.append(", host=${if(secret) "[secret]" else host}")
+        log.append("host=${if(secret) "[secret]" else host}")
         log.append(", password=${if(secret) "[secret]" else password}")
         Logger.debug("Init REDIS plugin: $log")
-        val jConfig = JedisPoolConfig()
-        jConfig.maxTotal = config.getInt("max-total", JedisPoolConfig.DEFAULT_MAX_TOTAL)
-        jConfig.maxIdle = config.getInt("max-idle", JedisPoolConfig.DEFAULT_MAX_IDLE)
-        jConfig.minIdle = config.getInt("min-idle", JedisPoolConfig.DEFAULT_MIN_IDLE)
+        val redisConfig = JedisPoolConfig()
+        redisConfig.maxTotal = config.getInt("max-total", JedisPoolConfig.DEFAULT_MAX_TOTAL)
+        redisConfig.maxIdle = config.getInt("max-idle", JedisPoolConfig.DEFAULT_MAX_IDLE)
+        redisConfig.minIdle = config.getInt("min-idle", JedisPoolConfig.DEFAULT_MIN_IDLE)
         val timeout = config.getInt("timeout", Protocol.DEFAULT_TIMEOUT)
-        REAL_POOL = JedisPool(jConfig, host, port, timeout, password)
+        if (password.isNullOrEmpty()){
+            REAL_POOL = JedisPool(redisConfig, host, port, timeout)
+        }else{
+            REAL_POOL = JedisPool(redisConfig, host, port, timeout, password)
+        }
     }
 
     override fun onDestroy() {
