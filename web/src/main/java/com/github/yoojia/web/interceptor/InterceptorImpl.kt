@@ -1,9 +1,6 @@
 package com.github.yoojia.web.interceptor
 
-import com.github.yoojia.web.ModuleImpl
-import com.github.yoojia.web.Request
-import com.github.yoojia.web.Response
-import com.github.yoojia.web.Router
+import com.github.yoojia.web.*
 import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.supports.RequestHandler
 import com.github.yoojia.web.util.concat
@@ -14,11 +11,11 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.a.10
  */
-abstract class InterceptorHandler(tag: String,
-                                   annotation: Class<out Annotation>,
-                                   classes: List<Class<*>>) : ModuleImpl(tag, annotation, classes) {
+abstract class InterceptorImpl(tag: String,
+                               annotation: Class<out Annotation>,
+                               classes: List<Class<*>>) : ModuleImpl(tag, annotation, classes) {
     companion object {
-        private val Logger = LoggerFactory.getLogger(InterceptorHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(InterceptorImpl::class.java)
     }
 
     private val definedIgnores = ArrayList<Comparator>()
@@ -46,12 +43,16 @@ abstract class InterceptorHandler(tag: String,
     }
 
     @Throws(Exception::class)
-    override fun process(request: Request, response: Response, router: Router) {
-        if(handlers.isNotEmpty()) {
-            val found = findMatches(request.comparator)
-            processHandlers(found, request, response, router)
+    override fun process(request: Request, response: Response, chain: RequestChain, router: Router) {
+        if(handlers.isEmpty()) {
+            router.next(request, response, chain, router)
+        }else{
+            val handlers = findMatches(request.comparator)
+            invokeHandlers(handlers, request, response, chain)
+            if (! chain.isInterrupted) {
+                router.next(request, response, chain, router)
+            }/*else{ 用户主动中断模块链的传递 }*/
         }
-        super.process(request, response, router)
     }
 
     override fun findMatches(requestComparator: Comparator): List<RequestHandler> {

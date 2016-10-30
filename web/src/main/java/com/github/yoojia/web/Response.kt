@@ -16,64 +16,71 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
         @JvmField val STATIC_NAME = "nwk.response.names:static"
     }
 
-    @JvmField val args = DataMap(HashMap<String, Any>())
+    @JvmField val params = DataMap(HashMap<String, Any>())
 
     init{
-        addHeader("X-Powered-By", Application.VERSION)
+        header("X-Powered-By", Application.VERSION)
     }
 
     /**
      * 向客户端发送文本数据
      */
-    fun sendText(text: String): Response  {
-        sendText(text, "text/plain; charset=utf-8")
+    fun text(text: String): Response  {
+        text(text, "text/plain; charset=utf-8")
         return this
     }
 
     /**
      * 向客户端发送文本数据，并指定 ContextType 类型
      */
-    fun sendText(text: String, contextType: String): Response  {
-        setContextType(contextType)
+    fun text(text: String, contextType: String): Response  {
+        contentType(contextType)
         return writeTextSilently(text)
-    }
-
-    /**
-     * 设置ContextType
-     */
-    fun setContextType(contextType: String): Response {
-        servletResponse.contentType = contextType
-        return this
     }
 
     /**
      * 向客户端发送HTML数据
      */
-    fun sendHtml(text: String): Response {
-        sendText(text, "text/html; charset=utf-8")
+    fun html(text: String): Response {
+        text(text, "text/html; charset=utf-8")
         return this
     }
 
     /**
      * 向客户端发送JSON数据
      */
-    fun sendJSON(jsonText: String): Response {
-        sendText(jsonText, "application/json; charset=utf-8")
+    fun json(jsonText: String): Response {
+        text(jsonText, "application/json; charset=utf-8")
         return this
     }
 
     /**
+     * 设置ContextType
+     */
+    fun contentType(contextType: String): Response {
+        servletResponse.contentType = contextType
+        return this
+    }
+
+    fun contentType(): String = servletResponse.contentType
+
+    /**
      * 设置响应状态码
      */
-    fun setStatusCode(code: Int): Response  {
+    fun status(code: Int): Response  {
         servletResponse.status = code
         return this
     }
 
     /**
+     * @return
+     */
+    fun status(): Int = servletResponse.status
+
+    /**
      * 添加Cookie
      */
-    fun addCookie(name: String, value: String): Response {
+    fun cookie(name: String, value: String): Response {
         servletResponse.addCookie(Cookie(name, value))
         return this
     }
@@ -81,7 +88,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
     /**
      * 添加Header
      */
-    fun addHeader(name: String, value: String): Response {
+    fun header(name: String, value: String): Response {
         servletResponse.addHeader(name, value)
         return this
     }
@@ -89,14 +96,14 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
     /**
      * 向客户端发送服务器内部错误响应数据
      */
-    fun sendError(err: Throwable): Response  {
-        return sendError(err.message ?: err.toString())
+    fun error(err: Throwable): Response  {
+        return error(err.message ?: err.toString())
     }
 
     /**
      * 向客户端发送服务器内部错误响应数据
      */
-    fun sendError(text: String): Response {
+    fun error(text: String): Response {
         servletResponse.sendError(StatusCode.INTERNAL_SERVER_ERROR, text)
         return this
     }
@@ -113,34 +120,34 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
      * 设置渲染模板
      */
     fun template(name: String): Response {
-        return putArg(TEMPLATE_NAME, name)
+        return param(TEMPLATE_NAME, name)
     }
 
     /**
      * 设置静态资源文件名
      */
     fun static(name: String): Response {
-        return putArg(STATIC_NAME, name)
+        return param(STATIC_NAME, name)
     }
 
     /**
      * 添加一个参数
      */
-    fun putArg(name: String, value: Any): Response {
-        args.put(name, value)
+    fun param(name: String, value: Any): Response {
+        params.put(name, value)
         return this
     }
 
-    fun putArgs(args: Map<String, Any>): Response {
-        this.args.putAll(args)
+    fun params(args: Map<String, Any>): Response {
+        this.params.putAll(args)
         return this
     }
 
     /**
      * 移除一个参数
      */
-    fun removeArg(name: String) {
-        args.remove(name)
+    fun removeParam(name: String) {
+        params.remove(name)
     }
 
     /**
@@ -156,7 +163,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
         try{
             writeTextThrows(text)
         }catch(err: Exception) {
-            sendError(err)
+            error(err)
         }finally{
             return this
         }

@@ -8,7 +8,7 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.a.13
  */
-class AfterLoggerHandler : LoggerModule() {
+class HttpAfterLogger : HttpLogger() {
 
     companion object {
 
@@ -24,9 +24,9 @@ class AfterLoggerHandler : LoggerModule() {
             return buff.toString()
         }
 
-        private val Logger = LoggerFactory.getLogger(AfterLoggerHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(HttpAfterLogger::class.java)
 
-        @JvmStatic val DEFAULT_PRIORITY = InternalPriority.LOGGER_AFTER
+        @JvmStatic val DEFAULT_PRIORITY = InternalPriority.LOGGING_AFTER
     }
 
     override fun onCreated(context: Context, config: Config) {
@@ -37,7 +37,7 @@ class AfterLoggerHandler : LoggerModule() {
         // nop
     }
 
-    override fun process(request: Request, response: Response, router: Router) {
+    override fun process(request: Request, response: Response, chain: RequestChain, router: Router) {
         val prepared = request.paramAsBoolean(LOGGING_ENABLED_NAME)
         val text = request.paramAsString(LOGGING_TEXT_NAME)
         request.removeParam(LOGGING_ENABLED_NAME)
@@ -48,6 +48,6 @@ class AfterLoggerHandler : LoggerModule() {
             buff.append("<=== END ===>")
             Logger.debug(buff.toString())
         }
-        super.process(request, response, router)
+        router.next(request, response, chain, router)
     }
 }

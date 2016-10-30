@@ -10,7 +10,7 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.0
  */
-class JavaInvoker(@JvmField val hostType: Class<*>,
+class JavaInvoker(@JvmField val classType: Class<*>,
                   @JvmField val method: Method,
                   private val strictAccessible: Boolean,
                   private val argumentTypes: Array<Class<*>> = method.parameterTypes) {
@@ -63,7 +63,7 @@ class JavaInvoker(@JvmField val hostType: Class<*>,
     }
 
     override fun toString(): String{
-        return "${hostType.name}.${method.name}()"
+        return "${classType.name}.${method.name}()"
     }
 
 }

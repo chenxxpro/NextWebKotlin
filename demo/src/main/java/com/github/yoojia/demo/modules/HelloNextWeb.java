@@ -18,46 +18,52 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
 
     @GET("/hello/{username}")
     public void hello(Request request, Response response, RequestChain chain) {
-        response.sendHtml("<br/>Handle by GET/hello/{username}, username= " + request.dynamic("username"));
+        response.html("<br/>Handle by GET/hello/{username}, username= " + request.dynamic("username"));
         chain.interrupt();
     }
 
     @GET("/{user_id}")
     public void undefined(Request request, Response response, RequestChain chain) {
-        response.sendHtml("<br/>Handle by GET/{user_id}, user_id= " + request.dynamic("user_id"));
+        response.html("<br/>Handle by GET/{user_id}, user_id= " + request.dynamic("user_id"));
         chain.interrupt();
     }
 
     @GET("/{string:username}")
     public void dynamicTyped(Request request, Response response) {
-        response.sendHtml("<br/>Handle by GET/{string:username} , username= " + request.dynamic("username"));
+        response.html("<br/>Handle by GET/{string:username} , username= " + request.dynamic("username"));
     }
 
     @GET("/{int:user_id}")
     public void intDynamic(Request request, Response response) {
-        response.sendHtml("<br/>Handle by GET/{int:user_id} , user_id= " + request.dynamic("user_id"));
+        response.html("<br/>Handle by GET/{int:user_id} , user_id= " + request.dynamic("user_id"));
     }
 
     @GETPOST("/*")
-    public void getpostWildcards(Request request, Response response) {
-        response.sendHtml("<br/>Handle by GET/* , username= " + request.paramOrNull("username"));
+    public void getpostWildcards(Request request, Response response, RequestChain chain) {
+        String username = request.paramOrNull("username");
+        if (username == null || username.isEmpty()) {
+            response.html("<br/>Handle by GET/* , empty username, will be interrupted");
+            chain.interrupt();
+        }else{
+            response.html("<br/>Handle by GET/* , username= " + username);
+        }
     }
 
     @POST("/yoojia")
     public void statix(Request request, Response response) {
-        response.sendHtml("<br/>Handle by POST/yoojia, username= " + request.paramOrNull("username"));
+        response.html("<br/>Handle by POST/yoojia, username= " + request.paramOrNull("username"));
     }
 
     @PUT("/yoojia")
     public void put(Request request, Response response) {
-        response.sendHtml("<br/>Handle by PUT/yoojia, name= " + request.paramOrNull("name") + ", body.data = " + request.bodyData());
-        response.sendHtml("<br/>Body.data = " + request.bodyData());
+        response.html("<br/>Handle by PUT/yoojia, name= " + request.paramOrNull("name") + ", body.data = " + request.body());
+        response.html("<br/>Body.data = " + request.body());
     }
 
     @DELETE("/yoojia")
     public void delete(Request request, Response response) {
-        response.sendHtml("<br/>Handle by DELETE/yoojia, name= " + request.paramOrNull("name") + ", body.data = " + request.bodyData());
-        response.sendHtml("<br/>Body.data = " + request.bodyData());
+        response.html("<br/>Handle by DELETE/yoojia, name= " + request.paramOrNull("name") + ", body.data = " + request.body());
+        response.html("<br/>Body.data = " + request.body());
     }
 
     @Override

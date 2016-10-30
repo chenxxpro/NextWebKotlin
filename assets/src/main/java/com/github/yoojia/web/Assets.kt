@@ -25,21 +25,21 @@ class Assets : Module {
         }
     }
 
-    override fun process(request: Request, response: Response, router: Router) {
+    override fun process(request: Request, response: Response, chain: RequestChain, router: Router) {
         if(match(request)){
             val local = request.context.resolvePath(request.path)
             if(Files.exists(local)) {
-                response.setStatusCode(StatusCode.OK)
+                response.status(StatusCode.OK)
                 val path = local.toString()
                 request.servletRequest.servletContext.getMimeType(path)?.let{ mimeType ->
-                    response.setContextType(mimeType)
+                    response.contentType(mimeType)
                 }
                 TransferAdapter(local).dispatch(request, response)
             }else{
-                response.setStatusCode(StatusCode.NOT_FOUND)
+                response.status(StatusCode.NOT_FOUND)
             }
         }else{
-            router.next(request, response, router)
+            router.next(request, response, chain, router)
         }
     }
 

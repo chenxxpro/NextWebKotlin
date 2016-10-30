@@ -18,10 +18,18 @@ import javax.servlet.http.HttpServletRequest
 class Request(ctx: Context, request: HttpServletRequest){
 
     @JvmField val servletRequest: HttpServletRequest
+
     @JvmField val context: Context
+
     @JvmField val method: String
     @JvmField val path: String
     @JvmField val contextPath: String
+    @JvmField val host: String
+    @JvmField val ip: String
+    @JvmField val port: Int
+    @JvmField val userAgent: String
+    @JvmField val contentType: String
+
     @JvmField val createTime: Long
     @JvmField val resources: List<String>
     @JvmField val comparator: Comparator
@@ -68,6 +76,11 @@ class Request(ctx: Context, request: HttpServletRequest){
         val uri = request.requestURI
         path = if ("/" == contextPath) uri else uri.substring(contextPath.length)
         method = request.method.toUpperCase()
+        host = servletRequest.getHeader("host")?:""
+        ip = servletRequest.remoteAddr?:""
+        port = servletRequest.remotePort
+        userAgent = servletRequest.getHeader("User-Agent")?:""
+        contentType = servletRequest.contentType ?: ""
         resources = splitToArray(path)
         comparator = Comparator.createRequest(method, path, resources)
     }
@@ -76,11 +89,11 @@ class Request(ctx: Context, request: HttpServletRequest){
      * 读取BodyData (InputStream) 的文本数据。
      * 允许重复读取。第一次读取BodyData后，Request会将数据缓存到 requestParams.BODY_DATA_NAME 中。
      * HTTP 的各个方法的数据读取逻辑：
-     * - GET/POST 在调用bodyData()时检查；
+     * - GET/POST 在调用 body()时检查；
      * - PUT/DELETE 在调用任意params相关接口时才检查和加载（LazyLoad）
      * @return 文本数据。如果不存在数据则返回 null
      */
-    fun bodyData(): String? {
+    fun body(): String? {
         val cached = requestParams[BODY_DATA_NAME]?.firstOrNull()
         if(cached == null && method in GET_POST) {
             val data = readBodyStream()
@@ -299,6 +312,10 @@ class Request(ctx: Context, request: HttpServletRequest){
 
     fun dynamic(name: String): String {
         return dynamic(name, "")
+    }
+
+    fun dynamicAsString(name: String): String {
+        return dynamic(name)
     }
 
     fun dynamicAsInt(name: String): Int {

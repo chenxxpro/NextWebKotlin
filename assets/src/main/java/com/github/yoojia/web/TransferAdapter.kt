@@ -24,9 +24,9 @@ internal class TransferAdapter {
         val serverDate = Date(lastModified).toString()
         val clientDate = request.header("If-Modified-Since")
         if(serverDate.equals(clientDate)) {
-            response.setStatusCode(StatusCode.NOT_MODIFIED)
+            response.status(StatusCode.NOT_MODIFIED)
         }else{
-            response.addHeader("Last-Modified", serverDate)
+            response.header("Last-Modified", serverDate)
             val file = FileInputStream(inputFilter).channel
             val out = Channels.newChannel(response.servletResponse.outputStream)
             file.transferTo(0, file.size(), out)

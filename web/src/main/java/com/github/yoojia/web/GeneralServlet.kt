@@ -33,6 +33,6 @@ abstract class GeneralServlet : Servlet {
     }
 
     override fun service(request: ServletRequest?, response: ServletResponse?) {
-        Application.process(request!!, response!!)
+        Application.service(request!!, response!!)
     }
 }

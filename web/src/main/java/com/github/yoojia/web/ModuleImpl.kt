@@ -20,14 +20,14 @@ abstract class ModuleImpl(val tag: String,
 
     /// 被多线程访问但保证只在主线初始化时才有写操作，请求处理过程只读操作
     private val cached = ArrayList<RequestHandler>()
-    private val moduleCachedObjects: ModuleCachedProvider
+    private val instances: ModuleCachedProvider
     private val classes: ArrayList<Class<*>>
 
     protected val handlers: List<RequestHandler> by lazy { cached }
 
     init{
         val found = inputs.filter { it.isAnnotationPresent(annotation) }
-        moduleCachedObjects = ModuleCachedProvider(found.size)
+        instances = ModuleCachedProvider(found.size)
         classes = ArrayList(found)
     }
 
@@ -43,7 +43,9 @@ abstract class ModuleImpl(val tag: String,
                 checkArguments(javaMethod)
                 val handler = RequestHandler.create(root, clazz, javaMethod, httpMethod, path)
                 cached.add(handler)
-                Logger.info("$tag-Module-Define: $handler")
+                if (Logger.isInfoEnabled) {
+                    Logger.info("$tag-Define: $handler")
+                }
             })
         }
         try{
@@ -57,17 +59,23 @@ abstract class ModuleImpl(val tag: String,
         cached.clear()
     }
 
-    fun processHandlers(handlers: List<RequestHandler>, request: Request, response: Response, router: Router) {
+    /**
+     * 执行指定RequestHandler列表，返回是否继续运行模块链的标记。
+     * @return True为继续传递，False则中断
+     */
+    protected fun invokeHandlers(handlers: List<RequestHandler>, request: Request, response: Response, chain: RequestChain) {
         handlers.sortedBy { it.priority }.forEach { handler ->
             request.removeDynamics()
-            val dynamics = getDynamics(handler, request)
+            val dynamics = dynamics(handler, request)
             if (dynamics.isNotEmpty()) {
                 request.putDynamics(dynamics)
-                response.putArgs(dynamics) // copy to response
+                response.params(dynamics) // copy to response
             }
-            Logger.trace("$tag-Processing-Handler: $handler")
-            val moduleObject = moduleCachedObjects.getCachedOrNew(handler.invoker.hostType)
-            val chain = RequestChain()
+            if (Logger.isTraceEnabled) {
+                Logger.trace("$tag-Processing: $handler")
+            }
+            val moduleObject = instances.getOrNew(handler.invoker.classType)
+            chain.reset() // 在每个请求处理器执行前重置 RequestChain , 中断状态只限于当前请求处理器
             // 插入一些特殊处理过程接口的调用
             if(moduleObject is ModuleRequestsListener) {
                 moduleObject.beforeRequests(handler.javaMethod, request, response)
@@ -79,10 +87,10 @@ abstract class ModuleImpl(val tag: String,
             }else{
                 handler.invoker.invoke(request, response, chain, moduleObject)
             }
-            if(chain.isInterrupted()) return@forEach
-            if(chain.isStopDispatching()) return
+            if (chain.isInterrupted) {
+                return
+            }
         }
-        router.next(request, response, router)
     }
 
     protected open fun findMatches(requestComparator: Comparator): List<RequestHandler> {
@@ -91,7 +99,7 @@ abstract class ModuleImpl(val tag: String,
 
     protected abstract fun getRootUri(hostType: Class<*>): String
 
-    private fun getDynamics(handler: RequestHandler, request: Request): Map<String, String> {
+    private fun dynamics(handler: RequestHandler, request: Request): Map<String, String> {
         val output = mutableMapOf<String, String>()
         for(i in handler.comparator.segments.indices) {
             val segment = handler.comparator.segments[i]
