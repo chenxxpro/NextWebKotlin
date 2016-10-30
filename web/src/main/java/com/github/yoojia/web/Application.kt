@@ -191,7 +191,7 @@ object Application {
     private fun findExtensionBefore(rootConfig: Config): List<ConfigEntry>{
         val output = findConfig(rootConfig, "before-interceptors")
         tryLoadClass("com.github.yoojia.web.HttpBeforeLogger")?.let { clazz->
-            output.add(ConfigEntry(clazz.name, InternalPriority.LOGGING_BEFORE, rootConfig.getConfig("before-logger")))
+            output.add(ConfigEntry(clazz.name, InternalPriority.LOGGING_BEFORE, rootConfig.getConfig("logger")))
         }
         tryLoadClass("com.github.yoojia.web.Assets")?.let { clazz->
             output.add(ConfigEntry(clazz.name, InternalPriority.ASSETS, rootConfig.getConfig("assets")))
@@ -202,7 +202,7 @@ object Application {
     private fun findExtensionAfter(rootConfig: Config): List<ConfigEntry>{
         val output = findConfig(rootConfig, "after-interceptors")
         tryLoadClass("com.github.yoojia.web.HttpAfterLogger")?.let { clazz->
-            output.add(ConfigEntry(clazz.name, InternalPriority.LOGGING_BEFORE, rootConfig.getConfig("after-logger")))
+            output.add(ConfigEntry(clazz.name, InternalPriority.LOGGING_BEFORE, rootConfig.getConfig("logger")))
         }
         tryLoadClass("com.github.yoojia.web.Velocity")?.let { clazz->
             output.add(ConfigEntry(clazz.name, InternalPriority.TEMPLATES, rootConfig.getConfig("template")))
