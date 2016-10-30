@@ -16,7 +16,7 @@ public class HelloBeforeInterceptor {
 
     @GET("/*")
     @Ignore("/templates/*")
-    public void used(Request request, Response response, RequestChain chain){
-        response.text("<br/> BeforeInterceptor processed");
+    public void used(Request request, Response response){
+        response.html("<br/> BeforeInterceptor processed");
     }
 }

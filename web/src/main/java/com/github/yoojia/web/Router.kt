@@ -38,7 +38,7 @@ class Router {
         }
     }
 
-    fun shutdown(){
+    fun destroy(){
         modules.clear()
         threadIndex.remove()
     }

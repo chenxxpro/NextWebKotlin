@@ -39,8 +39,14 @@ public class HelloNextWeb implements ModuleCachedListener, ModuleRequestsListene
     }
 
     @GETPOST("/*")
-    public void getpostWildcards(Request request, Response response) {
-        response.html("<br/>Handle by GET/* , username= " + request.paramOrNull("username"));
+    public void getpostWildcards(Request request, Response response, RequestChain chain) {
+        String username = request.paramOrNull("username");
+        if (username == null || username.isEmpty()) {
+            response.html("<br/>Handle by GET/* , empty username, will be interrupted");
+            chain.interrupt();
+        }else{
+            response.html("<br/>Handle by GET/* , username= " + username);
+        }
     }
 
     @POST("/yoojia")

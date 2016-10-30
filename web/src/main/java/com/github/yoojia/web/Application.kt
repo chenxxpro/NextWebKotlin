@@ -1,8 +1,8 @@
 package com.github.yoojia.web
 
 import com.github.yoojia.web.http.HttpHandler
-import com.github.yoojia.web.interceptor.AfterHandler
-import com.github.yoojia.web.interceptor.BeforeHandler
+import com.github.yoojia.web.interceptor.AfterInterceptorHandler
+import com.github.yoojia.web.interceptor.BeforeInterceptorHandler
 import com.github.yoojia.web.supports.InternalPriority
 import com.github.yoojia.web.util.*
 import org.slf4j.LoggerFactory
@@ -23,17 +23,17 @@ import javax.servlet.http.HttpServletResponse
 object Application {
 
     const val PRODUCT_NAME = "NextWebKotlin"
-    const val VERSION = "$PRODUCT_NAME/2.24-ALPHA (Kotlin 1.0.4; Java 7/8;)"
+    const val VERSION = "$PRODUCT_NAME/3.0.0-ALPHA (Kotlin 1.0.4; Java 7/8;)"
 
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
     private val Logger = LoggerFactory.getLogger(Application::class.java)
 
-    private val beforeRouter = Router()
-    private val afterRouter = Router()
-    private val httpRouter = Router()
+    private val preRouter = Router()
+    private val postRouter = Router()
+    private val moduleRouter = Router()
 
-    private val appContext = AtomicReference<Context>()
+    private val globalContext = AtomicReference<Context>()
 
     private val kernels = KernelManager()
 
@@ -48,34 +48,31 @@ object Application {
         val path = servletContext.getRealPath("/")
         val config = configProvider.getConfig(Paths.get(path, CONFIG_FILE))
         val ctx = Context(path, config, servletContext)
-        appContext.set(ctx)
+        globalContext.set(ctx)
         init(ctx, classProvider.getClasses(ctx).toMutableList())
         // register to routers
-        kernels.befores().forEach { beforeRouter.register(it) }
-        kernels.afters().forEach { afterRouter.register(it) }
-        kernels.https().forEach { httpRouter.register(it) }
+        kernels.befores().forEach { preRouter.register(it) }
+        kernels.afters().forEach { postRouter.register(it) }
+        kernels.modules().forEach { moduleRouter.register(it) }
         // startup
-        kernels.sortedPlugins.forEach { it.invoker.onCreated(ctx, it.config) }
-        kernels.sortedBefore.forEach { it.invoker.onCreated(ctx, it.config) }
-        kernels.sortedHttps.forEach { it.invoker.onCreated(ctx, it.config) }
-        kernels.sortedAfter.forEach { it.invoker.onCreated(ctx, it.config) }
+        kernels.created(ctx)
         // Logging
         if (Logger.isDebugEnabled) {
-            Logger.debug("Config-From : ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_PATH)}")
+            Logger.debug("Config-From: ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_PATH)}")
             Logger.debug("Config-State: ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_STATE)}")
-            Logger.debug("Config-Time : ${escape(start)}ms")
+            Logger.debug("Config-Time: ${escape(start)}ms")
             Logger.debug("App-Path: ${ctx.webPath}")
-            Logger.debug("App-Context  : ${ctx.contextPath}")
-            Logger.debug("Modules-Loaded: ${kernels.moduleCount()}")
-            Logger.debug("Plugins-Loaded: ${kernels.pluginCount()}")
+            Logger.debug("App-Context: ${ctx.contextPath}")
+            Logger.debug("BeforeInterceptors-Loaded: ${kernels.sortedBefore.size}")
+            Logger.debug("Modules-Loaded: ${kernels.sortedModules.size}")
+            Logger.debug("AfterInterceptors-Loaded: ${kernels.sortedAfter.size}")
+            Logger.debug("Plugins-Loaded: ${kernels.sortedPlugins.size}")
         }
-        if (Logger.isWarnEnabled) {
-            Logger.warn("$PRODUCT_NAME startup successful, boot-time: ${escape(start)}ms")
-        }
+        Logger.warn("$PRODUCT_NAME startup successful, boot-time: ${escape(start)}ms")
     }
 
     fun service(req: ServletRequest, res: ServletResponse) {
-        val context = appContext.get()
+        val context = globalContext.get()
         // 接收到每个客户端请求时，独立创建 Request 和 Response 临时对象，生命周期只限于请求过程。
         val request = Request(context, req as HttpServletRequest)
         val response = Response(context, res as HttpServletResponse)
@@ -87,11 +84,11 @@ object Application {
             // 三大处理过程中，前、后拦截器必定会被执行，
             // 其中前拦截器的中断状态影响着HTTP处理模块是否被执行。
             val chain = RequestChain()
-            beforeRouter.route(request, response, chain)
+            preRouter.route(request, response, chain)
             if (! chain.isInterrupted) {
-                httpRouter.route(request, response, chain)
+                moduleRouter.route(request, response, chain)
             }
-            afterRouter.route(request, response, chain)
+            postRouter.route(request, response, chain)
         }catch(errors: Throwable) {
             if (Logger.isDebugEnabled) {
                 Logger.debug("Error when processing request", errors)
@@ -107,62 +104,74 @@ object Application {
     }
 
     fun shutdown() {
-        httpRouter.shutdown()
+        preRouter.destroy()
+        moduleRouter.destroy()
+        postRouter.destroy()
         kernels.destroy()
     }
 
     private fun init(context: Context, classes: MutableList<Class<*>>) {
         val rootConfig = context.rootConfig
-        val prepareModules = fun(tag: String, module: Module, action: (Module)->Unit){
-            val start = now()
-            val scrapClasses = module.prepare(classes)
-            if (scrapClasses.isNotEmpty()) {
-                classes.removeAll(scrapClasses)
-            }
-            Logger.debug("$tag-Prepare: ${escape(start)}ms")
-            action.invoke(module)
-        }
         // plugins
+        val pluginStart = now()
         val pluginEntries = ArrayList<ConfigEntry>()
         pluginEntries.addAll(findPlugins(rootConfig))
         pluginEntries.forEach { entry->
             val plugin = tryPluginObject(entry)
             kernels.registerPlugin(plugin, entry.priority, entry.args)
         }
+        Logger.debug("Plugins-Prepare: ${escape(pluginStart)}ms")
+
+        val prepare = fun(module: Module, action: (Module)->Unit){
+            val scrapClasses = module.prepare(classes)
+            if (scrapClasses.isNotEmpty()) {
+                classes.removeAll(scrapClasses)
+            }
+            action.invoke(module)
+        }
+
         // before interceptors
-        val beforeEntries = ArrayList<ConfigEntry>()
-        beforeEntries.addAll(findExtensionBefore(rootConfig))
-        beforeEntries.add(ConfigEntry(BeforeHandler::class.java.name, BeforeHandler.DEFAULT_PRIORITY, Config.empty()))
-        beforeEntries.forEach { entry->
-            prepareModules("BeforeInterceptors", tryModuleObject(entry, classes)) { module->
-                kernels.registerBefore(module, entry.priority, entry.args)
+        val beforeStart = now()
+        val before = ArrayList<ConfigEntry>()
+        before.addAll(findExtensionBefore(rootConfig))
+        before.add(ConfigEntry(BeforeInterceptorHandler::class.java.name, BeforeInterceptorHandler.DEFAULT_PRIORITY, Config.empty()))
+        before.forEach { entry->
+            prepare(tryModuleObject(entry, classes)) { interceptor->
+                kernels.registerBefore(interceptor, entry.priority, entry.args)
             }
         }
+        Logger.debug("BeforeInterceptor-Prepare: ${escape(beforeStart)}ms")
+
         // http modules
-        val httpEntries = ArrayList<ConfigEntry>()
-        httpEntries.add(ConfigEntry(HttpHandler::class.java.name, HttpHandler.DEFAULT_PRIORITY, Config.empty()))
-        httpEntries.addAll(findModules(rootConfig))
-        httpEntries.forEach { entry->
-            prepareModules("HttpModules", tryModuleObject(entry, classes)) { module->
-                kernels.registerHttp(module, entry.priority, entry.args)
+        val moduleStart = now()
+        val modules = ArrayList<ConfigEntry>()
+        modules.add(ConfigEntry(HttpHandler::class.java.name, HttpHandler.DEFAULT_PRIORITY, Config.empty()))
+        modules.addAll(findModules(rootConfig))
+        modules.forEach { entry->
+            prepare(tryModuleObject(entry, classes)) { module->
+                kernels.registerModules(module, entry.priority, entry.args)
             }
         }
+        Logger.debug("Modules-Prepare: ${escape(moduleStart)}ms")
+
         // after interceptors
-        val afterEntries = ArrayList<ConfigEntry>()
-        afterEntries.add(ConfigEntry(AfterHandler::class.java.name, BeforeHandler.DEFAULT_PRIORITY, Config.empty()))
-        afterEntries.addAll(findExtensionAfter(rootConfig))
-        afterEntries.forEach { entry->
-            prepareModules("AftersInterceptors", tryModuleObject(entry, classes)) { module->
-                kernels.registerAfter(module, entry.priority, entry.args)
+        val afterStart = now()
+        val after = ArrayList<ConfigEntry>()
+        after.add(ConfigEntry(AfterInterceptorHandler::class.java.name, BeforeInterceptorHandler.DEFAULT_PRIORITY, Config.empty()))
+        after.addAll(findExtensionAfter(rootConfig))
+        after.forEach { entry->
+            prepare(tryModuleObject(entry, classes)) { interceptor->
+                kernels.registerAfter(interceptor, entry.priority, entry.args)
             }
         }
+        Logger.debug("AfterInterceptor-Prepare: ${escape(afterStart)}ms")
     }
 
     private fun tryModuleObject(config: ConfigEntry, classes: MutableList<Class<*>>): Module {
         return when(config.className) {
             HttpHandler::class.java.name -> HttpHandler(classes)
-            AfterHandler::class.java.name -> AfterHandler(classes)
-            BeforeHandler::class.java.name -> BeforeHandler(classes)
+            AfterInterceptorHandler::class.java.name -> AfterInterceptorHandler(classes)
+            BeforeInterceptorHandler::class.java.name -> BeforeInterceptorHandler(classes)
             else -> {
                 newClassInstance<Module>(getCoreClassLoader().loadClass(config.className))
             }

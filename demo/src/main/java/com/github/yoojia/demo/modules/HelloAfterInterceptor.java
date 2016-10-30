@@ -15,7 +15,6 @@ public class HelloAfterInterceptor {
 
     @GET("/*")
     public void used(Request request, Response response, RequestChain chain){
-//        response.sendText("After interceptor");
-//        chain.stop();
+        response.html("<br/> AfterInterceptor processed");
     }
 }

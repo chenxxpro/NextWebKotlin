@@ -11,11 +11,11 @@ import java.util.*
  * @author Yoojia Chen (yoojiachen@gmail.com)
  * @since 2.a.10
  */
-abstract class InterceptorHandler(tag: String,
-                                   annotation: Class<out Annotation>,
-                                   classes: List<Class<*>>) : ModuleImpl(tag, annotation, classes) {
+abstract class InterceptorImpl(tag: String,
+                               annotation: Class<out Annotation>,
+                               classes: List<Class<*>>) : ModuleImpl(tag, annotation, classes) {
     companion object {
-        private val Logger = LoggerFactory.getLogger(InterceptorHandler::class.java)
+        private val Logger = LoggerFactory.getLogger(InterceptorImpl::class.java)
     }
 
     private val definedIgnores = ArrayList<Comparator>()
