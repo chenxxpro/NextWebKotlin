@@ -118,11 +118,13 @@ object Application {
         pluginEntries.addAll(findPlugins(rootConfig))
         pluginEntries.forEach { entry->
             val plugin = tryPluginObject(entry)
+            if (Logger.isDebugEnabled) Logger.debug("Preparing: ${entry.className}")
             kernels.registerPlugin(plugin, entry.priority, entry.args)
         }
         Logger.debug("Plugins-Prepare: ${escape(pluginStart)}ms")
 
         val prepare = fun(module: Module, action: (Module)->Unit){
+            if (Logger.isDebugEnabled) Logger.debug("Preparing: ${module.javaClass.name}")
             val scrapClasses = module.prepare(classes)
             if (scrapClasses.isNotEmpty()) {
                 classes.removeAll(scrapClasses)
@@ -133,8 +135,8 @@ object Application {
         // before interceptors
         val beforeStart = now()
         val before = ArrayList<ConfigEntry>()
-        before.addAll(findExtensionBefore(rootConfig))
         before.add(ConfigEntry(BeforeInterceptorHandler::class.java.name, BeforeInterceptorHandler.DEFAULT_PRIORITY, Config.empty()))
+        before.addAll(findExtensionBefore(rootConfig))
         before.forEach { entry->
             prepare(tryModuleObject(entry, classes)) { interceptor->
                 kernels.registerBefore(interceptor, entry.priority, entry.args)
@@ -183,11 +185,11 @@ object Application {
     }
 
     private fun findPlugins(rootConfig: Config): List<ConfigEntry> {
-        return findSection(rootConfig, "plugins")
+        return findConfig(rootConfig, "plugins")
     }
 
     private fun findExtensionBefore(rootConfig: Config): List<ConfigEntry>{
-        val output = findSection(rootConfig, "before-interceptors")
+        val output = findConfig(rootConfig, "before-interceptors")
         tryLoadClass("com.github.yoojia.web.HttpBeforeLogger")?.let { clazz->
             output.add(ConfigEntry(clazz.name, InternalPriority.LOGGING_BEFORE, rootConfig.getConfig("before-logger")))
         }
@@ -198,7 +200,7 @@ object Application {
     }
 
     private fun findExtensionAfter(rootConfig: Config): List<ConfigEntry>{
-        val output = findSection(rootConfig, "after-interceptors")
+        val output = findConfig(rootConfig, "after-interceptors")
         tryLoadClass("com.github.yoojia.web.HttpAfterLogger")?.let { clazz->
             output.add(ConfigEntry(clazz.name, InternalPriority.LOGGING_BEFORE, rootConfig.getConfig("after-logger")))
         }
@@ -209,10 +211,10 @@ object Application {
     }
 
     private fun findModules(rootConfig: Config): List<ConfigEntry>{
-        return findSection(rootConfig, "modules")
+        return findConfig(rootConfig, "modules")
     }
 
-    private fun findSection(rootConfig: Config, section: String): MutableList<ConfigEntry> {
+    private fun findConfig(rootConfig: Config, section: String): MutableList<ConfigEntry> {
         return rootConfig.getConfigList(section).map { parseConfigEntry(it) }.toMutableList()
     }
 
