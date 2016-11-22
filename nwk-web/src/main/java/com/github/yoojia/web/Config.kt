@@ -1,13 +1,13 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.lang.DataMap
+import com.parkingwng.lang.data.KeyMap
 import java.util.*
 
 /**
  * @author Yoojia Chen (yoojia.chen@gmail.com)
  * @since 2.0
  */
-class Config(realMap: MutableMap<String, Any>?) : DataMap(realMap) {
+class Config(realMap: MutableMap<String, Any>?) : KeyMap(realMap) {
 
     companion object {
         @JvmStatic fun empty(): Config = Config(EMPTY)

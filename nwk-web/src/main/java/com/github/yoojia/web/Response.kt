@@ -1,6 +1,6 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.lang.DataMap
+import com.parkingwng.lang.data.KeyMap
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
@@ -16,7 +16,7 @@ class Response(@JvmField val context: Context, @JvmField val servletResponse: Ht
         @JvmField val STATIC_NAME = "nwk.response.names:static"
     }
 
-    @JvmField val params = DataMap(HashMap<String, Any>())
+    @JvmField val params = KeyMap(HashMap<String, Any>())
 
     init{
         header("X-Powered-By", Application.VERSION)

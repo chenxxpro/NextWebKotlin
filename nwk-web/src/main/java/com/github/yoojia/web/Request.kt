@@ -1,9 +1,9 @@
 package com.github.yoojia.web
 
-import com.github.yoojia.lang.DataMap
-import com.github.yoojia.lang.StreamKit
 import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.util.splitToArray
+import com.parkingwng.lang.data.KeyMap
+import com.parkingwng.lang.kit.StreamKit
 import java.io.InputStreamReader
 import java.io.StringWriter
 import java.net.URLDecoder
@@ -36,7 +36,7 @@ class Request(ctx: Context, request: HttpServletRequest){
 
     // （对用户只读）动态参数的意义是：用户定义的模块处理方法(method)的动态参数，
     // 通过动态参数来限定它（当前处理方法）的生命周期只存在于当前处理方法，隔离于其它处理方法。
-    private val dynamicParams = DataMap(HashMap<String, Any>())
+    private val dynamicParams = KeyMap(HashMap<String, Any>())
 
     // 整个请求生命周期内的请求参数：由客户端提交，以及用户实现的程序内部设置。
     private val requestParams: MutableMap<String, MutableList<String>> by lazy {
@@ -122,8 +122,8 @@ class Request(ctx: Context, request: HttpServletRequest){
      * - 多个数值的参数以 List<String> 类型返回
      * @return 非空AnyMap对象
      */
-    fun headers(): DataMap {
-        val map = DataMap(HashMap<String, Any>())
+    fun headers(): KeyMap {
+        val map = KeyMap(HashMap<String, Any>())
         servletRequest.headerNames?.let { headerNames->
             for (name in headerNames) {
                 servletRequest.getHeaders(name)?.let { headers->
@@ -178,8 +178,8 @@ class Request(ctx: Context, request: HttpServletRequest){
      * - 多个数值的参数以 List<String> 类型返回
      * @return 非空AnyMap对象
      */
-    fun params(): DataMap {
-        val map = DataMap(HashMap<String, Any>())
+    fun params(): KeyMap {
+        val map = KeyMap(HashMap<String, Any>())
         for((k, v) in requestParams) {
             if(v.size == 1) {
                 map.put(k, v.first())

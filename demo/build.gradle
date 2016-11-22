@@ -2,9 +2,9 @@
 sourceCompatibility = 1.7
 
 dependencies {
-    compile project(":web")
-    compile project(":velocity")
-    compile project(":assets")
-    compile project(":logging")
-    compile project(":server")
+    compile project(":nwk-web")
+    compile project(":nwk-module-velocity")
+    compile project(":nwk-module-assets")
+    compile project(":nwk-module-logging")
+    compile project(":nwk-server")
 }

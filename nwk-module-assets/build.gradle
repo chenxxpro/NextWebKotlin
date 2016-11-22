@@ -11,24 +11,16 @@ buildscript {
 
 sourceCompatibility = 1.7
 
-repositories {
-    jcenter()
-    maven { url 'http://repo.javalite.io' }
-}
-
 dependencies {
-    compile project(":web")
+    compile project(":nwk-web")
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    // Active JDBC
-    compile "org.javalite:activejdbc:1.4.12-SNAPSHOT"
-    compile "mysql:mysql-connector-java:5.1.25"
 }
 
 apply plugin: 'kotlin'
 
 ext{
     projVersion = project_version
-    projArtivactId = 'next-web-activejdbc'
+    projArtivactId = 'next-web-assets'
     projName = 'NextWebKotlin'
     projDesc = 'NextWebKotlin: A Servlet 3+ based micro web framework written in Kotlin'
     projURL = "https://github.com/yoojia/NextWebKotlin"
