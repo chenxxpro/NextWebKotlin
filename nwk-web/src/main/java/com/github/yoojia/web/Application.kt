@@ -3,8 +3,8 @@ package com.github.yoojia.web
 import com.github.yoojia.web.http.HttpHandler
 import com.github.yoojia.web.interceptor.AfterInterceptorHandler
 import com.github.yoojia.web.interceptor.BeforeInterceptorHandler
+import com.github.yoojia.web.lang.*
 import com.github.yoojia.web.supports.InternalPriority
-import com.github.yoojia.web.util.*
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Paths
@@ -42,33 +42,31 @@ object Application {
     }
 
     fun startup(servletContext: ServletContext, configProvider: ConfigProvider, classProvider: ClassProvider) {
-        Logger.warn("$PRODUCT_NAME starting, version: $VERSION")
+        Logger.info("$PRODUCT_NAME starting, version: $VERSION")
         // init
         val start = now()
         val path = servletContext.getRealPath("/")
         val config = configProvider.getConfig(Paths.get(path, CONFIG_FILE))
-        val ctx = Context(path, config, servletContext)
-        globalContext.set(ctx)
-        init(ctx, classProvider.getClasses(ctx).toMutableList())
+        val context = Context(path, config, servletContext)
+        globalContext.set(context)
+        init(context, classProvider.getClasses(context).toMutableList())
         // register to routers
         kernels.befores().forEach { preRouter.register(it) }
         kernels.afters().forEach { postRouter.register(it) }
         kernels.modules().forEach { moduleRouter.register(it) }
         // startup
-        kernels.created(ctx)
+        kernels.created(context)
         // Logging
-        if (Logger.isDebugEnabled) {
-            Logger.debug("Config-From: ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_PATH)}")
-            Logger.debug("Config-State: ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_STATE)}")
-            Logger.debug("Config-Time: ${escape(start)}ms")
-            Logger.debug("App-Path: ${ctx.webPath}")
-            Logger.debug("App-Context: ${ctx.contextPath}")
-            Logger.debug("BeforeInterceptors-Loaded: ${kernels.sortedBefore.size}")
-            Logger.debug("Modules-Loaded: ${kernels.sortedModules.size}")
-            Logger.debug("AfterInterceptors-Loaded: ${kernels.sortedAfter.size}")
-            Logger.debug("Plugins-Loaded: ${kernels.sortedPlugins.size}")
-        }
-        Logger.warn("$PRODUCT_NAME startup successful, boot-time: ${escape(start)}ms")
+        Logger.info("Config-From: ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_PATH)}")
+        Logger.info("Config-State: ${config.getStringValue(YamlConfigLoader.KEY_CONFIG_STATE)}")
+        Logger.info("Config-Time: ${escape(start)}ms")
+        Logger.info("App-Path: ${context.webPath}")
+        Logger.info("App-Context: ${context.contextPath}")
+        Logger.info("BeforeInterceptors-Loaded: ${kernels.sortedBefore.size}")
+        Logger.info("Modules-Loaded: ${kernels.sortedModules.size}")
+        Logger.info("AfterInterceptors-Loaded: ${kernels.sortedAfter.size}")
+        Logger.info("Plugins-Loaded: ${kernels.sortedPlugins.size}")
+        Logger.info("$PRODUCT_NAME startup successful, boot-time: ${escape(start)}ms")
     }
 
     fun service(req: ServletRequest, res: ServletResponse) {
@@ -90,14 +88,12 @@ object Application {
             }
             postRouter.route(request, response, chain)
         }catch(errors: Throwable) {
-            if (Logger.isDebugEnabled) {
-                Logger.debug("Error when processing request", errors)
-            }
+            Logger.error("Error when processing request", errors)
             try{
                 response.error(errors)
             }catch(still: Throwable) {
                 if (Logger.isDebugEnabled) {
-                    Logger.error("Error when send ERROR to client", still)
+                    Logger.debug("Error when send ERROR to client", still)
                 }
             }
         }
@@ -118,13 +114,17 @@ object Application {
         pluginEntries.addAll(findPlugins(rootConfig))
         pluginEntries.forEach { entry->
             val plugin = tryPluginObject(entry)
-            if (Logger.isDebugEnabled) Logger.debug("Preparing: ${entry.className}")
+            if (Logger.isDebugEnabled) {
+                Logger.debug("Preparing: ${entry.className}")
+            }
             kernels.registerPlugin(plugin, entry.priority, entry.args)
         }
         Logger.debug("Plugins-Prepare: ${escape(pluginStart)}ms")
 
         val prepare = fun(module: Module, action: (Module)->Unit){
-            if (Logger.isDebugEnabled) Logger.debug("Preparing: ${module.javaClass.name}")
+            if (Logger.isDebugEnabled) {
+                Logger.debug("Preparing: ${module.javaClass.name}")
+            }
             val scrapClasses = module.prepare(classes)
             if (scrapClasses.isNotEmpty()) {
                 classes.removeAll(scrapClasses)
@@ -142,7 +142,7 @@ object Application {
                 kernels.registerBefore(interceptor, entry.priority, entry.args)
             }
         }
-        Logger.debug("BeforeInterceptor-Prepare: ${escape(beforeStart)}ms")
+        Logger.info("BeforeInterceptor-Prepare: ${escape(beforeStart)}ms")
 
         // http modules
         val moduleStart = now()
@@ -154,7 +154,7 @@ object Application {
                 kernels.registerModules(module, entry.priority, entry.args)
             }
         }
-        Logger.debug("Modules-Prepare: ${escape(moduleStart)}ms")
+        Logger.info("Modules-Prepare: ${escape(moduleStart)}ms")
 
         // after interceptors
         val afterStart = now()
@@ -166,7 +166,7 @@ object Application {
                 kernels.registerAfter(interceptor, entry.priority, entry.args)
             }
         }
-        Logger.debug("AfterInterceptor-Prepare: ${escape(afterStart)}ms")
+        Logger.info("AfterInterceptor-Prepare: ${escape(afterStart)}ms")
     }
 
     private fun tryModuleObject(config: ConfigEntry, classes: MutableList<Class<*>>): Module {

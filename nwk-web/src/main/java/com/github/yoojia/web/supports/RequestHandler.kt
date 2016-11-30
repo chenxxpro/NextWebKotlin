@@ -1,6 +1,6 @@
 package com.github.yoojia.web.supports
 
-import com.github.yoojia.web.util.concat
+import com.github.yoojia.web.lang.concat
 import java.lang.reflect.Method
 
 /**

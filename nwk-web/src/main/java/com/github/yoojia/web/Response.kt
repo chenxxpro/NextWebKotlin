@@ -1,6 +1,6 @@
 package com.github.yoojia.web
 
-import com.parkingwng.lang.data.KeyMap
+import com.github.yoojia.web.lang.KeyMap
 import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse

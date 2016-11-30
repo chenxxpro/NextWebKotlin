@@ -1,6 +1,6 @@
 package com.github.yoojia.web.supports
 
-import com.github.yoojia.web.util.splitToArray
+import com.github.yoojia.web.lang.splitToArray
 
 /**
  * @author Yoojia Chen (yoojiachen@gmail.com)

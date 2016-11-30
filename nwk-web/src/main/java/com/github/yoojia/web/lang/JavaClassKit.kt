@@ -1,4 +1,4 @@
-package com.github.yoojia.web.util
+package com.github.yoojia.web.lang
 
 import com.github.yoojia.web.Application
 import com.github.yoojia.web.supports.Filter

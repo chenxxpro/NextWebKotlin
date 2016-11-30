@@ -1,4 +1,4 @@
-package com.github.yoojia.web.util
+package com.github.yoojia.web.lang
 
 import java.util.*
 import kotlin.reflect.KClass

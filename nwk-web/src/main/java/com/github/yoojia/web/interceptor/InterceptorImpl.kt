@@ -1,9 +1,9 @@
 package com.github.yoojia.web.interceptor
 
 import com.github.yoojia.web.*
+import com.github.yoojia.web.lang.concat
 import com.github.yoojia.web.supports.Comparator
 import com.github.yoojia.web.supports.RequestHandler
-import com.github.yoojia.web.util.concat
 import org.slf4j.LoggerFactory
 import java.util.*
 

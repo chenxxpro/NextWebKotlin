@@ -1,9 +1,9 @@
 package com.github.yoojia.web
 
+import com.github.yoojia.web.lang.KeyMap
+import com.github.yoojia.web.lang.StreamKit
+import com.github.yoojia.web.lang.splitToArray
 import com.github.yoojia.web.supports.Comparator
-import com.github.yoojia.web.util.splitToArray
-import com.parkingwng.lang.data.KeyMap
-import com.parkingwng.lang.kit.StreamKit
 import java.io.InputStreamReader
 import java.io.StringWriter
 import java.net.URLDecoder

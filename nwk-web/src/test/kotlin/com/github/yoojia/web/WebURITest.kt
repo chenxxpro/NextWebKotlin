@@ -1,7 +1,7 @@
 package com.github.yoojia.web
 
+import com.github.yoojia.web.lang.splitToArray
 import com.github.yoojia.web.supports.Comparator
-import com.github.yoojia.web.util.splitToArray
 import org.junit.Assert
 import org.junit.Test
 
