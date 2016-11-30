@@ -1,7 +1,6 @@
 package com.github.yoojia.demo.modules;
 
 import com.github.yoojia.web.Request;
-import com.github.yoojia.web.RequestChain;
 import com.github.yoojia.web.Response;
 import com.github.yoojia.web.interceptor.BeforeInterceptor;
 import com.github.yoojia.web.interceptor.Ignore;
