@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse
 object Application {
 
     const val PRODUCT_NAME = "NextWebKotlin"
-    const val VERSION = "$PRODUCT_NAME/3.0.4-ALPHA (Kotlin 1.0.4; Java 7/8;)"
+    const val VERSION = "$PRODUCT_NAME/3.0.5-ALPHA (Kotlin 1.0.5-2; Java 7)"
 
     private val CONFIG_FILE = "WEB-INF${File.separator}next.yml"
 
